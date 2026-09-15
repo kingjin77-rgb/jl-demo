@@ -479,7 +479,6 @@ var Anim = {
     try { sessionStorage.setItem('jl2_intro', '1'); } catch (e) {}
     $('introApt').textContent = C.apt;
     $('introOrg').textContent = C.org;
-    box.querySelector('.im-t').textContent = C.emblem;
     box.classList.add('out');
 
     setTimeout(function () {
