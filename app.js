@@ -485,8 +485,8 @@ var Anim = {
       document.body.classList.remove('booting');
       document.body.classList.add('booted');
       done && done();
-    }, 2150);
-    setTimeout(function () { box.classList.add('gone'); }, 3150);
+    }, 4900);
+    setTimeout(function () { box.classList.add('gone'); }, 5900);
 
     /* 화면을 누르면 건너뜁니다 */
     box.addEventListener('pointerdown', function () {
@@ -584,6 +584,18 @@ var App = {
 
     if (C.heroLight !== false) document.querySelector('.hero').classList.add('light');
     document.title = C.org;
+    /* 홈 화면에 추가했을 때 뜨는 이름을 단지명으로 바꿉니다 */
+    try {
+      var lk = document.querySelector('link[rel="manifest"]');
+      if (lk && location.protocol.indexOf('http') === 0 && window.Blob && URL.createObjectURL) {
+        fetch(lk.href).then(function (r) { return r.json(); }).then(function (m) {
+          m.name = C.org;
+          m.short_name = (C.apt || '').split(' ')[0] || m.short_name;
+          m.description = C.apt + ' ' + m.description;
+          lk.href = URL.createObjectURL(new Blob([JSON.stringify(m)], { type: 'application/manifest+json' }));
+        }).catch(function () {});
+      }
+    } catch (e) {}
     $('emblem').textContent = C.emblem;
     $('heroName').textContent = C.apt;
     $('heroLoc').textContent = C.address;
@@ -628,6 +640,7 @@ var App = {
     this.go(TITLES[t] ? t : 'home');
     Anim.indicator();
     Anim.bindRipple();
+    Install.init();
     Anim.parallax();
     Anim.intro(function () {
       Anim.indicator();
@@ -1345,8 +1358,6 @@ var Admin = {
   },
 
   paint: function () {
-    Notify.init();
-    Notify.log();
     $('adminGate').hidden = true;
     $('adminBody').hidden = false;
 
@@ -2141,129 +2152,96 @@ var Say = {
   }
 };
 
+
 /* ══════════════════════════════════════════════════════════════
-   카카오 알림톡 (데모 — 실제 발송 없음)
+   홈 화면에 추가 — 설치 없이 앱처럼 쓰게 합니다
    ══════════════════════════════════════════════════════════════ */
-var Notify = {
-  targets: function () {
-    var feePaid = Object.keys(S.fees);
-    var unpaid = S.recs.filter(function (r) { return feePaid.indexOf(r.dong + '-' + r.ho) < 0; }).length;
-    return [
-      { k:'all',   t:'전체 접수 세대',        n:S.recs.length },
-      { k:'nodel', t:'위임장 미제출 세대',    n:Math.max(0, TOTAL - S.recs.length) },
-      { k:'fee',   t:'회비 미납 세대',        n:unpaid },
-      { k:'as',    t:'회의 참석 미응답 세대',  n:Math.max(0, S.recs.length - 132) }
-    ];
+var Install = {
+  ev: null,
+
+  standalone: function () {
+    try {
+      return window.matchMedia('(display-mode: standalone)').matches ||
+             window.navigator.standalone === true;
+    } catch (e) { return false; }
   },
 
-  tpls: function () {
-    var a = S.assembly;
-    var days = Math.max(0, Math.ceil((new Date(a.date) - new Date()) / 86400000));
-    return [
-      { k:'as', t:'회의 개최 안내',
-        m:'[' + C.org + ']\n\n' + a.no + ' 개최를 안내드립니다.\n\n' +
-          '▪ 일시 : ' + a.date + ' ' + a.time + '\n' +
-          '▪ 장소 : ' + a.place + '\n' +
-          '▪ 남은 기간 : D-' + days + '\n\n' +
-          '참석이 어려우신 세대는 전자 위임장을 제출해 주시기 바랍니다.',
-        b:'참석 여부 등록하기' },
-      { k:'del', t:'위임장 제출 독려',
-        m:'[' + C.org + ']\n\n' + C.apt + ' 전자 위임장 접수가 진행 중입니다.\n\n' +
-          '현재 ' + S.recs.length.toLocaleString() + '세대가 참여하셨습니다.\n' +
-          '동·호수 선택 후 서명까지 약 1분이면 완료됩니다.\n\n' +
-          '앱 설치 없이 아래 링크로 바로 접수하실 수 있습니다.',
-        b:'위임장 제출하기' },
-      { k:'fee', t:'회비 납부 안내',
-        m:'[' + C.org + ']\n\n협의회 운영 회비 납부를 안내드립니다.\n\n' +
-          '▪ 금액 : 세대당 20,000원\n' +
-          '▪ 계좌 : ○○은행 123-456-789012\n' +
-          '▪ 예금주 : ' + C.org + '\n\n' +
-          '납부하신 내역은 플랫폼에서 전 세대가 확인하실 수 있습니다.',
-        b:'우리 집 납부 확인' },
-      { k:'no', t:'새 공지 등록 알림',
-        m:'[' + C.org + ']\n\n새로운 공지사항이 등록되었습니다.\n\n' +
-          '▪ ' + S.notices[0].t + '\n▪ 등록일 : ' + S.notices[0].d + '\n\n' +
-          '자세한 내용은 플랫폼에서 확인해 주세요.',
-        b:'공지 확인하기' }
-    ];
+  isIOS: function () {
+    return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+  },
+
+  dismissed: function () {
+    try { return localStorage.getItem('jl2_ins') === 'no'; } catch (e) { return false; }
   },
 
   init: function () {
-    var ts = $('atTarget'); ts.innerHTML = '';
-    this.targets().forEach(function (x, i) {
-      var o = document.createElement('option');
-      o.value = i; o.textContent = x.t + ' (' + x.n.toLocaleString() + '명)';
-      ts.appendChild(o);
+    /* 서비스 워커 — file:// 로 열었을 때는 등록하지 않습니다 */
+    if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
+      window.addEventListener('load', function () {
+        navigator.serviceWorker.register('sw.js').catch(function () {});
+      });
+    }
+
+    if (this.standalone() || this.dismissed()) return;
+
+    var self = this;
+    window.addEventListener('beforeinstallprompt', function (e) {
+      e.preventDefault();
+      self.ev = e;
+      self.show();
     });
-    var tp = $('atTpl'); tp.innerHTML = '';
-    this.tpls().forEach(function (x, i) {
-      var o = document.createElement('option');
-      o.value = i; o.textContent = x.t;
-      tp.appendChild(o);
-    });
-    $('ktProf').textContent = C.emblem;
-    $('ktName').textContent = C.org;
-    this.preview();
+
+    /* 아이폰은 설치 창을 띄울 수 없어 방법만 안내합니다 */
+    if (this.isIOS()) {
+      setTimeout(function () { self.show(true); }, 4200);
+    }
   },
 
-  preview: function () {
-    var t = this.targets()[+$('atTarget').value || 0];
-    var p = this.tpls()[+$('atTpl').value || 0];
-    $('ktMsg').textContent = p.m;
-    $('ktBtn').textContent = p.b;
-    $('atN').textContent = t.n.toLocaleString() + '명';
+  show: function (ios) {
+    var bar = $('installBar');
+    if (!bar) return;
+    if (ios) {
+      $('insTitle').textContent = '홈 화면에 추가하기';
+      $('insDesc').textContent = '아래 공유 버튼 → 「홈 화면에 추가」를 누르시면 앱처럼 열립니다.';
+      $('insGo').textContent = '방법 보기';
+    }
+    bar.hidden = false;
   },
 
-  send: function () {
-    var t = this.targets()[+$('atTarget').value || 0];
-    var p = this.tpls()[+$('atTpl').value || 0];
-    if (!t.n) return App.toast('발송 대상이 없습니다');
-
-    var btn = $('atGo'), hint = $('atHint');
-    btn.disabled = true;
-    var i = 0;
-    var timer = setInterval(function () {
-      i += Math.ceil(t.n / 12);
-      if (i >= t.n) i = t.n;
-      btn.textContent = '발송 중… ' + i.toLocaleString() + ' / ' + t.n.toLocaleString();
-      hint.textContent = '카카오 비즈메시지 서버로 전송하고 있습니다.';
-      if (i >= t.n) {
-        clearInterval(timer);
-        var fail = Math.round(t.n * 0.018);
-        S.atLog.unshift({ t:p.t, target:t.t, n:t.n, ok:t.n - fail, fail:fail, at:Date.now() });
-        DB.save();
-        btn.disabled = false;
-        btn.textContent = '알림톡 발송';
-        hint.textContent = '협의회에 별도로 청구되지 않습니다.';
-        Notify.log();
-        App.sheet('발송 완료',
-          '<div style="font-size:.88rem;color:var(--tx-2);line-height:1.8">' +
-          '<b style="color:var(--tx)">' + esc(p.t) + '</b> · ' + esc(t.t) + '<br><br>' +
-          '카카오톡 도착 <b style="color:var(--ok)">' + (t.n - fail).toLocaleString() + '건</b><br>' +
-          '문자 대체 발송 <b style="color:var(--tx)">' + fail.toLocaleString() + '건</b> ' +
-          '<span style="color:var(--tx-3)">(카카오톡 미사용 · 번호 변경 세대)</span><br><br>' +
-          '전 세대 전달이 완료되었습니다.<br>' +
-          '<b style="color:var(--acc)">발송 비용은 법무법인 제이엘이 부담합니다.</b><br><br>' +
-          '<span style="color:var(--tx-3);font-size:.82rem">※ 데모 화면입니다. 실제 발송은 카카오 비즈니스 채널 개설 후 가능합니다.</span></div>');
-      }
-    }, 170);
+  go: function () {
+    if (this.ev) {
+      this.ev.prompt();
+      var self = this;
+      this.ev.userChoice.then(function (r) {
+        $('installBar').hidden = true;
+        self.ev = null;
+        if (r && r.outcome === 'accepted') {
+          App.toast('홈 화면에 추가되었습니다');
+          Anim.ok();
+        }
+      });
+      return;
+    }
+    App.sheet('홈 화면에 추가하는 방법',
+      '<div style="font-size:.88rem;color:var(--tx-2);line-height:1.85">' +
+      (this.isIOS()
+        ? '<b style="color:var(--tx)">아이폰 · 아이패드</b><br>' +
+          '1. 화면 아래 <b>공유 버튼</b>(↑)을 누릅니다<br>' +
+          '2. 목록을 내려 <b>「홈 화면에 추가」</b>를 선택합니다<br>' +
+          '3. 오른쪽 위 <b>「추가」</b>를 누릅니다'
+        : '<b style="color:var(--tx)">안드로이드</b><br>' +
+          '1. 오른쪽 위 <b>점 세 개(⋮)</b>를 누릅니다<br>' +
+          '2. <b>「홈 화면에 추가」</b> 또는 <b>「앱 설치」</b>를 선택합니다<br>' +
+          '3. <b>「설치」</b>를 누릅니다') +
+      '<br><br><span style="color:var(--tx-3);font-size:.82rem">' +
+      '앱 장터에서 내려받는 것이 아니라 바로가기를 만드는 것이라, ' +
+      '설치 용량이 거의 들지 않고 언제든 지울 수 있습니다.</span></div>');
+    $('installBar').hidden = true;
   },
 
-  log: function () {
-    var w = $('atLogWrap');
-    if (!S.atLog.length) { w.hidden = true; return; }
-    w.hidden = false;
-    var box = $('atLog'); box.innerHTML = '';
-    S.atLog.forEach(function (x) {
-      box.appendChild(el('div', 'row',
-        '<div class="tick">💬</div><div class="rl">' +
-        '<div class="rt" style="font-size:.9rem">' + esc(x.t) + '</div>' +
-        '<div class="rm"><span>' + esc(x.target) + '</span>' +
-        '<span class="num">카톡 ' + x.ok.toLocaleString() + '</span>' +
-        '<span class="num">문자 ' + x.fail.toLocaleString() + '</span>' +
-        '<span>' + ago(x.at) + '</span></div></div>' +
-        '<div class="rr num" style="font-weight:800;color:var(--tx)">' + x.n.toLocaleString() + '건</div>'));
-    });
+  later: function () {
+    $('installBar').hidden = true;
+    try { localStorage.setItem('jl2_ins', 'no'); } catch (e) {}
   }
 };
 
@@ -2316,7 +2294,7 @@ window.App = App; window.Deleg = Deleg; window.Admin = Admin;
 window.Check = Check; window.Board = Board; window.Assembly = Assembly;
 window.Election = Election; window.Legal = Legal; window.Docs = Docs;
 window.Transfer = Transfer; window.Fee = Fee; window.Cert = Cert;
-window.Say = Say; window.Notify = Notify;
+window.Say = Say; window.Install = Install;
 document.addEventListener('DOMContentLoaded', function () {
   App.init();
   /* 웹폰트는 화면이 그려진 뒤에 따로 불러옵니다 (로딩 지연 방지) */

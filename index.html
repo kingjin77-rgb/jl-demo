@@ -4,6 +4,15 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>입주예정자협의회 플랫폼</title>
+<meta name="theme-color" content="#F7F8FB" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#080C15" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="입예협">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" href="icon-192.png">
 
 <style>
 /* ───────── 디자인 토큰 ───────── */
@@ -261,32 +270,22 @@ button{cursor:pointer;border:0;background:none}
   padding:9px 12px;font-size:.87rem;outline:0}
 .sc-rein input:focus{border-color:var(--acc)}
 
-/* 알림톡 */
-.kt{display:grid;grid-template-columns:1fr;gap:14px;margin-top:12px}
-.kt-phone{background:#9BBBD4;border-radius:20px;padding:0 0 18px;overflow:hidden;
-  box-shadow:var(--sh-l)}
-.kt-bar{background:#A0BDD6;color:#2B2B2B;font-size:.78rem;font-weight:700;padding:11px 16px;
-  border-bottom:1px solid rgba(0,0,0,.07)}
-.kt-body{padding:16px 14px 0}
-.kt-row{display:flex;gap:9px;align-items:flex-start}
-.kt-prof{width:36px;height:36px;border-radius:12px;background:#3C1E1E;color:#FEE500;flex:none;
-  display:grid;place-items:center;font-weight:800;font-size:.82rem}
-.kt-name{font-size:.76rem;color:#2B2B2B;margin-bottom:5px;font-weight:600}
-.kt-bubble{background:#fff;border-radius:4px 14px 14px 14px;overflow:hidden;max-width:290px;
-  box-shadow:0 1px 3px rgba(0,0,0,.14)}
-.kt-head{background:#FEE500;color:#3C1E1E;font-size:.74rem;font-weight:800;padding:8px 14px}
-.kt-msg{padding:14px;font-size:.85rem;line-height:1.72;color:#111;white-space:pre-wrap;word-break:keep-all}
-.kt-btn{margin:0 14px 14px;text-align:center;background:#F4F4F4;border-radius:8px;padding:10px;
-  font-size:.82rem;font-weight:700;color:#333}
-.kt-side{background:var(--surf);border:1px solid var(--line);border-radius:var(--r);
-  box-shadow:var(--sh);padding:17px 18px}
-.kt-stat{display:flex;justify-content:space-between;align-items:baseline;padding:9px 0;
-  border-bottom:1px solid var(--line-2);font-size:.85rem}
-.kt-stat span{color:var(--tx-2)}
-.kt-stat b{font-weight:800}
-.kt-stat.hi{border-bottom:0}
-.kt-stat.hi b{font-size:.92rem;color:var(--acc);font-weight:800;letter-spacing:-.02em}
-@media(min-width:860px){.kt{grid-template-columns:1fr 300px;align-items:start}}
+/* ── 홈 화면 추가 안내 ───────────────────────────────────── */
+.install{position:fixed;left:12px;right:12px;z-index:70;
+  bottom:calc(var(--nav-h) + var(--safe-b) + 12px);
+  display:flex;align-items:center;gap:12px;
+  background:var(--surf);border:1px solid var(--line);border-radius:18px;
+  padding:12px 14px;box-shadow:var(--sh-l);
+  animation:insUp .6s var(--spring) both}
+@keyframes insUp{from{opacity:0;transform:translateY(24px) scale(.96)}to{opacity:1;transform:none}}
+.ins-ic{width:42px;height:42px;border-radius:13px;flex:none}
+.ins-tx{flex:1;min-width:0}
+.ins-tx b{display:block;font-size:.91rem;font-weight:750;letter-spacing:-.025em}
+.ins-tx span{display:block;font-size:.78rem;color:var(--tx-2);line-height:1.5;margin-top:2px}
+.ins-btns{display:flex;align-items:center;gap:4px;flex:none}
+.ins-x{width:30px;height:30px;border-radius:9px;color:var(--tx-3);font-size:.9rem}
+.ins-x:active{background:var(--surf-2)}
+@media(min-width:960px){.install{left:auto;right:24px;bottom:24px;max-width:400px}}
 
 /* ── 인트로 시퀀스 ───────────────────────────────────────── */
 .intro{position:fixed;inset:0;z-index:200;display:grid;place-items:center;
@@ -297,13 +296,13 @@ button{cursor:pointer;border:0;background:none}
     radial-gradient(58% 42% at 50% 40%, rgba(92,130,255,.28), transparent 70%),
     radial-gradient(45% 40% at 80% 80%, rgba(180,137,60,.20), transparent 70%),
     linear-gradient(160deg,#070B14,#0F1725 60%,#16203A);
-  transform:scale(1.2);animation:introBg 2.9s var(--ease) both}
+  transform:scale(1.2);animation:introBg 5.2s var(--ease) both}
 @keyframes introBg{to{transform:scale(1)}}
 .intro-in{position:relative;text-align:center;padding:0 26px;max-width:460px}
 
 /* 1막 — 로고가 또렷해지며 빛이 한 번 훑고 지나갑니다 */
 .intro-logo{position:relative;display:inline-block;overflow:hidden;
-  opacity:0;animation:logoIn 1.05s var(--ease) .18s forwards}
+  opacity:0;animation:logoIn 1.15s var(--ease) .2s forwards}
 .intro-logo img{display:block;width:230px;max-width:62vw;height:auto}
 @keyframes logoIn{
   from{opacity:0;transform:scale(.9) translateY(10px);filter:blur(9px)}
@@ -311,32 +310,34 @@ button{cursor:pointer;border:0;background:none}
 }
 .intro-logo .shine{position:absolute;top:-30%;bottom:-30%;width:42%;left:-60%;
   background:linear-gradient(100deg,transparent,rgba(255,255,255,.55),transparent);
-  transform:skewX(-18deg);animation:shine 1.15s cubic-bezier(.5,0,.3,1) .85s}
+  transform:skewX(-18deg);animation:shine 1.25s cubic-bezier(.5,0,.3,1) .95s}
 @keyframes shine{to{left:130%}}
 
 /* 2막 — 가는 선이 가운데서 양쪽으로 열립니다 */
 .intro-rule{width:0;height:1px;margin:24px auto 20px;
   background:linear-gradient(90deg,transparent,rgba(143,168,255,.85),transparent);
-  animation:rule .85s var(--ease) 1.35s forwards}
+  animation:rule .9s var(--ease) 1.55s forwards}
 @keyframes rule{to{width:200px}}
 
 /* 3막 — 단지명이 자간을 좁히며 모입니다 */
-.intro-apt{font-size:1.4rem;font-weight:800;letter-spacing:.3em;opacity:0;
-  animation:introTx 1s var(--ease) 1.5s forwards;text-indent:.3em}
+.intro-apt{font-size:1.52rem;font-weight:800;letter-spacing:.3em;opacity:0;
+  animation:introTx 1.35s var(--ease) 1.8s forwards;text-indent:.3em}
 .intro-org{font-size:.79rem;color:#93A4C4;letter-spacing:.2em;margin-top:10px;opacity:0;
-  animation:introTx .95s var(--ease) 1.72s forwards;text-indent:.2em}
+  animation:introTx 1.15s var(--ease) 2.25s forwards;text-indent:.2em}
 @keyframes introTx{
   from{opacity:0;letter-spacing:.6em;filter:blur(7px);transform:translateY(9px)}
   to{opacity:1;letter-spacing:.22em;filter:blur(0);transform:none}
 }
 .intro-by{font-size:.68rem;color:#5E6E8A;letter-spacing:.16em;margin-top:26px;
-  opacity:0;animation:byIn .9s var(--ease) 2.05s forwards}
+  opacity:0;animation:byIn .9s var(--ease) 2.75s forwards}
 @keyframes byIn{to{opacity:1}}
+.intro-skip{font-size:.68rem;color:#3E4A62;letter-spacing:.1em;margin-top:34px;
+  opacity:0;animation:byIn 1s var(--ease) 3.3s forwards}
 
 /* 마무리 — 화면 전체가 위로 걷히며 앱이 드러납니다 */
-.intro.out .intro-in{animation:introOut .5s var(--ease) 2.5s forwards}
+.intro.out .intro-in{animation:introOut .55s var(--ease) 4.5s forwards}
 @keyframes introOut{to{opacity:0;transform:translateY(-14px) scale(.975);filter:blur(4px)}}
-.intro.out{animation:curtain 1s cubic-bezier(.76,0,.24,1) 2.72s forwards}
+.intro.out{animation:curtain 1s cubic-bezier(.76,0,.24,1) 4.8s forwards}
 @keyframes curtain{to{transform:translateY(-101%)}}
 body.booting{overflow:hidden}
 body.booting main,body.booting .appbar,body.booting .tabbar,body.booting .demoflag{
@@ -873,6 +874,7 @@ select.inp{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.
     <div class="intro-apt" id="introApt"></div>
     <div class="intro-org" id="introOrg"></div>
     <div class="intro-by">법률자문 · 법무법인 제이엘</div>
+    <div class="intro-skip">화면을 누르면 건너뜁니다</div>
   </div>
 </div>
 
@@ -1509,53 +1511,6 @@ select.inp{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.
     </div>
 
     <div class="sec">
-      <div class="sec-h"><h2 class="sec-t">카카오 알림톡 발송</h2></div>
-      <p class="sec-d">위임장 접수 시 수집한 연락처로 발송합니다. 앱 설치 없이 카카오톡으로 바로 전달됩니다.</p>
-      <div class="card"><div class="cbody">
-        <div class="field">
-          <label class="lbl">받는 대상</label>
-          <select class="inp" id="atTarget" onchange="Notify.preview()"></select>
-        </div>
-        <div class="field" style="margin-bottom:0">
-          <label class="lbl">템플릿</label>
-          <select class="inp" id="atTpl" onchange="Notify.preview()"></select>
-        </div>
-      </div></div>
-
-      <div class="kt">
-        <div class="kt-phone">
-          <div class="kt-bar">카카오톡</div>
-          <div class="kt-body">
-            <div class="kt-row">
-              <div class="kt-prof" id="ktProf">협</div>
-              <div>
-                <div class="kt-name" id="ktName">입주예정자협의회</div>
-                <div class="kt-bubble">
-                  <div class="kt-head">알림톡 도착</div>
-                  <div class="kt-msg" id="ktMsg"></div>
-                  <div class="kt-btn" id="ktBtn">플랫폼 바로가기</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="kt-side">
-          <div class="kt-stat"><span>발송 대상</span><b class="num" id="atN">0명</b></div>
-          <div class="kt-stat"><span>도달 방식</span><b>카카오톡</b></div>
-          <div class="kt-stat hi"><span>발송 비용</span><b id="atCost">법무법인 제이엘 부담</b></div>
-          <button class="btn" style="margin-top:14px" id="atGo" onclick="Notify.send()">알림톡 발송</button>
-          <div class="hint" id="atHint">협의회에 별도로 청구되지 않습니다.
-            카카오톡을 쓰지 않는 세대에는 문자로 자동 발송됩니다.</div>
-        </div>
-      </div>
-
-      <div class="sec" id="atLogWrap" hidden>
-        <div class="sec-h"><h2 class="sec-t">발송 이력</h2></div>
-        <div class="list" id="atLog"></div>
-      </div>
-    </div>
-
-    <div class="sec">
       <div class="sec-h"><h2 class="sec-t">지출 승인 대기</h2></div>
       <div class="list" id="apprBox"></div>
     </div>
@@ -1601,6 +1556,18 @@ select.inp{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.
 
 <div class="scrim" id="scrim" onclick="App.closeSheet()"></div>
 <div class="sheet" id="sheet"><div class="grab"></div><div id="sheetBody"></div></div>
+<div class="install" id="installBar" hidden>
+  <img class="ins-ic" src="icon-192.png" alt="">
+  <div class="ins-tx">
+    <b id="insTitle">홈 화면에 추가하기</b>
+    <span id="insDesc">한 번 추가하면 앱처럼 바로 열립니다. 설치 용량은 1MB도 되지 않습니다.</span>
+  </div>
+  <div class="ins-btns">
+    <button class="btn sm" id="insGo" onclick="Install.go()">추가</button>
+    <button class="ins-x" onclick="Install.later()" aria-label="닫기">✕</button>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <div class="certwrap" id="certWrap" hidden>
@@ -2187,8 +2154,8 @@ var Anim = {
       document.body.classList.remove('booting');
       document.body.classList.add('booted');
       done && done();
-    }, 2150);
-    setTimeout(function () { box.classList.add('gone'); }, 3150);
+    }, 4900);
+    setTimeout(function () { box.classList.add('gone'); }, 5900);
 
     /* 화면을 누르면 건너뜁니다 */
     box.addEventListener('pointerdown', function () {
@@ -2286,6 +2253,18 @@ var App = {
 
     if (C.heroLight !== false) document.querySelector('.hero').classList.add('light');
     document.title = C.org;
+    /* 홈 화면에 추가했을 때 뜨는 이름을 단지명으로 바꿉니다 */
+    try {
+      var lk = document.querySelector('link[rel="manifest"]');
+      if (lk && location.protocol.indexOf('http') === 0 && window.Blob && URL.createObjectURL) {
+        fetch(lk.href).then(function (r) { return r.json(); }).then(function (m) {
+          m.name = C.org;
+          m.short_name = (C.apt || '').split(' ')[0] || m.short_name;
+          m.description = C.apt + ' ' + m.description;
+          lk.href = URL.createObjectURL(new Blob([JSON.stringify(m)], { type: 'application/manifest+json' }));
+        }).catch(function () {});
+      }
+    } catch (e) {}
     $('emblem').textContent = C.emblem;
     $('heroName').textContent = C.apt;
     $('heroLoc').textContent = C.address;
@@ -2330,6 +2309,7 @@ var App = {
     this.go(TITLES[t] ? t : 'home');
     Anim.indicator();
     Anim.bindRipple();
+    Install.init();
     Anim.parallax();
     Anim.intro(function () {
       Anim.indicator();
@@ -3047,8 +3027,6 @@ var Admin = {
   },
 
   paint: function () {
-    Notify.init();
-    Notify.log();
     $('adminGate').hidden = true;
     $('adminBody').hidden = false;
 
@@ -3843,129 +3821,96 @@ var Say = {
   }
 };
 
+
 /* ══════════════════════════════════════════════════════════════
-   카카오 알림톡 (데모 — 실제 발송 없음)
+   홈 화면에 추가 — 설치 없이 앱처럼 쓰게 합니다
    ══════════════════════════════════════════════════════════════ */
-var Notify = {
-  targets: function () {
-    var feePaid = Object.keys(S.fees);
-    var unpaid = S.recs.filter(function (r) { return feePaid.indexOf(r.dong + '-' + r.ho) < 0; }).length;
-    return [
-      { k:'all',   t:'전체 접수 세대',        n:S.recs.length },
-      { k:'nodel', t:'위임장 미제출 세대',    n:Math.max(0, TOTAL - S.recs.length) },
-      { k:'fee',   t:'회비 미납 세대',        n:unpaid },
-      { k:'as',    t:'회의 참석 미응답 세대',  n:Math.max(0, S.recs.length - 132) }
-    ];
+var Install = {
+  ev: null,
+
+  standalone: function () {
+    try {
+      return window.matchMedia('(display-mode: standalone)').matches ||
+             window.navigator.standalone === true;
+    } catch (e) { return false; }
   },
 
-  tpls: function () {
-    var a = S.assembly;
-    var days = Math.max(0, Math.ceil((new Date(a.date) - new Date()) / 86400000));
-    return [
-      { k:'as', t:'회의 개최 안내',
-        m:'[' + C.org + ']\n\n' + a.no + ' 개최를 안내드립니다.\n\n' +
-          '▪ 일시 : ' + a.date + ' ' + a.time + '\n' +
-          '▪ 장소 : ' + a.place + '\n' +
-          '▪ 남은 기간 : D-' + days + '\n\n' +
-          '참석이 어려우신 세대는 전자 위임장을 제출해 주시기 바랍니다.',
-        b:'참석 여부 등록하기' },
-      { k:'del', t:'위임장 제출 독려',
-        m:'[' + C.org + ']\n\n' + C.apt + ' 전자 위임장 접수가 진행 중입니다.\n\n' +
-          '현재 ' + S.recs.length.toLocaleString() + '세대가 참여하셨습니다.\n' +
-          '동·호수 선택 후 서명까지 약 1분이면 완료됩니다.\n\n' +
-          '앱 설치 없이 아래 링크로 바로 접수하실 수 있습니다.',
-        b:'위임장 제출하기' },
-      { k:'fee', t:'회비 납부 안내',
-        m:'[' + C.org + ']\n\n협의회 운영 회비 납부를 안내드립니다.\n\n' +
-          '▪ 금액 : 세대당 20,000원\n' +
-          '▪ 계좌 : ○○은행 123-456-789012\n' +
-          '▪ 예금주 : ' + C.org + '\n\n' +
-          '납부하신 내역은 플랫폼에서 전 세대가 확인하실 수 있습니다.',
-        b:'우리 집 납부 확인' },
-      { k:'no', t:'새 공지 등록 알림',
-        m:'[' + C.org + ']\n\n새로운 공지사항이 등록되었습니다.\n\n' +
-          '▪ ' + S.notices[0].t + '\n▪ 등록일 : ' + S.notices[0].d + '\n\n' +
-          '자세한 내용은 플랫폼에서 확인해 주세요.',
-        b:'공지 확인하기' }
-    ];
+  isIOS: function () {
+    return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+  },
+
+  dismissed: function () {
+    try { return localStorage.getItem('jl2_ins') === 'no'; } catch (e) { return false; }
   },
 
   init: function () {
-    var ts = $('atTarget'); ts.innerHTML = '';
-    this.targets().forEach(function (x, i) {
-      var o = document.createElement('option');
-      o.value = i; o.textContent = x.t + ' (' + x.n.toLocaleString() + '명)';
-      ts.appendChild(o);
+    /* 서비스 워커 — file:// 로 열었을 때는 등록하지 않습니다 */
+    if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
+      window.addEventListener('load', function () {
+        navigator.serviceWorker.register('sw.js').catch(function () {});
+      });
+    }
+
+    if (this.standalone() || this.dismissed()) return;
+
+    var self = this;
+    window.addEventListener('beforeinstallprompt', function (e) {
+      e.preventDefault();
+      self.ev = e;
+      self.show();
     });
-    var tp = $('atTpl'); tp.innerHTML = '';
-    this.tpls().forEach(function (x, i) {
-      var o = document.createElement('option');
-      o.value = i; o.textContent = x.t;
-      tp.appendChild(o);
-    });
-    $('ktProf').textContent = C.emblem;
-    $('ktName').textContent = C.org;
-    this.preview();
+
+    /* 아이폰은 설치 창을 띄울 수 없어 방법만 안내합니다 */
+    if (this.isIOS()) {
+      setTimeout(function () { self.show(true); }, 4200);
+    }
   },
 
-  preview: function () {
-    var t = this.targets()[+$('atTarget').value || 0];
-    var p = this.tpls()[+$('atTpl').value || 0];
-    $('ktMsg').textContent = p.m;
-    $('ktBtn').textContent = p.b;
-    $('atN').textContent = t.n.toLocaleString() + '명';
+  show: function (ios) {
+    var bar = $('installBar');
+    if (!bar) return;
+    if (ios) {
+      $('insTitle').textContent = '홈 화면에 추가하기';
+      $('insDesc').textContent = '아래 공유 버튼 → 「홈 화면에 추가」를 누르시면 앱처럼 열립니다.';
+      $('insGo').textContent = '방법 보기';
+    }
+    bar.hidden = false;
   },
 
-  send: function () {
-    var t = this.targets()[+$('atTarget').value || 0];
-    var p = this.tpls()[+$('atTpl').value || 0];
-    if (!t.n) return App.toast('발송 대상이 없습니다');
-
-    var btn = $('atGo'), hint = $('atHint');
-    btn.disabled = true;
-    var i = 0;
-    var timer = setInterval(function () {
-      i += Math.ceil(t.n / 12);
-      if (i >= t.n) i = t.n;
-      btn.textContent = '발송 중… ' + i.toLocaleString() + ' / ' + t.n.toLocaleString();
-      hint.textContent = '카카오 비즈메시지 서버로 전송하고 있습니다.';
-      if (i >= t.n) {
-        clearInterval(timer);
-        var fail = Math.round(t.n * 0.018);
-        S.atLog.unshift({ t:p.t, target:t.t, n:t.n, ok:t.n - fail, fail:fail, at:Date.now() });
-        DB.save();
-        btn.disabled = false;
-        btn.textContent = '알림톡 발송';
-        hint.textContent = '협의회에 별도로 청구되지 않습니다.';
-        Notify.log();
-        App.sheet('발송 완료',
-          '<div style="font-size:.88rem;color:var(--tx-2);line-height:1.8">' +
-          '<b style="color:var(--tx)">' + esc(p.t) + '</b> · ' + esc(t.t) + '<br><br>' +
-          '카카오톡 도착 <b style="color:var(--ok)">' + (t.n - fail).toLocaleString() + '건</b><br>' +
-          '문자 대체 발송 <b style="color:var(--tx)">' + fail.toLocaleString() + '건</b> ' +
-          '<span style="color:var(--tx-3)">(카카오톡 미사용 · 번호 변경 세대)</span><br><br>' +
-          '전 세대 전달이 완료되었습니다.<br>' +
-          '<b style="color:var(--acc)">발송 비용은 법무법인 제이엘이 부담합니다.</b><br><br>' +
-          '<span style="color:var(--tx-3);font-size:.82rem">※ 데모 화면입니다. 실제 발송은 카카오 비즈니스 채널 개설 후 가능합니다.</span></div>');
-      }
-    }, 170);
+  go: function () {
+    if (this.ev) {
+      this.ev.prompt();
+      var self = this;
+      this.ev.userChoice.then(function (r) {
+        $('installBar').hidden = true;
+        self.ev = null;
+        if (r && r.outcome === 'accepted') {
+          App.toast('홈 화면에 추가되었습니다');
+          Anim.ok();
+        }
+      });
+      return;
+    }
+    App.sheet('홈 화면에 추가하는 방법',
+      '<div style="font-size:.88rem;color:var(--tx-2);line-height:1.85">' +
+      (this.isIOS()
+        ? '<b style="color:var(--tx)">아이폰 · 아이패드</b><br>' +
+          '1. 화면 아래 <b>공유 버튼</b>(↑)을 누릅니다<br>' +
+          '2. 목록을 내려 <b>「홈 화면에 추가」</b>를 선택합니다<br>' +
+          '3. 오른쪽 위 <b>「추가」</b>를 누릅니다'
+        : '<b style="color:var(--tx)">안드로이드</b><br>' +
+          '1. 오른쪽 위 <b>점 세 개(⋮)</b>를 누릅니다<br>' +
+          '2. <b>「홈 화면에 추가」</b> 또는 <b>「앱 설치」</b>를 선택합니다<br>' +
+          '3. <b>「설치」</b>를 누릅니다') +
+      '<br><br><span style="color:var(--tx-3);font-size:.82rem">' +
+      '앱 장터에서 내려받는 것이 아니라 바로가기를 만드는 것이라, ' +
+      '설치 용량이 거의 들지 않고 언제든 지울 수 있습니다.</span></div>');
+    $('installBar').hidden = true;
   },
 
-  log: function () {
-    var w = $('atLogWrap');
-    if (!S.atLog.length) { w.hidden = true; return; }
-    w.hidden = false;
-    var box = $('atLog'); box.innerHTML = '';
-    S.atLog.forEach(function (x) {
-      box.appendChild(el('div', 'row',
-        '<div class="tick">💬</div><div class="rl">' +
-        '<div class="rt" style="font-size:.9rem">' + esc(x.t) + '</div>' +
-        '<div class="rm"><span>' + esc(x.target) + '</span>' +
-        '<span class="num">카톡 ' + x.ok.toLocaleString() + '</span>' +
-        '<span class="num">문자 ' + x.fail.toLocaleString() + '</span>' +
-        '<span>' + ago(x.at) + '</span></div></div>' +
-        '<div class="rr num" style="font-weight:800;color:var(--tx)">' + x.n.toLocaleString() + '건</div>'));
-    });
+  later: function () {
+    $('installBar').hidden = true;
+    try { localStorage.setItem('jl2_ins', 'no'); } catch (e) {}
   }
 };
 
@@ -4018,7 +3963,7 @@ window.App = App; window.Deleg = Deleg; window.Admin = Admin;
 window.Check = Check; window.Board = Board; window.Assembly = Assembly;
 window.Election = Election; window.Legal = Legal; window.Docs = Docs;
 window.Transfer = Transfer; window.Fee = Fee; window.Cert = Cert;
-window.Say = Say; window.Notify = Notify;
+window.Say = Say; window.Install = Install;
 document.addEventListener('DOMContentLoaded', function () {
   App.init();
   /* 웹폰트는 화면이 그려진 뒤에 따로 불러옵니다 (로딩 지연 방지) */
