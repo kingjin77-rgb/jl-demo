@@ -237,6 +237,282 @@ var TOTAL = C.dongs.reduce(function (a, r) { return a + r[1]; }, 0) || C.totalUn
 function MT()  { return C.meeting || '전체회의'; }
 function MTS() { return C.meetingShort || '회의'; }
 
+
+/* ══════════════════════════════════════════════════════════════
+   동작 — 숫자 굴리기 · 등장 · 색종이 · 진동
+   ══════════════════════════════════════════════════════════════ */
+var REDUCE = false;
+try { REDUCE = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
+
+var Anim = {
+  /* 숫자가 차오르듯 올라갑니다 */
+  count: function (el, to, opt) {
+    if (!el) return;
+    opt = opt || {};
+    var dur = opt.dur || 1100;
+    var pre = opt.pre || '', suf = opt.suf || '';
+    var fmt = opt.fmt || function (n) { return n.toLocaleString('ko-KR'); };
+    if (REDUCE) { el.textContent = pre + fmt(to) + suf; return; }
+    var from = 0, t0 = null;
+    cancelAnimationFrame(el._raf);
+    function step(t) {
+      if (t0 === null) t0 = t;
+      var p = Math.min(1, (t - t0) / dur);
+      var e = 1 - Math.pow(2, -10 * p);          /* easeOutExpo */
+      var v = Math.round(from + (to - from) * (p === 1 ? 1 : e));
+      el.textContent = pre + fmt(v) + suf;
+      if (p < 1) el._raf = requestAnimationFrame(step);
+    }
+    el._raf = requestAnimationFrame(step);
+  },
+
+  /* 스크롤하면 하나씩 올라옵니다 */
+  reveal: function (root) {
+    if (REDUCE || !window.IntersectionObserver) return;
+    var targets = (root || document).querySelectorAll('.sec, .card, .act, .saycard, .cand, .risk');
+    if (!Anim._io) {
+      Anim._io = new IntersectionObserver(function (es) {
+        es.forEach(function (e) {
+          if (!e.isIntersecting) return;
+          var el = e.target;
+          var d = +(el.dataset.rd || 0);
+          setTimeout(function () { el.classList.add('in'); }, d);
+          Anim._io.unobserve(el);
+        });
+      }, { rootMargin: '0px 0px -8% 0px', threshold: 0.05 });
+    }
+    var i = 0;
+    Array.prototype.forEach.call(targets, function (el) {
+      if (el.classList.contains('reveal')) return;
+      el.classList.add('reveal');
+      el.dataset.rd = String(Math.min(i++, 6) * 55);
+      Anim._io.observe(el);
+    });
+  },
+
+  /* 짧은 진동 — 휴대폰에서 눌린 느낌을 만듭니다.
+     브라우저가 실제 터치 이전의 진동을 막으므로 첫 조작 뒤부터 동작합니다. */
+  _touched: false,
+  tap: function (ms) {
+    if (!Anim._touched || !navigator.vibrate) return;
+    try { navigator.vibrate(ms || 8); } catch (e) {}
+  },
+
+  /* 성공 — 조금 더 길게 */
+  ok: function () { Anim.tap([12, 55, 20]); },
+
+  /* 색종이 — 중력·회전·바람까지 계산합니다 */
+  confetti: function (canvas, opt) {
+    if (!canvas || REDUCE) return;
+    opt = opt || {};
+    var ctx = canvas.getContext('2d');
+    var box = canvas.getBoundingClientRect();
+    var dpr = Math.min(2, window.devicePixelRatio || 1);
+    canvas.width = box.width * dpr;
+    canvas.height = box.height * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    var W = box.width, H = box.height;
+    var COLS = ['#5C82FF', '#8FA8FF', '#E8C06A', '#34D399', '#F27A9B', '#FFFFFF'];
+    var N = opt.n || 90;
+    var ps = [];
+    var cx = W / 2, cy = H * 0.32;
+
+    for (var i = 0; i < N; i++) {
+      var ang = (-Math.PI / 2) + (Math.random() - 0.5) * 2.5;
+      var sp = 4 + Math.random() * 8;
+      ps.push({
+        x: cx + (Math.random() - 0.5) * 40,
+        y: cy + (Math.random() - 0.5) * 20,
+        vx: Math.cos(ang) * sp * (0.8 + Math.random() * 0.9),
+        vy: Math.sin(ang) * sp,
+        w: 5 + Math.random() * 6,
+        h: 8 + Math.random() * 7,
+        rot: Math.random() * Math.PI,
+        vr: (Math.random() - 0.5) * 0.34,
+        col: COLS[(Math.random() * COLS.length) | 0],
+        life: 0,
+        max: 90 + Math.random() * 60,
+        round: Math.random() < 0.3
+      });
+    }
+
+    var G = 0.22, DRAG = 0.986, WIND = 0.03;
+    cancelAnimationFrame(canvas._raf);
+    function frame() {
+      ctx.clearRect(0, 0, W, H);
+      var alive = 0;
+      for (var i = 0; i < ps.length; i++) {
+        var p = ps[i];
+        p.life++;
+        if (p.life > p.max) continue;
+        alive++;
+        p.vy += G;
+        p.vx = p.vx * DRAG + Math.sin((p.life + i) / 18) * WIND;
+        p.vy *= DRAG;
+        p.x += p.vx;
+        p.y += p.vy;
+        p.rot += p.vr;
+        var a = p.life > p.max - 28 ? (p.max - p.life) / 28 : 1;
+        ctx.save();
+        ctx.globalAlpha = Math.max(0, a);
+        ctx.translate(p.x, p.y);
+        ctx.rotate(p.rot);
+        ctx.fillStyle = p.col;
+        /* 앞뒤로 뒤집히는 느낌 — 폭을 사인으로 줄입니다 */
+        var w = p.w * Math.abs(Math.cos(p.rot));
+        if (p.round) {
+          ctx.beginPath();
+          ctx.ellipse(0, 0, Math.max(1, w / 2), p.h / 2, 0, 0, Math.PI * 2);
+          ctx.fill();
+        } else {
+          ctx.fillRect(-w / 2, -p.h / 2, Math.max(1, w), p.h);
+        }
+        ctx.restore();
+      }
+      if (alive) canvas._raf = requestAnimationFrame(frame);
+      else ctx.clearRect(0, 0, W, H);
+    }
+    canvas._raf = requestAnimationFrame(frame);
+  },
+
+
+  /* 숫자 롤링 — 자리마다 숫자판이 굴러 올라갑니다 */
+  odo: function (el, to, opt) {
+    if (!el) return;
+    opt = opt || {};
+    var txt = (opt.fmt || function (n) { return n.toLocaleString('ko-KR'); })(to);
+    if (REDUCE) { el.textContent = txt + (opt.suf || ''); return; }
+    var chars = (txt + (opt.suf || '')).split('');
+    el.textContent = '';
+    el.classList.add('odo');
+    var delay = 0;
+    chars.forEach(function (ch) {
+      if (!/\d/.test(ch)) {
+        var sp = el.appendChild(el.ownerDocument.createElement('span'));
+        sp.className = 'odo-s';
+        sp.textContent = ch;
+        return;
+      }
+      var col = el.appendChild(el.ownerDocument.createElement('span'));
+      col.className = 'odo-d';
+      var strip = col.appendChild(el.ownerDocument.createElement('i'));
+      var h = '';
+      for (var r = 0; r < 3; r++) for (var d = 0; d <= 9; d++) h += d + '<br>';
+      strip.innerHTML = h;
+      var target = 20 + (+ch);                 /* 두 바퀴 돌고 멈춥니다 */
+      strip.style.transform = 'translateY(0)';
+      strip.style.transitionDelay = (delay += 55) + 'ms';
+      requestAnimationFrame(function () {
+        requestAnimationFrame(function () {
+          strip.style.transform = 'translateY(-' + target + 'em)';
+        });
+      });
+    });
+  },
+
+  /* 누른 자리에서 퍼지는 물결 */
+  ripple: function (e) {
+    var t = e.currentTarget || e.target;
+    if (!t || !t.getBoundingClientRect) return;
+    var b = t.getBoundingClientRect();
+    var size = Math.max(b.width, b.height);
+    var r = document.createElement('span');
+    r.className = 'rip';
+    r.style.width = r.style.height = size + 'px';
+    r.style.left = ((e.clientX || (b.left + b.width / 2)) - b.left - size / 2) + 'px';
+    r.style.top  = ((e.clientY || (b.top + b.height / 2)) - b.top - size / 2) + 'px';
+    t.appendChild(r);
+    setTimeout(function () { r.remove(); }, 640);
+  },
+
+  bindRipple: function () {
+    if (Anim._rip) return;
+    Anim._rip = true;
+    document.addEventListener('pointerdown', function (e) {
+      var t = e.target.closest && e.target.closest('.act,.row,.btn,.mtile,.seg,.stamp,.hcell,.opt,.cand');
+      if (t && !REDUCE) Anim.ripple({ currentTarget: t, clientX: e.clientX, clientY: e.clientY });
+    }, { passive: true });
+  },
+
+  /* 히어로가 손끝·기울기·스크롤을 따라 움직입니다 */
+  parallax: function () {
+    var hero = document.querySelector('.hero');
+    if (!hero || REDUCE) return;
+    var set = function (x, y) {
+      hero.style.setProperty('--px', x.toFixed(3));
+      hero.style.setProperty('--py', y.toFixed(3));
+    };
+    window.addEventListener('pointermove', function (e) {
+      set((e.clientX / innerWidth - .5) * 2, (e.clientY / innerHeight - .5) * 2);
+    }, { passive: true });
+    window.addEventListener('deviceorientation', function (e) {
+      if (e.gamma == null) return;
+      set(Math.max(-1, Math.min(1, e.gamma / 28)), Math.max(-1, Math.min(1, (e.beta - 45) / 34)));
+    }, { passive: true });
+
+    /* 스크롤하면 히어로가 살짝 뒤로 물러납니다 */
+    var raf = 0;
+    window.addEventListener('scroll', function () {
+      if (raf) return;
+      raf = requestAnimationFrame(function () {
+        raf = 0;
+        var y = Math.min(1, window.scrollY / 260);
+        hero.style.transform = 'translate3d(0,' + (y * -16).toFixed(1) + 'px,0) scale(' + (1 - y * .028).toFixed(4) + ')';
+        hero.style.opacity = String(1 - y * .28);
+      });
+    }, { passive: true });
+  },
+
+  /* 첫 진입 오프닝 */
+  intro: function (done) {
+    var box = $('intro');
+    var seen = false;
+    try { seen = sessionStorage.getItem('jl2_intro') === '1'; } catch (e) {}
+    if (!box || seen || REDUCE) {
+      if (box) box.classList.add('gone');
+      document.body.classList.remove('booting');
+      document.body.classList.add('booted');
+      done && done();
+      return;
+    }
+    try { sessionStorage.setItem('jl2_intro', '1'); } catch (e) {}
+    $('introApt').textContent = C.apt;
+    $('introOrg').textContent = C.org;
+    box.querySelector('.im-t').textContent = C.emblem;
+    box.classList.add('out');
+
+    setTimeout(function () {
+      document.body.classList.remove('booting');
+      document.body.classList.add('booted');
+      done && done();
+    }, 2150);
+    setTimeout(function () { box.classList.add('gone'); }, 3150);
+
+    /* 화면을 누르면 건너뜁니다 */
+    box.addEventListener('pointerdown', function () {
+      box.classList.add('gone');
+      document.body.classList.remove('booting');
+      document.body.classList.add('booted');
+      done && done();
+    }, { once: true });
+  }
+,
+
+  /* 하단 탭 표시선 */
+  indicator: function () {
+    var bar = $('tabbar');
+    if (!bar || window.matchMedia('(min-width:960px)').matches) return;
+    var ind = bar.querySelector('.tab-ind');
+    if (!ind) { ind = el('div', 'tab-ind'); bar.appendChild(ind); }
+    var on = bar.querySelector('.tab.on');
+    if (!on) { ind.style.width = '0'; return; }
+    var w = on.offsetWidth * 0.42;
+    ind.style.width = w + 'px';
+    ind.style.left = (on.offsetLeft + (on.offsetWidth - w) / 2) + 'px';
+  }
+};
+
 /* ══════════════════════════════════════════════════════════════
    App
    ══════════════════════════════════════════════════════════════ */
@@ -286,6 +562,7 @@ var App = {
   cur: 'home',
 
   init: function () {
+    document.body.classList.add('booting');
     S = DB.load();
     if (!S || !S.recs || !S.posts) { S = seed(); DB.save(); }
 
@@ -350,6 +627,17 @@ var App = {
 
     var t = (location.hash || '').replace('#', '');
     this.go(TITLES[t] ? t : 'home');
+    Anim.indicator();
+    Anim.bindRipple();
+    Anim.parallax();
+    Anim.intro(function () {
+      Anim.indicator();
+      App.paintHome();
+    });
+    window.addEventListener('resize', function () { Anim.indicator(); });
+    ['pointerdown', 'touchstart', 'keydown'].forEach(function (ev) {
+      window.addEventListener(ev, function () { Anim._touched = true; }, { once: true });
+    });
 
     window.addEventListener('resize', function () { App.setBarTitle(); });
     window.addEventListener('scroll', function () {
@@ -409,6 +697,9 @@ var App = {
     if (dnb) dnb.classList.add('on');
     location.hash = id;
     window.scrollTo(0, 0);
+    Anim.tap();
+    Anim.indicator();
+    requestAnimationFrame(function () { Anim.reveal(p); });
     if (id === 'home') this.paintHome();
     if (id === 'admin' && S.pin) Admin.paint();
     if (id === 'board') Board.back();
@@ -423,18 +714,20 @@ var App = {
     var done = S.recs.length;
     var pct  = Math.round(done / TOTAL * 100);
 
-    $('fDone').innerHTML  = done.toLocaleString() + '<em>세대</em>';
-    $('fLeft').innerHTML  = (TOTAL - done).toLocaleString() + '<em>세대</em>';
-    $('fTotal').innerHTML = TOTAL.toLocaleString() + '<em>세대</em>';
+    $('fDone').innerHTML  = '<span id="nDone"></span><em>세대</em>';
+    $('fLeft').innerHTML  = '<span id="nLeft"></span><em>세대</em>';
+    $('fTotal').innerHTML = '<span id="nTotal"></span><em>세대</em>';
+    Anim.odo($('nDone'),  done);
+    Anim.odo($('nLeft'),  TOTAL - done);
+    Anim.odo($('nTotal'), TOTAL);
 
     setTimeout(function () {
       $('ringBar').style.strokeDashoffset = String(282.7 * (1 - pct / 100));
-    }, 120);
-    var n = 0, tick = setInterval(function () {
-      n += Math.max(1, Math.round(pct / 26));
-      if (n >= pct) { n = pct; clearInterval(tick); }
-      $('ringPct').textContent = n + '%';
-    }, 32);
+      if (pct >= (C.quorum || 50)) {
+        setTimeout(function () { document.querySelector('.ring').classList.add('done'); }, 1200);
+      }
+    }, 140);
+    Anim.count($('ringPct'), pct, { suf: '%', dur: 1400, fmt: function (n) { return String(n); } });
 
     this.paintDday();
     this.paintStamps();
@@ -673,6 +966,7 @@ var App = {
     DB.save();
     this.paintVote();
     this.paintHome();
+    Anim.ok();
     this.toast('투표가 반영되었습니다');
   },
 
@@ -976,7 +1270,7 @@ var Deleg = {
     } catch (e) {}
 
     var no = S.recs.length, pct2 = Math.round(no / TOTAL * 100);
-    $('doneNo').textContent = no.toLocaleString();
+    Anim.odo($('doneNo'), no);
     $('doneRate').textContent =
       '전체 ' + TOTAL.toLocaleString() + '세대 중 ' + no.toLocaleString() + '세대 참여 · ' + pct2 + '%';
     setTimeout(function () { $('doneBar').style.width = pct2 + '%'; }, 300);
@@ -997,19 +1291,10 @@ var Deleg = {
 
   /* 색종이 — 접수 완료 축하 */
   confetti: function () {
-    var box = $('cfBox');
-    if (!box) return;
-    box.innerHTML = '';
-    var cols = ['#5C82FF', '#E8C06A', '#34D399', '#F27A9B', '#8FA8FF'];
-    for (var i = 0; i < 34; i++) {
-      var p = document.createElement('i');
-      p.style.left = (Math.random() * 100) + '%';
-      p.style.background = cols[i % cols.length];
-      p.style.animationDuration = (1.5 + Math.random() * 1.4) + 's';
-      p.style.animationDelay = (Math.random() * 0.5) + 's';
-      box.appendChild(p);
-    }
-    setTimeout(function () { box.innerHTML = ''; }, 3600);
+    var cv = $('cfCanvas');
+    setTimeout(function () { Anim.confetti(cv, { n: 100 }); }, 380);
+    setTimeout(function () { Anim.confetti(cv, { n: 50 }); }, 1250);
+    Anim.ok();
   },
 
   /* 이웃에게 알리기 */
@@ -1628,7 +1913,7 @@ var Fee = {
   paint: function () {
     var keys = Object.keys(S.fees);
     var n = keys.length, pct = Math.round(n / TOTAL * 100);
-    $('feeRate').textContent = pct + '%';
+    Anim.count($('feeRate'), pct, { suf: '%', dur: 1100, fmt: function (n) { return String(n); } });
     setTimeout(function () { $('feeBar').style.width = pct + '%'; }, 250);
     $('feeSum').innerHTML =
       '<div><span>납부</span><b class="num" style="color:var(--ok)">' + n.toLocaleString() + '세대</b></div>' +
@@ -1784,6 +2069,7 @@ var Say = {
     var box = $('sayFeed'); box.innerHTML = '';
     if (!list.length) { box.innerHTML = '<div class="empty">아직 한마디가 없습니다.</div>'; return; }
     list.forEach(function (x) { box.appendChild(Say.card(x)); });
+    requestAnimationFrame(function () { Anim.reveal(box); });
   },
 
   card: function (x) {
@@ -1833,7 +2119,7 @@ var Say = {
   like: function (id) {
     var x = S.says.filter(function (s2) { return s2.id === id; })[0];
     if (S.sayLikes[id]) { x.l--; delete S.sayLikes[id]; }
-    else { x.l++; S.sayLikes[id] = 1; }
+    else { x.l++; S.sayLikes[id] = 1; Anim.tap(12); }
     DB.save();
     this.paint();
   },
@@ -1850,6 +2136,7 @@ var Say = {
     this.count();
     this.filter = '전체';
     this.init();
+    Anim.ok();
     App.toast('한마디가 등록되었습니다');
     window.scrollTo(0, 0);
   }

@@ -288,6 +288,153 @@ button{cursor:pointer;border:0;background:none}
 .kt-stat.hi b{font-size:1.18rem;color:var(--acc)}
 @media(min-width:860px){.kt{grid-template-columns:1fr 300px;align-items:start}}
 
+/* ── 인트로 시퀀스 ───────────────────────────────────────── */
+.intro{position:fixed;inset:0;z-index:200;display:grid;place-items:center;
+  background:#070B14;color:#fff;overflow:hidden}
+.intro.gone{display:none}
+.intro-bg{position:absolute;inset:0;
+  background:
+    radial-gradient(60% 45% at 50% 38%, rgba(92,130,255,.30), transparent 70%),
+    radial-gradient(45% 40% at 78% 78%, rgba(180,137,60,.22), transparent 70%),
+    linear-gradient(160deg,#070B14,#0F1725 60%,#16203A);
+  transform:scale(1.18);animation:introBg 2.4s var(--ease) both}
+@keyframes introBg{to{transform:scale(1)}}
+.intro-in{position:relative;text-align:center;padding:0 26px}
+.intro-mark{color:#8FA8FF;display:block;margin:0 auto 22px;
+  filter:drop-shadow(0 0 22px rgba(92,130,255,.45))}
+.im-r{stroke-dasharray:296;stroke-dashoffset:296;animation:draw .95s var(--ease) .15s forwards}
+.im-t{opacity:0;transform-origin:44px 44px;animation:markT .7s var(--spring) .72s forwards}
+@keyframes markT{from{opacity:0;transform:scale(.5)}to{opacity:1;transform:scale(1)}}
+.intro-apt{font-size:1.65rem;font-weight:800;letter-spacing:.32em;opacity:0;
+  animation:introTx 1.05s var(--ease) 1.0s forwards;text-indent:.32em}
+.intro-org{font-size:.8rem;color:#93A4C4;letter-spacing:.22em;margin-top:11px;opacity:0;
+  animation:introTx 1s var(--ease) 1.25s forwards;text-indent:.22em}
+@keyframes introTx{
+  from{opacity:0;letter-spacing:.62em;filter:blur(7px);transform:translateY(9px)}
+  to{opacity:1;letter-spacing:.24em;filter:blur(0);transform:none}
+}
+/* 마지막에 화면 전체가 위로 걷히면서 앱이 드러납니다 */
+.intro.out .intro-in{animation:introOut .5s var(--ease) 1.95s forwards}
+@keyframes introOut{to{opacity:0;transform:translateY(-16px) scale(.97);filter:blur(4px)}}
+.intro.out{animation:curtain .95s cubic-bezier(.76,0,.24,1) 2.15s forwards}
+@keyframes curtain{to{transform:translateY(-101%)}}
+body.booting{overflow:hidden}
+body.booting main,body.booting .appbar,body.booting .tabbar,body.booting .demoflag{
+  opacity:0;transform:translateY(16px)}
+body.booted main,body.booted .appbar,body.booted .tabbar,body.booted .demoflag{
+  opacity:1;transform:none;transition:opacity .7s var(--ease),transform .8s var(--ease)}
+body.booted .appbar{transition-delay:.06s}
+body.booted .tabbar{transition-delay:.14s}
+
+/* ── 히어로 패럴랙스 · 스크롤 반응 ───────────────────────── */
+.hero{--px:0;--py:0;will-change:transform}
+.hero::before{transform:translate3d(calc(var(--px) * 26px), calc(var(--py) * 20px), 0);
+  transition:transform .5s cubic-bezier(.16,1,.3,1)}
+.hero::after{transform:translate3d(calc(var(--px) * -18px), calc(var(--py) * -14px), 0);
+  transition:transform .65s cubic-bezier(.16,1,.3,1)}
+.hero .gauge,.hero-tx{transform:translate3d(calc(var(--px) * 5px), calc(var(--py) * 4px), 0);
+  transition:transform .6s cubic-bezier(.16,1,.3,1)}
+
+/* ── 숫자 롤링 (오도미터) ────────────────────────────────── */
+.odo{display:inline-flex;overflow:hidden;vertical-align:baseline;line-height:1}
+.odo-d{display:block;overflow:hidden;height:1em}
+.odo-d i{display:block;font-style:normal;height:1em;line-height:1;
+  transition:transform .95s cubic-bezier(.22,1,.36,1)}
+.odo-s{display:block}
+
+/* ── 리플 ────────────────────────────────────────────────── */
+.rip{position:absolute;border-radius:50%;pointer-events:none;
+  background:currentColor;opacity:.16;transform:scale(0);
+  animation:rip .62s cubic-bezier(.22,1,.36,1) forwards}
+@keyframes rip{to{transform:scale(2.6);opacity:0}}
+.act,.row,.btn,.mtile,.seg,.stamp,.hcell,.opt,.cand{position:relative;overflow:hidden}
+
+/* ── 동작 · 애니메이션 ─────────────────────────────────── */
+:root{
+  --ease:cubic-bezier(.22,1,.36,1);
+  --spring:cubic-bezier(.34,1.56,.64,1);
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;
+    transition-duration:.01ms!important;scroll-behavior:auto!important}
+}
+
+/* 화면 전환 */
+.page.on{animation:pageIn .44s var(--ease) both}
+@keyframes pageIn{
+  from{opacity:0;transform:translate3d(0,14px,0) scale(.994)}
+  to{opacity:1;transform:none}
+}
+
+/* 스크롤하며 하나씩 올라오기 */
+.reveal{opacity:0;transform:translate3d(0,18px,0)}
+.reveal.in{opacity:1;transform:none;
+  transition:opacity .55s var(--ease),transform .55s var(--ease)}
+
+/* 누르는 느낌 */
+.row,.seg,.stamp,.hcell,.opt,.mtile,.cand,.act,.btn,.tab,.stag,.reactbtn{
+  transition:transform .18s var(--spring),box-shadow .2s var(--ease),
+             border-color .18s var(--ease),background .18s var(--ease),color .18s var(--ease)}
+.row:active,.seg:active,.opt:active,.cand:active{transform:scale(.985)}
+.stamp:active,.hcell:active,.mtile:active,.stag:active,.reactbtn:active{transform:scale(.94)}
+.btn:active{transform:scale(.975)}
+
+/* 진행바 — 채워질 때 빛이 한 번 훑고 지나갑니다 */
+.bar i,.q-track>i,.cheer-bar i,.asbar i{position:relative;overflow:hidden}
+.bar i::after,.q-track>i::after,.cheer-bar i::after{
+  content:"";position:absolute;inset:0;border-radius:inherit;
+  background:linear-gradient(100deg,transparent 20%,rgba(255,255,255,.55) 50%,transparent 80%);
+  transform:translateX(-120%);animation:sheen 2.4s var(--ease) .7s 2}
+@keyframes sheen{to{transform:translateX(220%)}}
+
+/* 하단 탭 — 미끄러지는 표시선 */
+.tabbar{position:fixed}
+.tab-ind{position:absolute;top:0;height:3px;border-radius:0 0 3px 3px;background:var(--acc);
+  transition:left .42s var(--ease),width .42s var(--ease);pointer-events:none}
+.tab.on .ti{animation:tabPop .5s var(--spring)}
+@keyframes tabPop{0%{transform:translateY(0) scale(1)}
+  45%{transform:translateY(-5px) scale(1.2)}100%{transform:translateY(-2px) scale(1.06)}}
+
+/* 링 게이지 — 목표 도달 시 은은하게 빛남 */
+.ring.done svg{filter:drop-shadow(0 0 7px color-mix(in srgb,var(--acc) 55%,transparent))}
+.ring .bar{transition:stroke-dashoffset 1.5s var(--ease)}
+
+/* 숫자 올라가기 */
+.num.rolling{font-variant-numeric:tabular-nums}
+
+/* 체크마크 그리기 */
+.cheer-ic svg{overflow:visible}
+.ck-c{stroke-dasharray:145;stroke-dashoffset:145;opacity:.35;
+  animation:draw .7s var(--ease) .1s forwards}
+.ck-p{stroke-dasharray:44;stroke-dashoffset:44;
+  animation:draw .45s var(--ease) .5s forwards}
+@keyframes draw{to{stroke-dashoffset:0}}
+
+/* 색종이 캔버스 */
+canvas.cf{position:absolute;inset:0;z-index:1;pointer-events:none;width:100%;height:100%}
+
+/* 스탬프 — 도장 찍히듯 */
+.stamp.on .si{animation:stampIn .55s var(--spring)}
+@keyframes stampIn{
+  0%{transform:scale(2.2) rotate(-18deg);opacity:0}
+  55%{transform:scale(.88) rotate(4deg);opacity:1}
+  100%{transform:scale(1) rotate(0)}
+}
+.stamp.on::after{content:"";position:absolute;inset:0;border-radius:inherit;
+  box-shadow:0 0 0 0 color-mix(in srgb,var(--ok) 55%,transparent);animation:ring1 .7s var(--ease)}
+.stamp{position:relative}
+@keyframes ring1{to{box-shadow:0 0 0 14px transparent}}
+
+/* 메달 */
+.hcell .medal{animation:medal .7s var(--spring) both}
+@keyframes medal{0%{transform:scale(0) rotate(-40deg)}100%{transform:scale(1) rotate(0)}}
+
+/* 시트 */
+.sheet{transition:transform .46s var(--spring)}
+
+/* 토스트 */
+.toast{transition:opacity .3s var(--ease),transform .42s var(--spring)}
+
 /* 재미요소 — D-day · 접속자 · 스탬프 · 순위 · 축하 */
 .hero-tags{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
 .hero-tag{display:inline-flex;align-items:center;gap:6px;font-size:.7rem;font-weight:700;
@@ -320,9 +467,9 @@ button{cursor:pointer;border:0;background:none}
 .cheer{position:relative;overflow:hidden;border-radius:var(--r-l);text-align:center;
   background:linear-gradient(155deg,var(--ink),var(--ink-2) 62%,#1C2B4A);color:#fff;padding:34px 22px 30px}
 .cheer-in{position:relative;z-index:2}
-.cheer-ic{width:62px;height:62px;border-radius:21px;background:rgba(52,211,153,.18);color:#34D399;
-  display:grid;place-items:center;font-size:1.8rem;margin:0 auto 15px;
-  animation:pop .5s cubic-bezier(.22,1.4,.4,1)}
+.cheer-ic{width:66px;height:66px;border-radius:22px;background:rgba(52,211,153,.16);color:#34D399;
+  display:grid;place-items:center;margin:0 auto 16px;
+  animation:pop .55s cubic-bezier(.34,1.56,.64,1)}
 .cheer-t{font-size:1.08rem;font-weight:800;letter-spacing:-.03em}
 .cheer-no{margin-top:12px;line-height:1}
 .cheer-no span{font-size:3rem;font-weight:800;letter-spacing:-.06em;
@@ -335,10 +482,6 @@ button{cursor:pointer;border:0;background:none}
   background:linear-gradient(90deg,#5C82FF,#E8C06A);transition:width 1.1s cubic-bezier(.22,1,.36,1)}
 .cheer-rate{font-size:.85rem;color:#C9D4E8;font-weight:700}
 .cheer-sub{font-size:.83rem;color:#93A4C4;margin-top:14px;line-height:1.6}
-.cf{position:absolute;inset:0;z-index:1;pointer-events:none;overflow:hidden}
-.cf i{position:absolute;top:-14px;width:8px;height:13px;border-radius:2px;opacity:.9;
-  animation:fall linear forwards}
-@keyframes fall{to{transform:translateY(340px) rotate(620deg);opacity:0}}
 
 /* 회의 */
 .as-grid{display:grid;grid-template-columns:auto 1fr;gap:10px 18px;font-size:.9rem;align-items:baseline}
@@ -695,6 +838,20 @@ select.inp{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.
 </head>
 <body>
 
+<div class="intro" id="intro" aria-hidden="true">
+  <div class="intro-bg"></div>
+  <div class="intro-in">
+    <svg class="intro-mark" viewBox="0 0 88 88" width="72" height="72">
+      <rect class="im-r" x="6" y="6" width="76" height="76" rx="22" fill="none"
+            stroke="currentColor" stroke-width="2.5"/>
+      <text class="im-t" x="44" y="44" text-anchor="middle" dominant-baseline="central"
+            font-size="30" font-weight="800" fill="currentColor">협</text>
+    </svg>
+    <div class="intro-apt" id="introApt"></div>
+    <div class="intro-org" id="introOrg"></div>
+  </div>
+</div>
+
 <div class="demoflag" id="demoFlag">데모 화면입니다 · 입력하신 내용은 저장되지 않습니다</div>
 
 <header class="appbar" id="appbar">
@@ -923,9 +1080,16 @@ select.inp{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.
 
   <div id="st-done" hidden>
     <div class="cheer" id="cheerCard">
-      <div class="cf" id="cfBox"></div>
+      <canvas class="cf" id="cfCanvas"></canvas>
       <div class="cheer-in">
-        <div class="cheer-ic">✓</div>
+        <div class="cheer-ic">
+          <svg viewBox="0 0 52 52" width="34" height="34" aria-hidden="true">
+            <circle class="ck-c" cx="26" cy="26" r="23" fill="none" stroke="currentColor"
+                    stroke-width="3" stroke-linecap="round"/>
+            <path class="ck-p" d="M15 27.5 L23 35 L38 19" fill="none" stroke="currentColor"
+                  stroke-width="4.2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
         <div class="cheer-t">접수가 완료되었습니다</div>
         <div class="cheer-no"><span class="num" id="doneNo">0</span><i>번째 참여</i></div>
         <div class="cheer-bar"><i id="doneBar" style="width:0"></i></div>
@@ -1750,6 +1914,282 @@ var TOTAL = C.dongs.reduce(function (a, r) { return a + r[1]; }, 0) || C.totalUn
 function MT()  { return C.meeting || '전체회의'; }
 function MTS() { return C.meetingShort || '회의'; }
 
+
+/* ══════════════════════════════════════════════════════════════
+   동작 — 숫자 굴리기 · 등장 · 색종이 · 진동
+   ══════════════════════════════════════════════════════════════ */
+var REDUCE = false;
+try { REDUCE = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
+
+var Anim = {
+  /* 숫자가 차오르듯 올라갑니다 */
+  count: function (el, to, opt) {
+    if (!el) return;
+    opt = opt || {};
+    var dur = opt.dur || 1100;
+    var pre = opt.pre || '', suf = opt.suf || '';
+    var fmt = opt.fmt || function (n) { return n.toLocaleString('ko-KR'); };
+    if (REDUCE) { el.textContent = pre + fmt(to) + suf; return; }
+    var from = 0, t0 = null;
+    cancelAnimationFrame(el._raf);
+    function step(t) {
+      if (t0 === null) t0 = t;
+      var p = Math.min(1, (t - t0) / dur);
+      var e = 1 - Math.pow(2, -10 * p);          /* easeOutExpo */
+      var v = Math.round(from + (to - from) * (p === 1 ? 1 : e));
+      el.textContent = pre + fmt(v) + suf;
+      if (p < 1) el._raf = requestAnimationFrame(step);
+    }
+    el._raf = requestAnimationFrame(step);
+  },
+
+  /* 스크롤하면 하나씩 올라옵니다 */
+  reveal: function (root) {
+    if (REDUCE || !window.IntersectionObserver) return;
+    var targets = (root || document).querySelectorAll('.sec, .card, .act, .saycard, .cand, .risk');
+    if (!Anim._io) {
+      Anim._io = new IntersectionObserver(function (es) {
+        es.forEach(function (e) {
+          if (!e.isIntersecting) return;
+          var el = e.target;
+          var d = +(el.dataset.rd || 0);
+          setTimeout(function () { el.classList.add('in'); }, d);
+          Anim._io.unobserve(el);
+        });
+      }, { rootMargin: '0px 0px -8% 0px', threshold: 0.05 });
+    }
+    var i = 0;
+    Array.prototype.forEach.call(targets, function (el) {
+      if (el.classList.contains('reveal')) return;
+      el.classList.add('reveal');
+      el.dataset.rd = String(Math.min(i++, 6) * 55);
+      Anim._io.observe(el);
+    });
+  },
+
+  /* 짧은 진동 — 휴대폰에서 눌린 느낌을 만듭니다.
+     브라우저가 실제 터치 이전의 진동을 막으므로 첫 조작 뒤부터 동작합니다. */
+  _touched: false,
+  tap: function (ms) {
+    if (!Anim._touched || !navigator.vibrate) return;
+    try { navigator.vibrate(ms || 8); } catch (e) {}
+  },
+
+  /* 성공 — 조금 더 길게 */
+  ok: function () { Anim.tap([12, 55, 20]); },
+
+  /* 색종이 — 중력·회전·바람까지 계산합니다 */
+  confetti: function (canvas, opt) {
+    if (!canvas || REDUCE) return;
+    opt = opt || {};
+    var ctx = canvas.getContext('2d');
+    var box = canvas.getBoundingClientRect();
+    var dpr = Math.min(2, window.devicePixelRatio || 1);
+    canvas.width = box.width * dpr;
+    canvas.height = box.height * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    var W = box.width, H = box.height;
+    var COLS = ['#5C82FF', '#8FA8FF', '#E8C06A', '#34D399', '#F27A9B', '#FFFFFF'];
+    var N = opt.n || 90;
+    var ps = [];
+    var cx = W / 2, cy = H * 0.32;
+
+    for (var i = 0; i < N; i++) {
+      var ang = (-Math.PI / 2) + (Math.random() - 0.5) * 2.5;
+      var sp = 4 + Math.random() * 8;
+      ps.push({
+        x: cx + (Math.random() - 0.5) * 40,
+        y: cy + (Math.random() - 0.5) * 20,
+        vx: Math.cos(ang) * sp * (0.8 + Math.random() * 0.9),
+        vy: Math.sin(ang) * sp,
+        w: 5 + Math.random() * 6,
+        h: 8 + Math.random() * 7,
+        rot: Math.random() * Math.PI,
+        vr: (Math.random() - 0.5) * 0.34,
+        col: COLS[(Math.random() * COLS.length) | 0],
+        life: 0,
+        max: 90 + Math.random() * 60,
+        round: Math.random() < 0.3
+      });
+    }
+
+    var G = 0.22, DRAG = 0.986, WIND = 0.03;
+    cancelAnimationFrame(canvas._raf);
+    function frame() {
+      ctx.clearRect(0, 0, W, H);
+      var alive = 0;
+      for (var i = 0; i < ps.length; i++) {
+        var p = ps[i];
+        p.life++;
+        if (p.life > p.max) continue;
+        alive++;
+        p.vy += G;
+        p.vx = p.vx * DRAG + Math.sin((p.life + i) / 18) * WIND;
+        p.vy *= DRAG;
+        p.x += p.vx;
+        p.y += p.vy;
+        p.rot += p.vr;
+        var a = p.life > p.max - 28 ? (p.max - p.life) / 28 : 1;
+        ctx.save();
+        ctx.globalAlpha = Math.max(0, a);
+        ctx.translate(p.x, p.y);
+        ctx.rotate(p.rot);
+        ctx.fillStyle = p.col;
+        /* 앞뒤로 뒤집히는 느낌 — 폭을 사인으로 줄입니다 */
+        var w = p.w * Math.abs(Math.cos(p.rot));
+        if (p.round) {
+          ctx.beginPath();
+          ctx.ellipse(0, 0, Math.max(1, w / 2), p.h / 2, 0, 0, Math.PI * 2);
+          ctx.fill();
+        } else {
+          ctx.fillRect(-w / 2, -p.h / 2, Math.max(1, w), p.h);
+        }
+        ctx.restore();
+      }
+      if (alive) canvas._raf = requestAnimationFrame(frame);
+      else ctx.clearRect(0, 0, W, H);
+    }
+    canvas._raf = requestAnimationFrame(frame);
+  },
+
+
+  /* 숫자 롤링 — 자리마다 숫자판이 굴러 올라갑니다 */
+  odo: function (el, to, opt) {
+    if (!el) return;
+    opt = opt || {};
+    var txt = (opt.fmt || function (n) { return n.toLocaleString('ko-KR'); })(to);
+    if (REDUCE) { el.textContent = txt + (opt.suf || ''); return; }
+    var chars = (txt + (opt.suf || '')).split('');
+    el.textContent = '';
+    el.classList.add('odo');
+    var delay = 0;
+    chars.forEach(function (ch) {
+      if (!/\d/.test(ch)) {
+        var sp = el.appendChild(el.ownerDocument.createElement('span'));
+        sp.className = 'odo-s';
+        sp.textContent = ch;
+        return;
+      }
+      var col = el.appendChild(el.ownerDocument.createElement('span'));
+      col.className = 'odo-d';
+      var strip = col.appendChild(el.ownerDocument.createElement('i'));
+      var h = '';
+      for (var r = 0; r < 3; r++) for (var d = 0; d <= 9; d++) h += d + '<br>';
+      strip.innerHTML = h;
+      var target = 20 + (+ch);                 /* 두 바퀴 돌고 멈춥니다 */
+      strip.style.transform = 'translateY(0)';
+      strip.style.transitionDelay = (delay += 55) + 'ms';
+      requestAnimationFrame(function () {
+        requestAnimationFrame(function () {
+          strip.style.transform = 'translateY(-' + target + 'em)';
+        });
+      });
+    });
+  },
+
+  /* 누른 자리에서 퍼지는 물결 */
+  ripple: function (e) {
+    var t = e.currentTarget || e.target;
+    if (!t || !t.getBoundingClientRect) return;
+    var b = t.getBoundingClientRect();
+    var size = Math.max(b.width, b.height);
+    var r = document.createElement('span');
+    r.className = 'rip';
+    r.style.width = r.style.height = size + 'px';
+    r.style.left = ((e.clientX || (b.left + b.width / 2)) - b.left - size / 2) + 'px';
+    r.style.top  = ((e.clientY || (b.top + b.height / 2)) - b.top - size / 2) + 'px';
+    t.appendChild(r);
+    setTimeout(function () { r.remove(); }, 640);
+  },
+
+  bindRipple: function () {
+    if (Anim._rip) return;
+    Anim._rip = true;
+    document.addEventListener('pointerdown', function (e) {
+      var t = e.target.closest && e.target.closest('.act,.row,.btn,.mtile,.seg,.stamp,.hcell,.opt,.cand');
+      if (t && !REDUCE) Anim.ripple({ currentTarget: t, clientX: e.clientX, clientY: e.clientY });
+    }, { passive: true });
+  },
+
+  /* 히어로가 손끝·기울기·스크롤을 따라 움직입니다 */
+  parallax: function () {
+    var hero = document.querySelector('.hero');
+    if (!hero || REDUCE) return;
+    var set = function (x, y) {
+      hero.style.setProperty('--px', x.toFixed(3));
+      hero.style.setProperty('--py', y.toFixed(3));
+    };
+    window.addEventListener('pointermove', function (e) {
+      set((e.clientX / innerWidth - .5) * 2, (e.clientY / innerHeight - .5) * 2);
+    }, { passive: true });
+    window.addEventListener('deviceorientation', function (e) {
+      if (e.gamma == null) return;
+      set(Math.max(-1, Math.min(1, e.gamma / 28)), Math.max(-1, Math.min(1, (e.beta - 45) / 34)));
+    }, { passive: true });
+
+    /* 스크롤하면 히어로가 살짝 뒤로 물러납니다 */
+    var raf = 0;
+    window.addEventListener('scroll', function () {
+      if (raf) return;
+      raf = requestAnimationFrame(function () {
+        raf = 0;
+        var y = Math.min(1, window.scrollY / 260);
+        hero.style.transform = 'translate3d(0,' + (y * -16).toFixed(1) + 'px,0) scale(' + (1 - y * .028).toFixed(4) + ')';
+        hero.style.opacity = String(1 - y * .28);
+      });
+    }, { passive: true });
+  },
+
+  /* 첫 진입 오프닝 */
+  intro: function (done) {
+    var box = $('intro');
+    var seen = false;
+    try { seen = sessionStorage.getItem('jl2_intro') === '1'; } catch (e) {}
+    if (!box || seen || REDUCE) {
+      if (box) box.classList.add('gone');
+      document.body.classList.remove('booting');
+      document.body.classList.add('booted');
+      done && done();
+      return;
+    }
+    try { sessionStorage.setItem('jl2_intro', '1'); } catch (e) {}
+    $('introApt').textContent = C.apt;
+    $('introOrg').textContent = C.org;
+    box.querySelector('.im-t').textContent = C.emblem;
+    box.classList.add('out');
+
+    setTimeout(function () {
+      document.body.classList.remove('booting');
+      document.body.classList.add('booted');
+      done && done();
+    }, 2150);
+    setTimeout(function () { box.classList.add('gone'); }, 3150);
+
+    /* 화면을 누르면 건너뜁니다 */
+    box.addEventListener('pointerdown', function () {
+      box.classList.add('gone');
+      document.body.classList.remove('booting');
+      document.body.classList.add('booted');
+      done && done();
+    }, { once: true });
+  }
+,
+
+  /* 하단 탭 표시선 */
+  indicator: function () {
+    var bar = $('tabbar');
+    if (!bar || window.matchMedia('(min-width:960px)').matches) return;
+    var ind = bar.querySelector('.tab-ind');
+    if (!ind) { ind = el('div', 'tab-ind'); bar.appendChild(ind); }
+    var on = bar.querySelector('.tab.on');
+    if (!on) { ind.style.width = '0'; return; }
+    var w = on.offsetWidth * 0.42;
+    ind.style.width = w + 'px';
+    ind.style.left = (on.offsetLeft + (on.offsetWidth - w) / 2) + 'px';
+  }
+};
+
 /* ══════════════════════════════════════════════════════════════
    App
    ══════════════════════════════════════════════════════════════ */
@@ -1799,6 +2239,7 @@ var App = {
   cur: 'home',
 
   init: function () {
+    document.body.classList.add('booting');
     S = DB.load();
     if (!S || !S.recs || !S.posts) { S = seed(); DB.save(); }
 
@@ -1863,6 +2304,17 @@ var App = {
 
     var t = (location.hash || '').replace('#', '');
     this.go(TITLES[t] ? t : 'home');
+    Anim.indicator();
+    Anim.bindRipple();
+    Anim.parallax();
+    Anim.intro(function () {
+      Anim.indicator();
+      App.paintHome();
+    });
+    window.addEventListener('resize', function () { Anim.indicator(); });
+    ['pointerdown', 'touchstart', 'keydown'].forEach(function (ev) {
+      window.addEventListener(ev, function () { Anim._touched = true; }, { once: true });
+    });
 
     window.addEventListener('resize', function () { App.setBarTitle(); });
     window.addEventListener('scroll', function () {
@@ -1922,6 +2374,9 @@ var App = {
     if (dnb) dnb.classList.add('on');
     location.hash = id;
     window.scrollTo(0, 0);
+    Anim.tap();
+    Anim.indicator();
+    requestAnimationFrame(function () { Anim.reveal(p); });
     if (id === 'home') this.paintHome();
     if (id === 'admin' && S.pin) Admin.paint();
     if (id === 'board') Board.back();
@@ -1936,18 +2391,20 @@ var App = {
     var done = S.recs.length;
     var pct  = Math.round(done / TOTAL * 100);
 
-    $('fDone').innerHTML  = done.toLocaleString() + '<em>세대</em>';
-    $('fLeft').innerHTML  = (TOTAL - done).toLocaleString() + '<em>세대</em>';
-    $('fTotal').innerHTML = TOTAL.toLocaleString() + '<em>세대</em>';
+    $('fDone').innerHTML  = '<span id="nDone"></span><em>세대</em>';
+    $('fLeft').innerHTML  = '<span id="nLeft"></span><em>세대</em>';
+    $('fTotal').innerHTML = '<span id="nTotal"></span><em>세대</em>';
+    Anim.odo($('nDone'),  done);
+    Anim.odo($('nLeft'),  TOTAL - done);
+    Anim.odo($('nTotal'), TOTAL);
 
     setTimeout(function () {
       $('ringBar').style.strokeDashoffset = String(282.7 * (1 - pct / 100));
-    }, 120);
-    var n = 0, tick = setInterval(function () {
-      n += Math.max(1, Math.round(pct / 26));
-      if (n >= pct) { n = pct; clearInterval(tick); }
-      $('ringPct').textContent = n + '%';
-    }, 32);
+      if (pct >= (C.quorum || 50)) {
+        setTimeout(function () { document.querySelector('.ring').classList.add('done'); }, 1200);
+      }
+    }, 140);
+    Anim.count($('ringPct'), pct, { suf: '%', dur: 1400, fmt: function (n) { return String(n); } });
 
     this.paintDday();
     this.paintStamps();
@@ -2186,6 +2643,7 @@ var App = {
     DB.save();
     this.paintVote();
     this.paintHome();
+    Anim.ok();
     this.toast('투표가 반영되었습니다');
   },
 
@@ -2489,7 +2947,7 @@ var Deleg = {
     } catch (e) {}
 
     var no = S.recs.length, pct2 = Math.round(no / TOTAL * 100);
-    $('doneNo').textContent = no.toLocaleString();
+    Anim.odo($('doneNo'), no);
     $('doneRate').textContent =
       '전체 ' + TOTAL.toLocaleString() + '세대 중 ' + no.toLocaleString() + '세대 참여 · ' + pct2 + '%';
     setTimeout(function () { $('doneBar').style.width = pct2 + '%'; }, 300);
@@ -2510,19 +2968,10 @@ var Deleg = {
 
   /* 색종이 — 접수 완료 축하 */
   confetti: function () {
-    var box = $('cfBox');
-    if (!box) return;
-    box.innerHTML = '';
-    var cols = ['#5C82FF', '#E8C06A', '#34D399', '#F27A9B', '#8FA8FF'];
-    for (var i = 0; i < 34; i++) {
-      var p = document.createElement('i');
-      p.style.left = (Math.random() * 100) + '%';
-      p.style.background = cols[i % cols.length];
-      p.style.animationDuration = (1.5 + Math.random() * 1.4) + 's';
-      p.style.animationDelay = (Math.random() * 0.5) + 's';
-      box.appendChild(p);
-    }
-    setTimeout(function () { box.innerHTML = ''; }, 3600);
+    var cv = $('cfCanvas');
+    setTimeout(function () { Anim.confetti(cv, { n: 100 }); }, 380);
+    setTimeout(function () { Anim.confetti(cv, { n: 50 }); }, 1250);
+    Anim.ok();
   },
 
   /* 이웃에게 알리기 */
@@ -3141,7 +3590,7 @@ var Fee = {
   paint: function () {
     var keys = Object.keys(S.fees);
     var n = keys.length, pct = Math.round(n / TOTAL * 100);
-    $('feeRate').textContent = pct + '%';
+    Anim.count($('feeRate'), pct, { suf: '%', dur: 1100, fmt: function (n) { return String(n); } });
     setTimeout(function () { $('feeBar').style.width = pct + '%'; }, 250);
     $('feeSum').innerHTML =
       '<div><span>납부</span><b class="num" style="color:var(--ok)">' + n.toLocaleString() + '세대</b></div>' +
@@ -3297,6 +3746,7 @@ var Say = {
     var box = $('sayFeed'); box.innerHTML = '';
     if (!list.length) { box.innerHTML = '<div class="empty">아직 한마디가 없습니다.</div>'; return; }
     list.forEach(function (x) { box.appendChild(Say.card(x)); });
+    requestAnimationFrame(function () { Anim.reveal(box); });
   },
 
   card: function (x) {
@@ -3346,7 +3796,7 @@ var Say = {
   like: function (id) {
     var x = S.says.filter(function (s2) { return s2.id === id; })[0];
     if (S.sayLikes[id]) { x.l--; delete S.sayLikes[id]; }
-    else { x.l++; S.sayLikes[id] = 1; }
+    else { x.l++; S.sayLikes[id] = 1; Anim.tap(12); }
     DB.save();
     this.paint();
   },
@@ -3363,6 +3813,7 @@ var Say = {
     this.count();
     this.filter = '전체';
     this.init();
+    Anim.ok();
     App.toast('한마디가 등록되었습니다');
     window.scrollTo(0, 0);
   }
