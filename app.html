@@ -285,7 +285,7 @@ button{cursor:pointer;border:0;background:none}
 .kt-stat span{color:var(--tx-2)}
 .kt-stat b{font-weight:800}
 .kt-stat.hi{border-bottom:0}
-.kt-stat.hi b{font-size:1.18rem;color:var(--acc)}
+.kt-stat.hi b{font-size:.92rem;color:var(--acc);font-weight:800;letter-spacing:-.02em}
 @media(min-width:860px){.kt{grid-template-columns:1fr 300px;align-items:start}}
 
 /* ── 인트로 시퀀스 ───────────────────────────────────────── */
@@ -1541,10 +1541,11 @@ select.inp{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.
         </div>
         <div class="kt-side">
           <div class="kt-stat"><span>발송 대상</span><b class="num" id="atN">0명</b></div>
-          <div class="kt-stat"><span>건당 단가</span><b class="num">9원</b></div>
-          <div class="kt-stat hi"><span>예상 비용</span><b class="num" id="atCost">0원</b></div>
+          <div class="kt-stat"><span>도달 방식</span><b>카카오톡</b></div>
+          <div class="kt-stat hi"><span>발송 비용</span><b id="atCost">법무법인 제이엘 부담</b></div>
           <button class="btn" style="margin-top:14px" id="atGo" onclick="Notify.send()">알림톡 발송</button>
-          <div class="hint" id="atHint">데모 화면이므로 실제로 발송되지 않습니다.</div>
+          <div class="hint" id="atHint">협의회에 별도로 청구되지 않습니다.
+            카카오톡을 쓰지 않는 세대에는 문자로 자동 발송됩니다.</div>
         </div>
       </div>
 

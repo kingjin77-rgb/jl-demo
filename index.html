@@ -285,7 +285,7 @@ button{cursor:pointer;border:0;background:none}
 .kt-stat span{color:var(--tx-2)}
 .kt-stat b{font-weight:800}
 .kt-stat.hi{border-bottom:0}
-.kt-stat.hi b{font-size:1.18rem;color:var(--acc)}
+.kt-stat.hi b{font-size:.92rem;color:var(--acc);font-weight:800;letter-spacing:-.02em}
 @media(min-width:860px){.kt{grid-template-columns:1fr 300px;align-items:start}}
 
 /* ── 인트로 시퀀스 ───────────────────────────────────────── */
@@ -1541,10 +1541,11 @@ select.inp{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.
         </div>
         <div class="kt-side">
           <div class="kt-stat"><span>발송 대상</span><b class="num" id="atN">0명</b></div>
-          <div class="kt-stat"><span>건당 단가</span><b class="num">9원</b></div>
-          <div class="kt-stat hi"><span>예상 비용</span><b class="num" id="atCost">0원</b></div>
+          <div class="kt-stat"><span>도달 방식</span><b>카카오톡</b></div>
+          <div class="kt-stat hi"><span>발송 비용</span><b id="atCost">법무법인 제이엘 부담</b></div>
           <button class="btn" style="margin-top:14px" id="atGo" onclick="Notify.send()">알림톡 발송</button>
-          <div class="hint" id="atHint">데모 화면이므로 실제로 발송되지 않습니다.</div>
+          <div class="hint" id="atHint">협의회에 별도로 청구되지 않습니다.
+            카카오톡을 쓰지 않는 세대에는 문자로 자동 발송됩니다.</div>
         </div>
       </div>
 
@@ -3845,8 +3846,6 @@ var Say = {
 /* ══════════════════════════════════════════════════════════════
    카카오 알림톡 (데모 — 실제 발송 없음)
    ══════════════════════════════════════════════════════════════ */
-var AT_PRICE = 9;
-
 var Notify = {
   targets: function () {
     var feePaid = Object.keys(S.fees);
@@ -3915,7 +3914,6 @@ var Notify = {
     $('ktMsg').textContent = p.m;
     $('ktBtn').textContent = p.b;
     $('atN').textContent = t.n.toLocaleString() + '명';
-    $('atCost').textContent = (t.n * AT_PRICE).toLocaleString() + '원';
   },
 
   send: function () {
@@ -3934,20 +3932,20 @@ var Notify = {
       if (i >= t.n) {
         clearInterval(timer);
         var fail = Math.round(t.n * 0.018);
-        S.atLog.unshift({ t:p.t, target:t.t, n:t.n, ok:t.n - fail, fail:fail,
-          cost:(t.n - fail) * AT_PRICE, at:Date.now() });
+        S.atLog.unshift({ t:p.t, target:t.t, n:t.n, ok:t.n - fail, fail:fail, at:Date.now() });
         DB.save();
         btn.disabled = false;
         btn.textContent = '알림톡 발송';
-        hint.textContent = '데모 화면이므로 실제로 발송되지 않습니다.';
+        hint.textContent = '협의회에 별도로 청구되지 않습니다.';
         Notify.log();
         App.sheet('발송 완료',
           '<div style="font-size:.88rem;color:var(--tx-2);line-height:1.8">' +
           '<b style="color:var(--tx)">' + esc(p.t) + '</b> · ' + esc(t.t) + '<br><br>' +
-          '성공 <b style="color:var(--ok)">' + (t.n - fail).toLocaleString() + '건</b> · ' +
-          '실패 <b style="color:var(--warn)">' + fail.toLocaleString() + '건</b><br>' +
-          '(실패 = 카카오톡 미사용 · 번호 변경 세대 — 문자로 자동 대체 발송)<br><br>' +
-          '집행 비용 <b style="color:var(--tx)">' + ((t.n - fail) * AT_PRICE).toLocaleString() + '원</b><br><br>' +
+          '카카오톡 도착 <b style="color:var(--ok)">' + (t.n - fail).toLocaleString() + '건</b><br>' +
+          '문자 대체 발송 <b style="color:var(--tx)">' + fail.toLocaleString() + '건</b> ' +
+          '<span style="color:var(--tx-3)">(카카오톡 미사용 · 번호 변경 세대)</span><br><br>' +
+          '전 세대 전달이 완료되었습니다.<br>' +
+          '<b style="color:var(--acc)">발송 비용은 법무법인 제이엘이 부담합니다.</b><br><br>' +
           '<span style="color:var(--tx-3);font-size:.82rem">※ 데모 화면입니다. 실제 발송은 카카오 비즈니스 채널 개설 후 가능합니다.</span></div>');
       }
     }, 170);
@@ -3963,10 +3961,10 @@ var Notify = {
         '<div class="tick">💬</div><div class="rl">' +
         '<div class="rt" style="font-size:.9rem">' + esc(x.t) + '</div>' +
         '<div class="rm"><span>' + esc(x.target) + '</span>' +
-        '<span class="num">성공 ' + x.ok.toLocaleString() + '</span>' +
-        '<span class="num">실패 ' + x.fail.toLocaleString() + '</span>' +
+        '<span class="num">카톡 ' + x.ok.toLocaleString() + '</span>' +
+        '<span class="num">문자 ' + x.fail.toLocaleString() + '</span>' +
         '<span>' + ago(x.at) + '</span></div></div>' +
-        '<div class="rr num" style="font-weight:800;color:var(--tx)">' + x.cost.toLocaleString() + '원</div>'));
+        '<div class="rr num" style="font-weight:800;color:var(--tx)">' + x.n.toLocaleString() + '건</div>'));
     });
   }
 };

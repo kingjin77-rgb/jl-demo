@@ -2144,8 +2144,6 @@ var Say = {
 /* ══════════════════════════════════════════════════════════════
    카카오 알림톡 (데모 — 실제 발송 없음)
    ══════════════════════════════════════════════════════════════ */
-var AT_PRICE = 9;
-
 var Notify = {
   targets: function () {
     var feePaid = Object.keys(S.fees);
@@ -2214,7 +2212,6 @@ var Notify = {
     $('ktMsg').textContent = p.m;
     $('ktBtn').textContent = p.b;
     $('atN').textContent = t.n.toLocaleString() + '명';
-    $('atCost').textContent = (t.n * AT_PRICE).toLocaleString() + '원';
   },
 
   send: function () {
@@ -2233,20 +2230,20 @@ var Notify = {
       if (i >= t.n) {
         clearInterval(timer);
         var fail = Math.round(t.n * 0.018);
-        S.atLog.unshift({ t:p.t, target:t.t, n:t.n, ok:t.n - fail, fail:fail,
-          cost:(t.n - fail) * AT_PRICE, at:Date.now() });
+        S.atLog.unshift({ t:p.t, target:t.t, n:t.n, ok:t.n - fail, fail:fail, at:Date.now() });
         DB.save();
         btn.disabled = false;
         btn.textContent = '알림톡 발송';
-        hint.textContent = '데모 화면이므로 실제로 발송되지 않습니다.';
+        hint.textContent = '협의회에 별도로 청구되지 않습니다.';
         Notify.log();
         App.sheet('발송 완료',
           '<div style="font-size:.88rem;color:var(--tx-2);line-height:1.8">' +
           '<b style="color:var(--tx)">' + esc(p.t) + '</b> · ' + esc(t.t) + '<br><br>' +
-          '성공 <b style="color:var(--ok)">' + (t.n - fail).toLocaleString() + '건</b> · ' +
-          '실패 <b style="color:var(--warn)">' + fail.toLocaleString() + '건</b><br>' +
-          '(실패 = 카카오톡 미사용 · 번호 변경 세대 — 문자로 자동 대체 발송)<br><br>' +
-          '집행 비용 <b style="color:var(--tx)">' + ((t.n - fail) * AT_PRICE).toLocaleString() + '원</b><br><br>' +
+          '카카오톡 도착 <b style="color:var(--ok)">' + (t.n - fail).toLocaleString() + '건</b><br>' +
+          '문자 대체 발송 <b style="color:var(--tx)">' + fail.toLocaleString() + '건</b> ' +
+          '<span style="color:var(--tx-3)">(카카오톡 미사용 · 번호 변경 세대)</span><br><br>' +
+          '전 세대 전달이 완료되었습니다.<br>' +
+          '<b style="color:var(--acc)">발송 비용은 법무법인 제이엘이 부담합니다.</b><br><br>' +
           '<span style="color:var(--tx-3);font-size:.82rem">※ 데모 화면입니다. 실제 발송은 카카오 비즈니스 채널 개설 후 가능합니다.</span></div>');
       }
     }, 170);
@@ -2262,10 +2259,10 @@ var Notify = {
         '<div class="tick">💬</div><div class="rl">' +
         '<div class="rt" style="font-size:.9rem">' + esc(x.t) + '</div>' +
         '<div class="rm"><span>' + esc(x.target) + '</span>' +
-        '<span class="num">성공 ' + x.ok.toLocaleString() + '</span>' +
-        '<span class="num">실패 ' + x.fail.toLocaleString() + '</span>' +
+        '<span class="num">카톡 ' + x.ok.toLocaleString() + '</span>' +
+        '<span class="num">문자 ' + x.fail.toLocaleString() + '</span>' +
         '<span>' + ago(x.at) + '</span></div></div>' +
-        '<div class="rr num" style="font-weight:800;color:var(--tx)">' + x.cost.toLocaleString() + '원</div>'));
+        '<div class="rr num" style="font-weight:800;color:var(--tx)">' + x.n.toLocaleString() + '건</div>'));
     });
   }
 };
