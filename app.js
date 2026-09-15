@@ -73,8 +73,8 @@ function seed() {
         opts:[{t:'실내 골프연습장', v:301},{t:'키즈카페·돌봄센터', v:377},{t:'피트니스 확장', v:164}] }
     ],
     notices: [
-      { t:'제1차 정기총회 개최 안내', k:'중요', d:'2026-09-12',
-        s:'10월 4일(토) 오후 2시, ○○구민회관 대강당에서 제1차 정기총회를 개최합니다. 위임장을 제출하신 세대는 별도 참석 없이도 의결권이 행사됩니다.' },
+      { t:'제1차 정기회의 개최 안내', k:'중요', d:'2026-09-12',
+        s:'10월 4일(토) 오후 2시, ○○구민회관 대강당에서 제1차 정기회의를 개최합니다. 위임장을 제출하신 세대는 별도 참석 없이도 의결권이 행사됩니다.' },
       { t:'시공사 현장 실사 결과 공유', k:'공지', d:'2026-09-08',
         s:'9월 5일 임원진 6인이 현장을 방문하여 지하주차장 골조 상태를 확인하였습니다. 세부 사진은 현장 사진 메뉴에 올렸습니다.' },
       { t:'위임장 미제출 세대 안내문 부착', k:'안내', d:'2026-09-02',
@@ -83,16 +83,16 @@ function seed() {
         s:'○○은행 협의회 명의 계좌 개설이 완료되었습니다. 회비 입금 내역은 회비 메뉴에서 전 세대가 확인하실 수 있습니다.' }
     ],
     timeline: [
-      { d:'2026-07-15', t:'입주예정자협의회 발족', s:'발기인 12인, 창립총회 개최', st:'past' },
+      { d:'2026-07-15', t:'입주예정자협의회 발족', s:'발기인 12인, 창립 회의 개최', st:'past' },
       { d:'2026-08-02', t:'법무법인 자문 계약 체결', s:'법률 자문 및 플랫폼 운영 지원', st:'past' },
       { d:'2026-08-20', t:'전자 위임장 접수 개시', s:'QR 기반 모바일 접수 시작', st:'past' },
-      { d:'2026-10-04', t:'제1차 정기총회', s:'임원 선출 · 사업계획 의결', st:'now' },
+      { d:'2026-10-04', t:'제1차 정기회의', s:'임원 선출 · 사업계획 의결', st:'now' },
       { d:'2026-12-00', t:'사전점검 대응 준비', s:'하자 체크리스트 배포 예정', st:'next' },
       { d:'2027-03-00', t:'입주 및 협의회 이관', s:'입주자대표회의 구성 지원', st:'next' }
     ],
     org: [
       { r:'회장',   n:'김○○', d:'103동', c:'총괄 · 대외 협의' },
-      { r:'부회장', n:'이○○', d:'107동', c:'회의 운영 · 총회 준비' },
+      { r:'부회장', n:'이○○', d:'107동', c:'회의 운영 · 안건 준비' },
       { r:'총무',   n:'박○○', d:'101동', c:'회계 · 회비 관리' },
       { r:'감사',   n:'최○○', d:'105동', c:'지출 감사' },
       { r:'홍보이사', n:'정○○', d:'108동', c:'공지 · 플랫폼 운영' },
@@ -101,7 +101,7 @@ function seed() {
     budget: [
       { d:'2026-09-12', t:'현수막 제작 · 게시', a: -420000, type:'out', rc:true, st:'대기' },
       { d:'2026-09-10', t:'회비 납부 (9월분 48세대)', a:  960000, type:'in'  },
-      { d:'2026-09-05', t:'총회 장소 대관료',          a: -350000, type:'out', rc:true, st:'승인' },
+      { d:'2026-09-05', t:'회의 장소 대관료',          a: -350000, type:'out', rc:true, st:'승인' },
       { d:'2026-08-28', t:'회비 납부 (8월분 121세대)',  a: 2420000, type:'in'  },
       { d:'2026-08-22', t:'안내문 인쇄 · 부착',        a: -186000, type:'out', rc:true, st:'승인' },
       { d:'2026-08-12', t:'법률 자문료',              a: -550000, type:'out', rc:true, st:'승인' },
@@ -123,7 +123,7 @@ function seed() {
            {n:'익명', b:'수평계 앱 깔아가시면 문틀 기울기 바로 확인됩니다.', at:Date.now()-1.7*3600000},
            {n:'총무', b:'협의회에서 체크리스트 배포 예정입니다. 공지 확인해 주세요.', at:Date.now()-40*60000}] },
       { id:'p2', cat:'정보', t:'커뮤니티 시설 관련 시행사 답변 정리',
-        b:'지난주 시행사 면담 내용 공유드립니다.\n\n1. 실내 골프연습장 — 설계 변경 검토 중\n2. 어린이집 — 원안 유지\n3. 피트니스 — 면적 확대 불가 회신\n\n자세한 내용은 총회에서 보고드리겠습니다.',
+        b:'지난주 시행사 면담 내용 공유드립니다.\n\n1. 실내 골프연습장 — 설계 변경 검토 중\n2. 어린이집 — 원안 유지\n3. 피트니스 — 면적 확대 불가 회신\n\n자세한 내용은 다음 회의에서 보고드리겠습니다.',
         n:'부회장', at:Date.now()-26*3600000, v:612, like:47,
         c:[{n:'101동 주민', b:'정리 감사합니다. 골프연습장은 계속 요청해야 할 것 같네요.', at:Date.now()-20*3600000}] },
       { id:'p3', cat:'자유', t:'입주 전에 인터넷 미리 신청하신 분 계신가요',
@@ -139,7 +139,7 @@ function seed() {
     ],
     fees: fees,
     assembly: {
-      no:'제1차 정기총회', date:'2026-10-04', time:'오후 2시',
+      no:(C.meetingNo || '제1차 정기회의'), date:'2026-10-04', time:'오후 2시',
       place:'○○구민회관 대강당', noticedAt:'2026-09-12',
       agenda:[
         { t:'제1호 의안 — 협의회 규약 제정(안)', s:'재적 과반 찬성', y:0, n:0 },
@@ -184,7 +184,7 @@ function seed() {
       { cat:'계약', t:'입주자모집공고문 전문', d:'2026-06-14', sz:'4.8MB', k:'PDF' },
       { cat:'계약', t:'분양계약서 표준양식', d:'2026-06-14', sz:'2.1MB', k:'PDF' },
       { cat:'회의록', t:'제3차 임원회의 회의록', d:'2026-09-08', sz:'420KB', k:'HWP' },
-      { cat:'회의록', t:'창립총회 회의록', d:'2026-07-15', sz:'510KB', k:'HWP' },
+      { cat:'회의록', t:'창립 회의록', d:'2026-07-15', sz:'510KB', k:'HWP' },
       { cat:'카탈로그', t:'견본주택 마감재 사양서', d:'2026-06-20', sz:'12.4MB', k:'PDF' },
       { cat:'카탈로그', t:'견본주택 내부 촬영본', d:'2026-06-20', sz:'38.2MB', k:'ZIP' }
     ],
@@ -197,7 +197,7 @@ function seed() {
         r:[{n:'101동 주민', b:'회비 메뉴에서 우리집 확인 누르면 계좌 나옵니다', at:Date.now()-3.6*3600000},
            {n:'익명', b:'감사합니다', at:Date.now()-3.2*3600000}] },
       { id:'s5', tag:'정보', n:'부회장', anon:false, b:'시행사 면담 다녀왔습니다. 자세한 내용은 게시판에 올렸어요', at:Date.now()-7*3600000, l:35, r:[] },
-      { id:'s6', tag:'궁금', n:'105동 주민', anon:false, b:'총회 위임하면 따로 안 가도 되는 거 맞죠?', at:Date.now()-11*3600000, l:9,
+      { id:'s6', tag:'궁금', n:'105동 주민', anon:false, b:'위임하면 회의에 따로 안 가도 되는 거 맞죠?', at:Date.now()-11*3600000, l:9,
         r:[{n:'총무', b:'네 맞습니다. 위임장 제출하시면 의결권이 행사됩니다', at:Date.now()-10.5*3600000}] },
       { id:'s7', tag:'응원', n:'익명', anon:true, b:'단톡방보다 여기가 훨씬 편하네요', at:Date.now()-26*3600000, l:52, r:[] },
       { id:'s8', tag:'정보', n:'103동 주민', anon:false, b:'단지 앞 버스 노선 민원 저도 넣었습니다. 다들 한 번씩 부탁드려요', at:Date.now()-2*86400000, l:64, r:[] }
@@ -233,6 +233,10 @@ function ago(ts) {
 }
 var TOTAL = C.dongs.reduce(function (a, r) { return a + r[1]; }, 0) || C.totalUnits;
 
+/* 회의 명칭 — 조합이 아니므로 '총회'를 쓰지 않습니다. config.meeting 에서 정합니다. */
+function MT()  { return C.meeting || '전체회의'; }
+function MTS() { return C.meetingShort || '회의'; }
+
 /* ══════════════════════════════════════════════════════════════
    App
    ══════════════════════════════════════════════════════════════ */
@@ -240,14 +244,14 @@ var TABS = [
   { id:'home',     ic:'🏠', t:'홈' },
   { id:'delegate', ic:'✍️', t:'위임장' },
   { id:'say',      ic:'💬', t:'한마디' },
-  { id:'assembly', ic:'⚖️', t:'총회' },
+  { id:'assembly', ic:'⚖️', t:MTS() },
   { id:'more',     ic:'⋯',  t:'더보기' }
 ];
 var TITLES = {
   home:'홈', delegate:'위임장 제출', vote:'투표 · 설문', notice:'소식',
   apt:'단지 개요', org:'임원진', budget:'회비 · 지출', gallery:'현장 사진',
   board:'게시판', say:'입주민 한마디', check:'내 접수 확인', admin:'관리자',
-  assembly:'총회', election:'임원 선거', legal:'계약 분석 · 법률상담',
+  assembly:MT(), election:'임원 선거', legal:'계약 분석 · 법률상담',
   docs:'자료실', transfer:'명의변경 신고'
 };
 var DESK = [
@@ -255,7 +259,7 @@ var DESK = [
   { id:'delegate', t:'위임장' },
   { id:'say',      t:'한마디' },
   { id:'board',    t:'게시판' },
-  { id:'assembly', t:'총회' },
+  { id:'assembly', t:MT() },
   { id:'election', t:'임원 선거' },
   { id:'legal',    t:'계약 분석' },
   { id:'budget',   t:'회비' },
@@ -309,6 +313,16 @@ var App = {
     $('heroLoc').textContent = C.address;
     $('barSub').textContent = C.org;
     $('agreeTx').textContent = C.agree;
+    /* 회의 명칭이 들어가는 고정 문구들 */
+    $('qLb').textContent    = MT() + ' 의결 성립 요건';
+    $('telHint').textContent = '접수 확인 및 ' + MT() + ' 안내 목적으로만 사용합니다.';
+    $('asNo').textContent   = C.meetingNo || ('제1차 정기' + MTS());
+    $('docN1').textContent  = MT() + ' 소집 안내문';
+    $('docN2').textContent  = MT() + ' 의결 확인서';
+    $('docN3').textContent  = MT() + ' 회의록';
+    $('tfWarn').textContent =
+      '신고하지 않으면 ' + MT() + ' 의결 성립 요건 산정이 틀어져 의결 자체가 무효가 될 수 있습니다.';
+
     $('footEm').textContent = C.emblem;
     $('footOrg').textContent = C.org;
     $('footAddr').innerHTML = esc(C.apt) + ' · ' + esc(C.address) +
@@ -485,7 +499,7 @@ var App = {
     });
   },
 
-  /* ── 총회 의결 정족수 ── */
+  /* ── 의결 성립 요건 ── */
   paintQuorum: function (done, pct) {
     var need = C.quorum || 50;
     var needUnits = Math.ceil(TOTAL * need / 100);
@@ -493,7 +507,7 @@ var App = {
     var conv = C.type === 'conversion';
 
     $('qState').textContent = ok
-      ? '충족 — 총회 의결이 가능합니다'
+      ? '충족 — ' + MT() + ' 의결이 가능합니다'
       : '미충족 — ' + (needUnits - done).toLocaleString() + '세대 더 필요합니다';
     var bd = $('qBadge');
     bd.textContent = ok ? '충족' : '미충족';
@@ -508,7 +522,7 @@ var App = {
       '재적 ' + TOTAL.toLocaleString() + '세대 · 위임 접수 <b>' + done.toLocaleString() + '세대(' + pct + '%)</b><br>' +
       (conv
         ? '분양전환 협의 및 감정평가 대응 권한 위임 기준 ' + need + '%'
-        : '총회 의결정족수 기준 ' + need + '% (' + needUnits.toLocaleString() + '세대)');
+        : MT() + ' 의결 성립 기준 ' + need + '% (' + needUnits.toLocaleString() + '세대)');
   },
 
   actCard: function (ic, tt, ds, cls, target, pill) {
@@ -1187,7 +1201,7 @@ var Board = {
 
 
 /* ══════════════════════════════════════════════════════════════
-   총회
+   전체회의
    ══════════════════════════════════════════════════════════════ */
 var Assembly = {
   paint: function () {
@@ -1201,14 +1215,15 @@ var Assembly = {
       '<dt>소집공고</dt><dd>' + esc(a.noticedAt) + '</dd>' +
       '<dt>재적</dt><dd class="num">' + TOTAL.toLocaleString() + '세대</dd>';
 
-    /* 법정 공고기한 — 총회 14일 전까지 공고 */
+    /* 규약에 정한 사전 안내기간 */
     var gap = Math.round((new Date(a.date) - new Date(a.noticedAt)) / 86400000);
-    var ok = gap >= 14;
+    var nd = C.noticeDays || 14;
+    var ok = gap >= nd;
     $('asLegal').innerHTML =
-      '공고일로부터 총회일까지 <b class="num">' + gap + '일</b> — ' +
-      (ok ? '<b>법정 공고기한(14일) 충족</b>'
-          : '<b class="no">법정 공고기한(14일) 미달 — 의결 무효 위험</b>') +
-      '<br>규약에 따라 총회는 개최 14일 전까지 공고하여야 합니다.';
+      '공고일로부터 회의일까지 <b class="num">' + gap + '일</b> — ' +
+      (ok ? '<b>사전 안내기간(' + nd + '일) 충족</b>'
+          : '<b class="no">사전 안내기간(' + nd + '일) 미달 — 의결 효력 다툼 소지</b>') +
+      '<br>' + esc(C.org) + ' 규약에 따라 ' + MT() + '는 개최 ' + nd + '일 전까지 안내하여야 합니다.';
 
     /* 참석 · 위임 집계 */
     var deleg = S.recs.length;
@@ -1226,12 +1241,12 @@ var Assembly = {
     var sum = att + deleg;
     $('asFoot').innerHTML =
       '성립 인원 <b class="num">' + sum.toLocaleString() + '세대 (' + pc(sum) + '%)</b> · ' +
-      (sum >= TOTAL / 2 ? '의결정족수 충족' : '의결정족수 미달') +
+      (sum >= TOTAL * (C.quorum || 50) / 100 ? '의결 성립 요건 충족' : '의결 성립 요건 미달') +
       '<br>직접 참석과 위임을 합산해 산정합니다.';
 
     /* 내 참석 의사 */
     var box = $('asPick'); box.innerHTML = '';
-    [['y', '✅', '직접 참석합니다', '총회 당일 현장에 갑니다'],
+    [['y', '✅', '직접 참석합니다', '회의 당일 현장에 갑니다'],
      ['d', '✍️', '위임하겠습니다', '협의회에 의결권을 위임합니다'],
      ['n', '❌', '불참합니다', '참석도 위임도 하지 않습니다']].forEach(function (o) {
       var b = el('button', 'act' + (a.myPick === o[0] ? ' done' : ''));
@@ -1264,30 +1279,31 @@ var Assembly = {
   },
 
   doc: function (kind) {
+    var LB = { '소집공고':'소집 안내문', '의결서':'의결 확인서', '회의록':'회의록' };
     var a = S.assembly, deleg = S.recs.length;
     var att = Object.keys(a.attend).filter(function (k) { return a.attend[k] === 'y'; }).length + 132;
     var body;
     if (kind === '소집공고') {
       body = '<table>' +
-        '<tr><th>총회 명칭</th><td>' + esc(a.no) + '</td></tr>' +
+        '<tr><th>회의 명칭</th><td>' + esc(a.no) + '</td></tr>' +
         '<tr><th>일시</th><td>' + esc(a.date) + ' ' + esc(a.time) + '</td></tr>' +
         '<tr><th>장소</th><td>' + esc(a.place) + '</td></tr>' +
         '<tr><th>공고일</th><td>' + esc(a.noticedAt) + '</td></tr></table>' +
         '<div class="stmt"><b>부의 안건</b><br>' +
         a.agenda.map(function (x, i) { return (i + 1) + '. ' + esc(x.t); }).join('<br>') +
         '</div><div class="stmt">위 안건을 의결하기 위하여 ' + esc(C.org) +
-        ' 규약에 따라 총회를 소집하오니 참석하여 주시기 바랍니다. ' +
+        ' 규약에 따라 ' + MT() + '를 소집하오니 참석하여 주시기 바랍니다. ' +
         '부득이 참석이 어려운 세대는 전자 위임장을 제출하여 주시기 바랍니다.</div>';
     } else if (kind === '의결서') {
       body = '<table>' +
-        '<tr><th>총회 명칭</th><td>' + esc(a.no) + '</td></tr>' +
+        '<tr><th>회의 명칭</th><td>' + esc(a.no) + '</td></tr>' +
         '<tr><th>개최 일시</th><td>' + esc(a.date) + ' ' + esc(a.time) + '</td></tr>' +
         '<tr><th>재적 세대</th><td class="num">' + TOTAL.toLocaleString() + '세대</td></tr>' +
         '<tr><th>직접 참석</th><td class="num">' + att.toLocaleString() + '세대</td></tr>' +
         '<tr><th>위임 참석</th><td class="num">' + deleg.toLocaleString() + '세대</td></tr>' +
         '<tr><th>성립 인원</th><td class="num big">' + (att + deleg).toLocaleString() + '세대 (' +
         Math.round((att + deleg) / TOTAL * 100) + '%)</td></tr></table>' +
-        '<div class="stmt">위와 같이 재적 세대 과반수의 참석으로 총회가 적법하게 성립하였으며, ' +
+        '<div class="stmt">위와 같이 재적 세대 과반수의 참석·위임으로 ' + esc(MT()) + '가 규약에 따라 적법하게 성립하였으며, ' +
         '아래 안건을 의결하였음을 확인합니다.<br><br>' +
         a.agenda.map(function (x, i) { return (i + 1) + '. ' + esc(x.t) + ' — <b>가결</b>'; }).join('<br>') +
         '</div>';
@@ -1302,7 +1318,7 @@ var Assembly = {
         a.agenda.map(function (x, i) { return (i + 3) + '. ' + esc(x.t) + ' 심의 및 의결'; }).join('<br>') +
         '<br>' + (a.agenda.length + 3) + '. 폐회</div>';
     }
-    Cert.render(kind, esc(a.no) + ' ' + kind, body);
+    Cert.render(kind, esc(a.no) + ' ' + (LB[kind] || kind), body);
   }
 };
 
@@ -1471,7 +1487,7 @@ var Transfer = {
       esc(d) + '동 ' + esc(h) + '호 명의변경이 접수되었습니다.<br><br>' +
       (had
         ? '<b style="color:var(--warn)">기존 위임장이 효력을 잃어 자동 해지되었습니다.</b><br>' +
-          '새 소유자께서 위임장을 다시 제출하셔야 총회 의결권이 인정됩니다.'
+          '새 소유자께서 위임장을 다시 제출하셔야 의결권이 인정됩니다.'
         : '해당 세대는 위임장 접수 이력이 없어 별도 해지 처리는 없습니다.') +
       '</div>');
     $('tfHo').value = ''; $('tfName').value = '';
@@ -1738,7 +1754,7 @@ var Notify = {
       { k:'all',   t:'전체 접수 세대',        n:S.recs.length },
       { k:'nodel', t:'위임장 미제출 세대',    n:Math.max(0, TOTAL - S.recs.length) },
       { k:'fee',   t:'회비 미납 세대',        n:unpaid },
-      { k:'as',    t:'총회 참석 미응답 세대',  n:Math.max(0, S.recs.length - 132) }
+      { k:'as',    t:'회의 참석 미응답 세대',  n:Math.max(0, S.recs.length - 132) }
     ];
   },
 
@@ -1746,7 +1762,7 @@ var Notify = {
     var a = S.assembly;
     var days = Math.max(0, Math.ceil((new Date(a.date) - new Date()) / 86400000));
     return [
-      { k:'as', t:'총회 개최 안내',
+      { k:'as', t:'회의 개최 안내',
         m:'[' + C.org + ']\n\n' + a.no + ' 개최를 안내드립니다.\n\n' +
           '▪ 일시 : ' + a.date + ' ' + a.time + '\n' +
           '▪ 장소 : ' + a.place + '\n' +

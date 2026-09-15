@@ -288,7 +288,7 @@ button{cursor:pointer;border:0;background:none}
 .kt-stat.hi b{font-size:1.18rem;color:var(--acc)}
 @media(min-width:860px){.kt{grid-template-columns:1fr 300px;align-items:start}}
 
-/* 총회 */
+/* 회의 */
 .as-grid{display:grid;grid-template-columns:auto 1fr;gap:10px 18px;font-size:.9rem;align-items:baseline}
 .as-grid dt{color:var(--tx-2);font-size:.83rem}
 .as-grid dd{margin:0;font-weight:700;letter-spacing:-.02em}
@@ -696,7 +696,7 @@ select.inp{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.
   <div class="card quorum" id="quorumCard"><div class="cbody">
     <div class="q-top">
       <div>
-        <div class="q-lb">총회 의결 정족수</div>
+        <div class="q-lb" id="qLb">의결 성립 요건</div>
         <div class="q-st" id="qState">산정 중…</div>
       </div>
       <div class="q-badge" id="qBadge">—</div>
@@ -795,7 +795,7 @@ select.inp{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.
       <div class="field">
         <label class="lbl">휴대전화<em>*</em></label>
         <input class="inp" id="inTel" inputmode="tel" placeholder="010-0000-0000">
-        <div class="hint">접수 확인 및 총회 안내 목적으로만 사용합니다.</div>
+        <div class="hint" id="telHint">접수 확인 및 회의 안내 목적으로만 사용합니다.</div>
       </div>
       <label class="act" style="box-shadow:none;padding:13px 14px">
         <input type="checkbox" id="inJoint" onchange="Deleg.joint()" style="width:20px;height:20px;accent-color:var(--acc)">
@@ -1049,10 +1049,10 @@ select.inp{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.
   </div>
 </section>
 
-<!-- ═══ 총회 ═══ -->
+<!-- ═══ 회의 ═══ -->
 <section class="page" id="p-assembly">
   <div class="sec" style="margin-top:6px">
-    <div class="sec-h"><h2 class="sec-t">제1차 정기총회</h2>
+    <div class="sec-h"><h2 class="sec-t" id="asNo">제1차 정기회의</h2>
       <span class="pill b" id="asD">D-0</span></div>
     <div class="card"><div class="cbody">
       <div class="as-grid" id="asInfo"></div>
@@ -1083,14 +1083,14 @@ select.inp{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.
     <div class="sec-h"><h2 class="sec-t">문서</h2></div>
     <div class="list">
       <button class="row" onclick="Assembly.doc('소집공고')"><div class="tick">📄</div>
-        <div class="rl"><div class="rt">총회 소집공고문</div>
-        <div class="rd">법정 공고기한을 반영해 자동 작성됩니다</div></div><div class="ar">›</div></button>
+        <div class="rl"><div class="rt" id="docN1">회의 소집 안내문</div>
+        <div class="rd">규약에 정한 사전 안내기간을 반영해 자동 작성됩니다</div></div><div class="ar">›</div></button>
       <button class="row" onclick="Assembly.doc('의결서')"><div class="tick">⚖️</div>
-        <div class="rl"><div class="rt">총회 의결서</div>
+        <div class="rl"><div class="rt" id="docN2">의결 확인서</div>
         <div class="rd">안건별 찬반 집계가 그대로 들어갑니다</div></div><div class="ar">›</div></button>
       <button class="row" onclick="Assembly.doc('회의록')"><div class="tick">📝</div>
-        <div class="rl"><div class="rt">총회 회의록</div>
-        <div class="rd">참석·위임 인원과 의결 결과 기록</div></div><div class="ar">›</div></button>
+        <div class="rl"><div class="rt" id="docN3">회의록</div>
+        <div class="rd">참석·위임 세대수와 의결 결과 기록</div></div><div class="ar">›</div></button>
     </div>
   </div>
 </section>
@@ -1164,7 +1164,7 @@ select.inp{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.
     <div class="sec-h"><h2 class="sec-t">전매 · 명의변경 신고</h2></div>
     <div class="warnbox">
       세대 명의가 바뀌면 <b>기존 위임장은 효력을 잃습니다.</b>
-      신고하지 않으면 총회 의결 정족수 산정이 틀어져 의결 자체가 무효가 될 수 있습니다.
+      <span id="tfWarn">신고하지 않으면 의결 성립 요건 산정이 틀어져 의결 자체가 무효가 될 수 있습니다.</span>
     </div>
     <div class="card"><div class="cbody">
       <div class="grid2">
