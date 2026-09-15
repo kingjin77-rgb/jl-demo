@@ -1,0 +1,3337 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>입주예정자협의회 플랫폼</title>
+
+<style>
+/* ───────── 디자인 토큰 ───────── */
+:root{
+  --ink:#0B1220; --ink-2:#141E33;
+  --acc:#2E5BFF; --acc-2:#5C82FF;
+  --acc-soft:color-mix(in srgb, var(--acc) 9%, #fff);
+  --gold:#B4893C;
+  --ok:#0E9F6E; --ok-soft:#E4F7EF;
+  --warn:#D97706; --warn-soft:#FEF3E2;
+  --bad:#DC2626;
+  --bg:#F7F8FB; --surf:#FFFFFF; --surf-2:#F1F3F8;
+  --tx:#0F172A; --tx-2:#5A6579; --tx-3:#98A1B2;
+  --line:#E4E8F0; --line-2:#EFF2F7;
+  --r:18px; --r-s:12px; --r-l:24px;
+  --sh:0 1px 2px rgba(11,18,32,.04), 0 8px 24px rgba(11,18,32,.06);
+  --sh-l:0 2px 4px rgba(11,18,32,.05), 0 18px 48px rgba(11,18,32,.10);
+  --safe-b:env(safe-area-inset-bottom,0px);
+  --safe-t:env(safe-area-inset-top,0px);
+  --nav-h:64px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --ink:#070B14; --ink-2:#0F1725;
+  --acc:#6E8FFF; --acc-2:#8FA8FF;
+  --acc-soft:color-mix(in srgb, var(--acc) 16%, #0B1220);
+  --ok:#34D399; --ok-soft:#10261F; --warn:#FBBF24; --warn-soft:#2A2011;
+  --bg:#080C15; --surf:#111826; --surf-2:#18202F;
+  --tx:#E9EDF5; --tx-2:#A2ACC0; --tx-3:#6C7688;
+  --line:#222B3C; --line-2:#1B2333;
+  --sh:0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.35);
+  --sh-l:0 2px 6px rgba(0,0,0,.5), 0 20px 50px rgba(0,0,0,.5);
+}}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{
+  background:var(--bg);color:var(--tx);
+  font-family:"Pretendard Variable",Pretendard,-apple-system,BlinkMacSystemFont,system-ui,"Malgun Gothic",sans-serif;
+  font-size:15px;line-height:1.6;letter-spacing:-.015em;word-break:keep-all;
+  -webkit-text-size-adjust:100%;
+  padding-bottom:calc(var(--nav-h) + var(--safe-b));
+}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer;border:0;background:none}
+[hidden]{display:none!important}
+.num{font-variant-numeric:tabular-nums;font-feature-settings:"tnum"}
+
+/* ───────── 레이아웃 ───────── */
+.shell{max-width:1180px;margin:0 auto}
+.page{display:none;padding:0 18px 40px}
+.page.on{display:block;animation:fade .28s ease}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+/* ───────── 상단 앱바 ───────── */
+.appbar{
+  position:sticky;top:0;z-index:40;background:var(--bg);
+  padding:calc(var(--safe-t) + 14px) 18px 12px;
+  display:flex;align-items:center;gap:12px;
+  transition:box-shadow .2s,border-color .2s;
+  border-bottom:1px solid transparent;
+}
+.appbar.stuck{border-bottom-color:var(--line);box-shadow:0 6px 20px rgba(11,18,32,.04)}
+.brand{display:flex;align-items:center;gap:10px;min-width:0;flex:1}
+.emblem{
+  width:38px;height:38px;border-radius:11px;flex:none;
+  background:linear-gradient(145deg,var(--ink),var(--ink-2));
+  color:#fff;display:grid;place-items:center;font-weight:800;font-size:.95rem;
+  letter-spacing:-.04em;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);
+}
+.emblem::after{content:"";position:absolute}
+.bname{font-weight:800;font-size:1.02rem;letter-spacing:-.03em;line-height:1.25;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bsub{font-size:.7rem;color:var(--tx-3);letter-spacing:.04em;font-weight:600}
+.ab-btn{width:38px;height:38px;border-radius:11px;display:grid;place-items:center;
+  background:var(--surf);border:1px solid var(--line);font-size:1rem;flex:none}
+.ab-btn:active{transform:scale(.94)}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--ok);flex:none}
+.dot.off{background:var(--tx-3)}
+
+/* ───────── 히어로(홈) ───────── */
+.hero{
+  position:relative;overflow:hidden;border-radius:var(--r-l);
+  background:linear-gradient(155deg,var(--ink) 0%,var(--ink-2) 62%,#1C2B4A 100%);
+  color:#fff;padding:24px 22px 22px;margin-bottom:14px;
+}
+.hero::before{content:"";position:absolute;right:-70px;top:-90px;width:240px;height:240px;
+  border-radius:50%;background:radial-gradient(circle,rgba(92,130,255,.34),transparent 68%)}
+.hero::after{content:"";position:absolute;left:-40px;bottom:-110px;width:210px;height:210px;
+  border-radius:50%;background:radial-gradient(circle,rgba(180,137,60,.20),transparent 68%)}
+.hero>*{position:relative;z-index:1}
+.hero-tag{display:inline-flex;align-items:center;gap:6px;font-size:.7rem;font-weight:700;
+  letter-spacing:.1em;color:#A9C0FF;background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.12);border-radius:999px;padding:4px 11px;margin-bottom:12px}
+.hero h1{margin:0 0 4px;font-size:1.42rem;font-weight:800;letter-spacing:-.035em;line-height:1.3}
+.hero .loc{color:#93A4C4;font-size:.82rem;margin:0}
+
+.gauge{display:flex;align-items:center;gap:18px;margin-top:20px}
+.ring{position:relative;width:104px;height:104px;flex:none}
+.ring svg{transform:rotate(-90deg)}
+.ring .tr{stroke:rgba(255,255,255,.14)}
+.ring .bar{stroke:url(#gr);stroke-linecap:round;transition:stroke-dashoffset 1.1s cubic-bezier(.22,1,.36,1)}
+.ring .lab{position:absolute;inset:0;display:grid;place-content:center;text-align:center}
+.ring .lab b{font-size:1.66rem;font-weight:800;letter-spacing:-.05em;line-height:1;display:block}
+.ring .lab i{font-style:normal;font-size:.63rem;color:#93A4C4;letter-spacing:.09em;font-weight:700}
+.gfacts{flex:1;min-width:0;display:grid;gap:8px}
+.gfact{display:flex;justify-content:space-between;align-items:baseline;
+  padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,.10)}
+.gfact:last-child{border:0;padding-bottom:0}
+.gfact span{font-size:.78rem;color:#93A4C4}
+.gfact b{font-size:1.02rem;font-weight:700;letter-spacing:-.02em}
+.gfact b em{font-style:normal;font-size:.72rem;color:#93A4C4;font-weight:600;margin-left:2px}
+
+/* 밝은 히어로 (config.heroLight) */
+.hero.light{color:var(--tx);border:1px solid var(--line);
+  background:linear-gradient(145deg,
+    color-mix(in srgb,var(--acc) 13%,var(--surf)) 0%,
+    var(--surf) 52%,
+    color-mix(in srgb,var(--gold) 12%,var(--surf)) 100%)}
+.hero.light::before{background:radial-gradient(circle,color-mix(in srgb,var(--acc) 26%,transparent),transparent 68%)}
+.hero.light::after{background:radial-gradient(circle,color-mix(in srgb,var(--gold) 22%,transparent),transparent 68%)}
+.hero.light .hero-tag{color:var(--acc);background:var(--surf);border-color:var(--line)}
+.hero.light .loc{color:var(--tx-2)}
+.hero.light .ring .tr{stroke:var(--line)}
+.hero.light .ring .lab i{color:var(--tx-3)}
+.hero.light .gfact{border-bottom-color:var(--line)}
+.hero.light .gfact span{color:var(--tx-2)}
+.hero.light .gfact b em{color:var(--tx-3)}
+
+/* ───────── 섹션 / 카드 ───────── */
+.sec{margin-top:26px}
+.sec-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:11px;gap:10px}
+.sec-t{font-size:1rem;font-weight:800;letter-spacing:-.03em;margin:0}
+.sec-a{font-size:.8rem;font-weight:700;color:var(--acc)}
+.sec-d{font-size:.81rem;color:var(--tx-2);margin:-6px 0 12px}
+
+.card{background:var(--surf);border:1px solid var(--line);border-radius:var(--r);
+  box-shadow:var(--sh);overflow:hidden}
+.card+.card{margin-top:10px}
+.cbody{padding:16px 17px}
+
+/* 액션 카드 */
+.act{display:flex;align-items:center;gap:14px;width:100%;text-align:left;
+  background:var(--surf);border:1px solid var(--line);border-radius:var(--r);
+  padding:15px 16px;box-shadow:var(--sh);transition:transform .14s,box-shadow .14s,border-color .14s}
+.act:active{transform:scale(.985)}
+.act:hover{border-color:var(--acc);box-shadow:var(--sh-l)}
+.act+.act{margin-top:10px}
+.act .ic{width:44px;height:44px;border-radius:13px;flex:none;display:grid;place-items:center;font-size:1.2rem;
+  background:var(--acc-soft)}
+.act.done .ic{background:var(--ok-soft)}
+.act .tx{flex:1;min-width:0}
+.act .tt{font-weight:750;font-size:.97rem;letter-spacing:-.025em;display:flex;align-items:center;gap:7px}
+.act .ds{font-size:.8rem;color:var(--tx-2);line-height:1.5;margin-top:2px}
+.act .ar{color:var(--tx-3);font-size:1.1rem;flex:none}
+.pill{font-size:.66rem;font-weight:800;letter-spacing:.02em;border-radius:999px;padding:3px 8px;flex:none}
+.pill.b{background:var(--acc);color:#fff}
+.pill.g{background:var(--ok-soft);color:var(--ok)}
+.pill.o{background:var(--warn-soft);color:var(--warn)}
+.pill.n{background:var(--surf-2);color:var(--tx-2)}
+
+/* 정족수 카드 */
+.quorum{margin-bottom:14px}
+.q-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:30px}
+.q-lb{font-size:.74rem;font-weight:800;color:var(--tx-3);letter-spacing:.09em}
+.q-st{font-size:1.02rem;font-weight:800;letter-spacing:-.03em;margin-top:4px}
+.q-badge{font-size:.74rem;font-weight:800;border-radius:999px;padding:6px 12px;flex:none;
+  background:var(--ok-soft);color:var(--ok)}
+.q-badge.no{background:var(--warn-soft);color:var(--warn)}
+.q-track{position:relative;height:12px;border-radius:999px;background:var(--surf-2);overflow:visible}
+.q-track>i{display:block;height:100%;border-radius:999px;
+  background:linear-gradient(90deg,var(--acc),var(--acc-2));transition:width 1.1s cubic-bezier(.22,1,.36,1)}
+.q-track.ok>i{background:linear-gradient(90deg,var(--ok),#34D399)}
+.q-mark{position:absolute;top:-5px;bottom:-5px;width:2px;background:var(--tx-2);border-radius:2px}
+.q-mark b{position:absolute;top:-19px;left:50%;transform:translateX(-50%);white-space:nowrap;
+  font-size:.64rem;font-weight:800;color:var(--tx-2)}
+.q-foot{font-size:.8rem;color:var(--tx-2);margin-top:18px;line-height:1.6}
+.q-foot b{color:var(--tx)}
+
+/* 조회 결과 */
+.ck{border-radius:var(--r);padding:20px 18px;text-align:center;border:1.5px solid var(--line);background:var(--surf)}
+.ck.yes{border-color:var(--ok);background:var(--ok-soft)}
+.ck.no{border-color:var(--warn);background:var(--warn-soft)}
+.ck .ci{font-size:2rem;line-height:1}
+.ck .ct{font-weight:800;font-size:1.06rem;letter-spacing:-.03em;margin-top:9px}
+.ck .cs{font-size:.85rem;color:var(--tx-2);margin-top:6px;line-height:1.6}
+
+/* 게시판 */
+.segs{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;margin-bottom:11px;scrollbar-width:none}
+.segs::-webkit-scrollbar{display:none}
+.seg{flex:none;padding:8px 14px;border-radius:999px;font-size:.84rem;font-weight:700;
+  background:var(--surf);border:1px solid var(--line);color:var(--tx-2);letter-spacing:-.02em}
+.seg.on{background:var(--acc);border-color:var(--acc);color:#fff}
+.searchbar{display:flex;align-items:center;gap:9px;background:var(--surf);border:1px solid var(--line);
+  border-radius:12px;padding:0 13px;margin-bottom:11px}
+.searchbar span{color:var(--tx-3);font-size:.9rem}
+.searchbar input{flex:1;border:0;background:none;padding:12px 0;font-size:.92rem;outline:0}
+.backlink{font-size:.86rem;font-weight:700;color:var(--tx-2);padding:14px 0 10px}
+.backlink:hover{color:var(--acc)}
+.post-h{border-bottom:1px solid var(--line-2);padding-bottom:14px;margin-bottom:16px}
+.post-t{font-size:1.16rem;font-weight:800;letter-spacing:-.03em;margin:9px 0 7px;line-height:1.45}
+.post-m{font-size:.78rem;color:var(--tx-3);display:flex;gap:9px;flex-wrap:wrap}
+.post-b{font-size:.93rem;line-height:1.8;color:var(--tx);white-space:pre-wrap}
+.post-act{display:flex;align-items:center;justify-content:space-between;gap:12px;
+  margin-top:20px;padding-top:15px;border-top:1px solid var(--line-2)}
+.reactbtn{border:1px solid var(--line);border-radius:999px;padding:8px 16px;font-size:.85rem;
+  font-weight:700;background:var(--surf);transition:border-color .15s,background .15s}
+.reactbtn.on{border-color:var(--acc);background:var(--acc-soft);color:var(--acc)}
+.post-views{font-size:.78rem;color:var(--tx-3)}
+.cmt-b{font-size:.89rem;line-height:1.65;margin-top:4px;white-space:pre-wrap}
+.bd-new{font-size:.62rem;font-weight:800;color:#fff;background:var(--bad);border-radius:5px;
+  padding:1px 5px;margin-left:6px;vertical-align:2px}
+.bd-cnt{font-size:.78rem;font-weight:800;color:var(--acc);margin-left:6px}
+.empty{text-align:center;padding:38px 20px;color:var(--tx-3);font-size:.88rem}
+
+/* 한마디 */
+.saybox{display:flex;gap:11px;background:var(--surf);border:1px solid var(--line);
+  border-radius:var(--r);box-shadow:var(--sh);padding:15px 16px;margin-bottom:14px}
+.say-av{width:40px;height:40px;border-radius:13px;flex:none;display:grid;place-items:center;
+  font-weight:800;font-size:.82rem;background:var(--acc-soft);color:var(--acc);letter-spacing:-.03em}
+.say-in{flex:1;min-width:0}
+.say-in textarea{width:100%;border:0;background:none;outline:0;resize:none;font-size:.97rem;
+  line-height:1.6;padding:6px 0 0;color:var(--tx)}
+.say-in textarea::placeholder{color:var(--tx-3)}
+.say-tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.stag{font-size:.74rem;font-weight:700;border-radius:999px;padding:5px 11px;
+  border:1px solid var(--line);background:var(--surf);color:var(--tx-2)}
+.stag.on{background:var(--acc-soft);border-color:var(--acc);color:var(--acc)}
+.say-foot{display:flex;align-items:center;gap:11px;margin-top:12px;padding-top:11px;
+  border-top:1px solid var(--line-2)}
+.say-anon{display:flex;align-items:center;gap:6px;font-size:.8rem;color:var(--tx-2)}
+.say-n{margin-left:auto;font-size:.76rem;color:var(--tx-3)}
+.say-n.over{color:var(--bad);font-weight:800}
+
+.saycard{background:var(--surf);border:1px solid var(--line);border-radius:var(--r);
+  box-shadow:var(--sh);padding:15px 16px;margin-bottom:9px}
+.sc-h{display:flex;align-items:center;gap:10px}
+.sc-n{font-weight:750;font-size:.89rem;letter-spacing:-.02em}
+.sc-t{font-size:.76rem;color:var(--tx-3)}
+.sc-tag{margin-left:auto;font-size:.68rem;font-weight:800;border-radius:999px;padding:3px 9px;
+  background:var(--surf-2);color:var(--tx-2)}
+.sc-b{font-size:.96rem;line-height:1.65;margin:10px 0 0;white-space:pre-wrap;word-break:keep-all}
+.sc-f{display:flex;gap:6px;margin-top:11px}
+.sc-f button{display:flex;align-items:center;gap:5px;font-size:.8rem;font-weight:700;color:var(--tx-2);
+  padding:6px 11px;border-radius:999px;transition:background .15s,color .15s}
+.sc-f button:hover{background:var(--surf-2)}
+.sc-f button.on{color:var(--acc);background:var(--acc-soft)}
+.sc-re{margin-top:11px;padding-top:11px;border-top:1px solid var(--line-2);display:grid;gap:9px}
+.sc-re-i{display:flex;gap:9px;align-items:flex-start}
+.sc-re-av{width:26px;height:26px;border-radius:9px;flex:none;display:grid;place-items:center;
+  font-size:.68rem;font-weight:800;background:var(--surf-2);color:var(--tx-2)}
+.sc-re-b{font-size:.87rem;line-height:1.6}
+.sc-re-b i{font-style:normal;font-weight:750;margin-right:6px}
+.sc-re-b s{text-decoration:none;color:var(--tx-3);font-size:.74rem;margin-left:6px}
+.sc-rein{display:flex;gap:8px;margin-top:10px}
+.sc-rein input{flex:1;border:1px solid var(--line);background:var(--surf-2);border-radius:10px;
+  padding:9px 12px;font-size:.87rem;outline:0}
+.sc-rein input:focus{border-color:var(--acc)}
+
+/* 알림톡 */
+.kt{display:grid;grid-template-columns:1fr;gap:14px;margin-top:12px}
+.kt-phone{background:#9BBBD4;border-radius:20px;padding:0 0 18px;overflow:hidden;
+  box-shadow:var(--sh-l)}
+.kt-bar{background:#A0BDD6;color:#2B2B2B;font-size:.78rem;font-weight:700;padding:11px 16px;
+  border-bottom:1px solid rgba(0,0,0,.07)}
+.kt-body{padding:16px 14px 0}
+.kt-row{display:flex;gap:9px;align-items:flex-start}
+.kt-prof{width:36px;height:36px;border-radius:12px;background:#3C1E1E;color:#FEE500;flex:none;
+  display:grid;place-items:center;font-weight:800;font-size:.82rem}
+.kt-name{font-size:.76rem;color:#2B2B2B;margin-bottom:5px;font-weight:600}
+.kt-bubble{background:#fff;border-radius:4px 14px 14px 14px;overflow:hidden;max-width:290px;
+  box-shadow:0 1px 3px rgba(0,0,0,.14)}
+.kt-head{background:#FEE500;color:#3C1E1E;font-size:.74rem;font-weight:800;padding:8px 14px}
+.kt-msg{padding:14px;font-size:.85rem;line-height:1.72;color:#111;white-space:pre-wrap;word-break:keep-all}
+.kt-btn{margin:0 14px 14px;text-align:center;background:#F4F4F4;border-radius:8px;padding:10px;
+  font-size:.82rem;font-weight:700;color:#333}
+.kt-side{background:var(--surf);border:1px solid var(--line);border-radius:var(--r);
+  box-shadow:var(--sh);padding:17px 18px}
+.kt-stat{display:flex;justify-content:space-between;align-items:baseline;padding:9px 0;
+  border-bottom:1px solid var(--line-2);font-size:.85rem}
+.kt-stat span{color:var(--tx-2)}
+.kt-stat b{font-weight:800}
+.kt-stat.hi{border-bottom:0}
+.kt-stat.hi b{font-size:1.18rem;color:var(--acc)}
+@media(min-width:860px){.kt{grid-template-columns:1fr 300px;align-items:start}}
+
+/* 총회 */
+.as-grid{display:grid;grid-template-columns:auto 1fr;gap:10px 18px;font-size:.9rem;align-items:baseline}
+.as-grid dt{color:var(--tx-2);font-size:.83rem}
+.as-grid dd{margin:0;font-weight:700;letter-spacing:-.02em}
+.as-legal{margin-top:16px;padding-top:14px;border-top:1px solid var(--line-2);
+  font-size:.8rem;color:var(--tx-2);line-height:1.65}
+.as-legal b{color:var(--ok)}
+.as-legal b.no{color:var(--bad)}
+.asbar{display:flex;height:34px;border-radius:10px;overflow:hidden;background:var(--surf-2)}
+.asbar i{display:block;height:100%;transition:width 1s cubic-bezier(.22,1,.36,1);
+  display:grid;place-items:center;font-size:.72rem;font-weight:800;color:#fff}
+.asbar i.a{background:var(--acc)}.asbar i.b{background:var(--ok)}.asbar i.c{background:var(--tx-3)}
+.aslegend{display:flex;gap:16px;flex-wrap:wrap;margin-top:12px;font-size:.79rem;color:var(--tx-2)}
+.aslegend s{text-decoration:none;width:10px;height:10px;border-radius:3px;display:inline-block;margin-right:6px}
+
+/* 선거 */
+.el-guard{font-size:.85rem;color:var(--tx-2);line-height:1.7}
+.el-guard b{color:var(--tx)}
+.cand{background:var(--surf);border:1px solid var(--line);border-radius:var(--r);
+  box-shadow:var(--sh);overflow:hidden;margin-bottom:11px}
+.cand-h{display:flex;gap:13px;align-items:center;padding:16px 17px 13px}
+.cand-av{width:46px;height:46px;border-radius:14px;background:var(--acc-soft);color:var(--acc);
+  display:grid;place-items:center;font-weight:800;font-size:1.05rem;flex:none}
+.cand-n{font-weight:800;font-size:1.02rem;letter-spacing:-.03em}
+.cand-d{font-size:.8rem;color:var(--tx-2);margin-top:2px}
+.cand-p{padding:0 17px 14px;font-size:.87rem;color:var(--tx-2);line-height:1.7;white-space:pre-wrap}
+.cand-f{display:flex;align-items:center;gap:12px;padding:13px 17px;border-top:1px solid var(--line-2);
+  background:var(--surf-2)}
+.cand-f .bar{flex:1}
+.cand-v{font-size:.85rem;font-weight:800;color:var(--acc);flex:none;min-width:74px;text-align:right}
+
+/* 계약 분석 */
+.riskbar{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:14px}
+.riskbar div{background:var(--surf);border:1px solid var(--line);border-radius:14px;
+  padding:13px 10px;text-align:center;box-shadow:var(--sh)}
+.riskbar b{display:block;font-size:1.3rem;font-weight:800;letter-spacing:-.04em}
+.riskbar span{font-size:.72rem;color:var(--tx-2)}
+.riskbar .r1 b{color:var(--bad)}.riskbar .r2 b{color:var(--warn)}.riskbar .r3 b{color:var(--tx-2)}
+.risk{background:var(--surf);border:1px solid var(--line);border-left:4px solid var(--line);
+  border-radius:var(--r);box-shadow:var(--sh);margin-bottom:10px;overflow:hidden}
+.risk.high{border-left-color:var(--bad)}
+.risk.mid{border-left-color:var(--warn)}
+.risk.low{border-left-color:var(--tx-3)}
+.risk-h{padding:15px 17px 12px}
+.risk-c{font-size:.73rem;font-weight:800;color:var(--tx-3);letter-spacing:.04em}
+.risk-t{font-weight:750;font-size:.96rem;letter-spacing:-.025em;margin-top:5px;line-height:1.5}
+.risk-b{padding:0 17px 15px;font-size:.85rem;color:var(--tx-2);line-height:1.7}
+.risk-b .jl{display:block;margin-top:10px;padding-top:10px;border-top:1px dashed var(--line);
+  color:var(--tx);font-size:.84rem}
+.risk-b .jl b{color:var(--acc)}
+.warnbox{background:var(--warn-soft);border:1px solid color-mix(in srgb,var(--warn) 30%,transparent);
+  border-radius:var(--r);padding:14px 16px;font-size:.85rem;line-height:1.7;color:var(--tx-2);margin-bottom:14px}
+.warnbox b{color:var(--warn)}
+
+/* 회비 */
+.feegrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;text-align:center;margin-top:16px}
+.feegrid div span{font-size:.73rem;color:var(--tx-3);display:block}
+.feegrid div b{font-size:.98rem;font-weight:800;margin-top:3px;display:block}
+.rcpt{font-size:.68rem;font-weight:800;background:var(--surf-2);border:1px solid var(--line);
+  border-radius:6px;padding:2px 6px;color:var(--tx-2);margin-left:6px}
+
+/* 증명서 */
+.certwrap{position:fixed;inset:0;z-index:90;background:var(--surf-2);overflow:auto;padding:0 0 40px}
+.certbar{position:sticky;top:0;display:flex;gap:9px;justify-content:flex-end;padding:14px 18px;
+  background:var(--surf);border-bottom:1px solid var(--line);z-index:2}
+.cert{width:210mm;min-height:297mm;margin:22px auto;background:#fff;color:#111;
+  padding:28mm 22mm;box-shadow:0 10px 40px rgba(0,0,0,.18);
+  font-size:11pt;line-height:1.9;word-break:keep-all}
+.cert h1{font-size:19pt;text-align:center;letter-spacing:.24em;margin:0 0 6mm;font-weight:800}
+.cert .sub{text-align:center;font-size:9.5pt;color:#555;margin-bottom:14mm;letter-spacing:.06em}
+.cert table{width:100%;border-collapse:collapse;margin-bottom:10mm}
+.cert th,.cert td{border:1px solid #999;padding:3.2mm 4mm;font-size:10.5pt;text-align:left}
+.cert th{background:#f2f4f7;width:34%;font-weight:700}
+.cert .big{font-size:15pt;font-weight:800}
+.cert .stmt{font-size:11pt;line-height:2.1;margin:8mm 0 12mm;text-align:left}
+.cert .date{text-align:center;font-size:11pt;margin-bottom:9mm;letter-spacing:.08em}
+.cert .sign{text-align:right;font-size:11.5pt;line-height:2.2}
+.cert .sign b{font-size:13pt;letter-spacing:.06em}
+.cert .foot{margin-top:14mm;padding-top:5mm;border-top:1px solid #ccc;font-size:8.5pt;color:#666;line-height:1.75}
+@media(max-width:820px){.cert{width:auto;min-height:0;margin:14px;padding:22px 20px;font-size:14px}
+  .cert h1{font-size:19px}.cert th,.cert td{font-size:13px;padding:8px 10px}}
+
+/* 동별 히트맵 */
+.heat{display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:8px}
+.hcell{background:var(--surf);border:1px solid var(--line);border-radius:14px;padding:11px 10px;
+  text-align:center;position:relative;overflow:hidden}
+.hcell .fill{position:absolute;left:0;bottom:0;width:100%;background:var(--acc);opacity:.13;transition:height .9s cubic-bezier(.22,1,.36,1)}
+.hcell .d{position:relative;font-weight:800;font-size:.9rem;letter-spacing:-.03em}
+.hcell .p{position:relative;font-size:.74rem;color:var(--tx-2);margin-top:1px}
+.hcell .n{position:relative;font-size:.66rem;color:var(--tx-3)}
+.hcell.hi .fill{background:var(--ok)}
+.hcell.lo .fill{background:var(--warn)}
+
+/* 리스트 */
+.list{background:var(--surf);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--sh);overflow:hidden}
+.row{display:flex;gap:13px;padding:14px 16px;align-items:flex-start;text-align:left;width:100%;background:none}
+.row+.row{border-top:1px solid var(--line-2)}
+.row:active{background:var(--surf-2)}
+.row .rl{flex:1;min-width:0}
+.row .rt{font-weight:700;font-size:.93rem;letter-spacing:-.02em;line-height:1.45}
+.row .rd{font-size:.81rem;color:var(--tx-2);margin-top:3px;line-height:1.5}
+.row .rm{font-size:.72rem;color:var(--tx-3);margin-top:5px;display:flex;gap:8px;align-items:center}
+.row .rr{flex:none;text-align:right;font-size:.74rem;color:var(--tx-3)}
+.tick{width:34px;height:34px;border-radius:11px;flex:none;display:grid;place-items:center;
+  background:var(--surf-2);font-size:.95rem}
+
+/* 타임라인 */
+.tl{position:relative;padding-left:26px}
+.tl::before{content:"";position:absolute;left:8px;top:6px;bottom:6px;width:2px;background:var(--line)}
+.tl-i{position:relative;padding-bottom:20px}
+.tl-i::before{content:"";position:absolute;left:-22px;top:5px;width:11px;height:11px;border-radius:50%;
+  background:var(--surf);border:2.5px solid var(--line)}
+.tl-i.now::before{border-color:var(--acc);box-shadow:0 0 0 4px var(--acc-soft)}
+.tl-i.past::before{background:var(--line);border-color:var(--line)}
+.tl-d{font-size:.72rem;font-weight:800;color:var(--acc);letter-spacing:.02em}
+.tl-i.past .tl-d{color:var(--tx-3)}
+.tl-t{font-weight:700;font-size:.94rem;margin-top:2px;letter-spacing:-.02em}
+.tl-s{font-size:.82rem;color:var(--tx-2);margin-top:3px}
+
+/* 진행바 */
+.bar{height:7px;border-radius:999px;background:var(--surf-2);overflow:hidden}
+.bar i{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,var(--acc),var(--acc-2));
+  transition:width 1s cubic-bezier(.22,1,.36,1)}
+.bar.g i{background:linear-gradient(90deg,var(--ok),#34D399)}
+
+/* 폼 */
+.field{margin-bottom:15px}
+.lbl{display:block;font-size:.81rem;font-weight:700;color:var(--tx-2);margin-bottom:7px;letter-spacing:-.01em}
+.lbl em{font-style:normal;color:var(--bad);margin-left:3px}
+.inp,select.inp{width:100%;background:var(--surf);border:1.5px solid var(--line);border-radius:var(--r-s);
+  padding:13px 14px;font-size:.95rem;transition:border-color .15s,box-shadow .15s;appearance:none}
+.inp:focus{outline:0;border-color:var(--acc);box-shadow:0 0 0 4px var(--acc-soft)}
+select.inp{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2398A1B2' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 14px center;padding-right:36px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.hint{font-size:.76rem;color:var(--tx-3);margin-top:6px;line-height:1.5}
+
+.btn{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;
+  border-radius:14px;padding:15px;font-size:.98rem;font-weight:750;letter-spacing:-.02em;
+  background:var(--acc);color:#fff;transition:transform .12s,opacity .15s;box-shadow:0 6px 18px rgba(46,91,255,.26)}
+.btn:active{transform:scale(.98)}
+.btn[disabled]{opacity:.4;box-shadow:none;pointer-events:none}
+.btn.ghost{background:var(--surf);color:var(--tx);border:1.5px solid var(--line);box-shadow:none}
+.btn.ink{background:var(--ink);box-shadow:none}
+.btn.sm{padding:11px 16px;font-size:.87rem;width:auto;border-radius:11px;box-shadow:none}
+
+/* 스텝퍼 */
+.steps{display:flex;gap:6px;margin-bottom:18px}
+.step{flex:1;text-align:center}
+.step i{display:block;height:4px;border-radius:999px;background:var(--line);margin-bottom:7px;transition:background .3s}
+.step.on i,.step.did i{background:var(--acc)}
+.step span{font-size:.72rem;font-weight:700;color:var(--tx-3);letter-spacing:-.01em}
+.step.on span{color:var(--acc)}
+.step.did span{color:var(--tx-2)}
+
+/* 서명패드 */
+.sign{position:relative;border:1.5px dashed var(--line);border-radius:var(--r-s);background:var(--surf);overflow:hidden}
+.sign canvas{display:block;width:100%;height:190px;touch-action:none}
+.sign .ph{position:absolute;inset:0;display:grid;place-content:center;text-align:center;pointer-events:none;
+  color:var(--tx-3);font-size:.85rem;line-height:1.7}
+.sign.has{border-style:solid;border-color:var(--acc)}
+.sign.has .ph{display:none}
+
+.signer-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;gap:10px}
+.sname{font-size:.82rem;font-weight:700;color:var(--tx-2);background:var(--surf-2);
+  border-radius:999px;padding:4px 11px;letter-spacing:-.01em}
+.signer+.signer{margin-top:18px}
+
+/* 투표 */
+.opt{display:block;width:100%;text-align:left;border:1.5px solid var(--line);border-radius:14px;
+  padding:14px 15px;background:var(--surf);position:relative;overflow:hidden;transition:border-color .15s}
+.opt+.opt{margin-top:9px}
+.opt .fill{position:absolute;left:0;top:0;bottom:0;background:var(--acc-soft);transition:width 1s cubic-bezier(.22,1,.36,1)}
+.opt .in{position:relative;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.opt .ot{font-weight:700;font-size:.93rem;letter-spacing:-.02em}
+.opt .ov{font-size:.87rem;font-weight:800;color:var(--acc)}
+.opt.mine{border-color:var(--acc)}
+.opt.mine .ot::after{content:" ✓";color:var(--acc)}
+
+/* 갤러리 */
+.gal{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.gal figure{margin:0;border-radius:16px;overflow:hidden;background:var(--surf-2);border:1px solid var(--line)}
+.gal .ph{aspect-ratio:4/3;display:grid;place-items:center;font-size:2rem;
+  background:linear-gradient(135deg,var(--surf-2),var(--line-2))}
+.gal figcaption{padding:9px 11px;font-size:.78rem;color:var(--tx-2);line-height:1.45}
+.gal figcaption b{display:block;color:var(--tx);font-size:.85rem;font-weight:700;margin-bottom:1px}
+
+/* 하단 탭바 */
+.tabbar{
+  position:fixed;left:0;right:0;bottom:0;z-index:50;
+  background:color-mix(in srgb,var(--surf) 88%,transparent);
+  backdrop-filter:saturate(180%) blur(18px);-webkit-backdrop-filter:saturate(180%) blur(18px);
+  border-top:1px solid var(--line);
+  padding-bottom:var(--safe-b);
+  display:grid;grid-template-columns:repeat(5,1fr);
+}
+.tab{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+  height:var(--nav-h);color:var(--tx-3);font-size:.68rem;font-weight:700;letter-spacing:-.01em;position:relative}
+.tab .ti{font-size:1.18rem;line-height:1;transition:transform .2s}
+.tab.on{color:var(--acc)}
+.tab.on .ti{transform:translateY(-2px) scale(1.06)}
+.tab .bdg{position:absolute;top:9px;left:calc(50% + 7px);min-width:16px;height:16px;border-radius:999px;
+  background:var(--bad);color:#fff;font-size:.6rem;font-weight:800;display:grid;place-items:center;padding:0 4px}
+
+/* 시트 */
+.scrim{position:fixed;inset:0;z-index:60;background:rgba(6,10,20,.5);
+  opacity:0;pointer-events:none;transition:opacity .25s}
+.scrim.on{opacity:1;pointer-events:auto}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:61;background:var(--surf);
+  border-radius:24px 24px 0 0;padding:10px 18px calc(22px + var(--safe-b));
+  transform:translateY(102%);transition:transform .3s cubic-bezier(.22,1,.36,1);
+  max-height:86vh;overflow:auto;box-shadow:0 -12px 40px rgba(6,10,20,.22)}
+.sheet.on{transform:none}
+.grab{width:38px;height:4px;border-radius:999px;background:var(--line);margin:0 auto 14px}
+.mgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+.mtile{background:var(--surf-2);border:1px solid var(--line-2);border-radius:16px;padding:15px 10px;
+  text-align:center;transition:transform .14s}
+.mtile:active{transform:scale(.96)}
+.mtile .mi{font-size:1.35rem;display:block;margin-bottom:6px}
+.mtile .mt{font-size:.79rem;font-weight:700;letter-spacing:-.02em}
+
+/* 토스트 */
+.toast{position:fixed;left:50%;bottom:calc(var(--nav-h) + var(--safe-b) + 16px);transform:translate(-50%,16px);
+  z-index:80;background:var(--ink);color:#fff;border-radius:14px;padding:12px 18px;font-size:.87rem;font-weight:600;
+  opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;max-width:calc(100% - 36px);
+  box-shadow:0 12px 34px rgba(6,10,20,.3);text-align:center;line-height:1.5}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+
+/* 데모 배너 */
+.demoflag{background:linear-gradient(90deg,var(--gold),#D4A94F);color:#2A1E06;
+  font-size:.74rem;font-weight:800;letter-spacing:-.01em;text-align:center;padding:7px 18px;
+  padding-top:calc(var(--safe-t) + 7px)}
+
+.desknav,.desk-only,.site-foot{display:none}
+.ab-act{display:flex;align-items:center;gap:8px;flex:none}
+
+/* ═══════════ 데스크톱 : 홈페이지 레이아웃 ═══════════ */
+@media(min-width:960px){
+  body{padding-bottom:0;font-size:16px}
+  .tabbar{display:none}
+  .shell{max-width:1120px;padding:0 32px}
+  .page{padding:0 0 72px}
+
+  /* 상단 헤더 */
+  .appbar{
+    background:color-mix(in srgb,var(--surf) 92%,transparent);
+    backdrop-filter:saturate(180%) blur(16px);-webkit-backdrop-filter:saturate(180%) blur(16px);
+    border-bottom:1px solid var(--line);padding:0;height:70px;
+    display:flex;justify-content:center}
+  .appbar.stuck{box-shadow:0 4px 20px rgba(11,18,32,.05)}
+  .appbar>.brand{flex:none}
+  .appbar::before{content:"";position:absolute;inset:0;pointer-events:none}
+  .appbar{position:sticky}
+  .appbar>*{position:relative;z-index:1}
+  .brand{gap:11px}
+  .bname{font-size:1.06rem}
+  .bsub{font-size:.72rem}
+
+  .desknav{display:flex;align-items:center;gap:2px;margin:0 auto;flex:1;justify-content:center}
+  .dn{padding:9px 14px;border-radius:10px;font-size:.92rem;font-weight:650;color:var(--tx-2);
+    letter-spacing:-.02em;white-space:nowrap;transition:color .15s,background .15s}
+  .dn:hover{color:var(--tx);background:var(--surf-2)}
+  .dn.on{color:var(--acc);background:var(--acc-soft);font-weight:750}
+  .desk-only{display:flex}
+  .btn.cta{padding:10px 18px;font-size:.88rem;border-radius:11px;box-shadow:none}
+
+  /* 헤더 안쪽 정렬용 래퍼 */
+  .appbar{padding:0 32px}
+  .appbar{max-width:none}
+
+  /* 히어로 — 와이드 배너 */
+  .hero{border-radius:28px;padding:46px 48px;margin:28px 0 20px;display:grid;
+    grid-template-columns:1.05fr .95fr;gap:46px;align-items:center}
+  .hero-tx{min-width:0}
+  .hero::before{right:-40px;top:-140px;width:420px;height:420px}
+  .hero::after{left:34%;bottom:-180px;width:320px;height:320px}
+  .hero h1{font-size:2.5rem;letter-spacing:-.045em;margin-bottom:8px}
+  .hero .loc{font-size:.95rem}
+  .hero-tag{font-size:.74rem;margin-bottom:16px}
+  .gauge{margin-top:0;gap:26px}
+  .ring{width:132px;height:132px}
+  .ring svg{width:132px;height:132px}
+  .ring .lab b{font-size:2.05rem}
+  .gfact b{font-size:1.14rem}
+  .gfact span{font-size:.84rem}
+
+  /* 본문 그리드 */
+  .quorum{margin-bottom:22px}
+  .two{display:grid;grid-template-columns:1.3fr 1fr;gap:26px;align-items:start}
+  .sec{margin-top:34px}
+  .sec-t{font-size:1.14rem}
+  .sec-d{font-size:.88rem}
+  .heat{grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:10px}
+  .hcell{padding:14px 10px}
+  .act{padding:18px 20px}
+  .act .ic{width:48px;height:48px;font-size:1.3rem}
+  .act .tt{font-size:1.02rem}
+  .row{padding:16px 20px}
+  .cbody{padding:20px 22px}
+  .gal{grid-template-columns:repeat(3,1fr);gap:14px}
+
+  /* 위임장 · 조회 폼은 가운데 좁게 — 문서처럼 */
+  #p-delegate,#p-check{max-width:660px;margin:0 auto}
+  .steps{margin:28px 0 22px}
+  .sign canvas{height:220px}
+
+  /* 나머지 단일 컬럼 페이지 폭 제한 */
+  #p-vote,#p-notice,#p-apt,#p-org,#p-budget,#p-admin{max-width:860px}
+
+  /* 시트 → 가운데 모달 */
+  .sheet{max-width:520px;left:50%;top:50%;bottom:auto;transform:translate(-50%,-44%) scale(.97);
+    border-radius:24px;opacity:0;padding:18px 24px 26px}
+  .sheet.on{transform:translate(-50%,-50%);opacity:1}
+  .toast{bottom:28px}
+
+  /* 푸터 */
+  .site-foot{display:block;border-top:1px solid var(--line);background:var(--surf);
+    padding:44px 32px 34px;margin-top:40px}
+  .sf-in{max-width:1120px;margin:0 auto;display:flex;justify-content:space-between;gap:40px;flex-wrap:wrap}
+  .sf-b{display:flex;align-items:center;gap:11px;font-size:1.02rem;font-weight:800;letter-spacing:-.03em}
+  .sf-em{width:34px;height:34px;border-radius:10px;font-size:.88rem}
+  .sf-p{margin:12px 0 0;font-size:.86rem;color:var(--tx-2)}
+  .sf-links{display:grid;grid-template-columns:1fr 1fr;gap:4px 34px;align-content:start}
+  .sf-links button{text-align:left;font-size:.88rem;color:var(--tx-2);padding:5px 0;font-weight:600}
+  .sf-links button:hover{color:var(--acc)}
+  .sf-law{max-width:1120px;margin:30px auto 0;padding-top:20px;border-top:1px solid var(--line-2);
+    font-size:.78rem;color:var(--tx-3);line-height:1.7}
+  .sf-law b{color:var(--tx-2)}
+  .demoflag{font-size:.8rem;padding:9px 32px}
+}
+@media(min-width:960px) and (max-width:1199px){
+  .appbar{padding:0 20px}
+  .dn{padding:8px 9px;font-size:.85rem}
+  .desk-only{display:none}
+  .hero{padding:36px 34px;gap:30px}
+  .hero h1{font-size:2.1rem}
+}
+@media(min-width:1240px){
+  .shell{max-width:1200px}
+  .sf-in,.sf-law{max-width:1200px}
+  .hero h1{font-size:2.8rem}
+}
+
+@media print{
+  .tabbar,.appbar,.demoflag,.toast,.certbar,.site-foot{display:none!important}
+  body{padding:0;background:#fff}
+  body.printing main{display:none!important}
+  .certwrap{position:static;background:#fff;padding:0;overflow:visible}
+  .cert{width:auto;min-height:0;margin:0;box-shadow:none;padding:20mm 18mm}
+  @page{size:A4 portrait;margin:0}
+}
+</style>
+</head>
+<body>
+
+<div class="demoflag" id="demoFlag">데모 화면입니다 · 입력하신 내용은 저장되지 않습니다</div>
+
+<header class="appbar" id="appbar">
+  <div class="brand">
+    <div class="emblem" id="emblem">협</div>
+    <div style="min-width:0">
+      <div class="bname" id="barTitle">홈</div>
+      <div class="bsub" id="barSub">입주예정자협의회</div>
+    </div>
+  </div>
+  <nav class="desknav" id="deskNav"></nav>
+  <div class="ab-act">
+    <button class="btn sm cta desk-only" onclick="App.go('delegate')">위임장 제출</button>
+    <button class="ab-btn" onclick="App.toggleTheme()" title="화면 모드" id="themeBtn">◐</button>
+    <button class="ab-btn" onclick="App.openSheet('status')" title="연결 상태">
+      <span class="dot" id="netDot"></span>
+    </button>
+  </div>
+</header>
+
+<main class="shell">
+
+<!-- ═══ 홈 ═══ -->
+<section class="page on" id="p-home">
+  <div class="hero">
+    <div class="hero-tx">
+      <div class="hero-tag">● 위임장 접수 진행중</div>
+      <h1 id="heroName">OO아파트</h1>
+      <p class="loc" id="heroLoc"></p>
+    </div>
+    <div class="gauge">
+      <div class="ring">
+        <svg width="104" height="104" viewBox="0 0 104 104">
+          <defs><linearGradient id="gr" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#2E5BFF"/><stop offset="100%" stop-color="#B4893C"/>
+          </linearGradient></defs>
+          <circle class="tr" cx="52" cy="52" r="45" fill="none" stroke-width="9"/>
+          <circle class="bar" id="ringBar" cx="52" cy="52" r="45" fill="none" stroke-width="9"
+                  stroke-dasharray="282.7" stroke-dashoffset="282.7"/>
+        </svg>
+        <div class="lab"><b class="num" id="ringPct">0%</b><i>접수율</i></div>
+      </div>
+      <div class="gfacts">
+        <div class="gfact"><span>접수 완료</span><b class="num" id="fDone">0<em>세대</em></b></div>
+        <div class="gfact"><span>미접수</span><b class="num" id="fLeft">0<em>세대</em></b></div>
+        <div class="gfact"><span>전체 세대</span><b class="num" id="fTotal">0<em>세대</em></b></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card quorum" id="quorumCard"><div class="cbody">
+    <div class="q-top">
+      <div>
+        <div class="q-lb">총회 의결 정족수</div>
+        <div class="q-st" id="qState">산정 중…</div>
+      </div>
+      <div class="q-badge" id="qBadge">—</div>
+    </div>
+    <div class="q-track">
+      <i id="qFill" style="width:0"></i>
+      <span class="q-mark" id="qMark"><b id="qMarkLb">과반 50%</b></span>
+    </div>
+    <div class="q-foot" id="qFoot"></div>
+  </div></div>
+
+  <div class="two">
+    <div>
+      <div class="sec" style="margin-top:14px">
+        <div class="sec-h"><h2 class="sec-t">지금 하실 일</h2></div>
+        <div id="todoBox"></div>
+      </div>
+
+      <div class="sec">
+        <div class="sec-h">
+          <h2 class="sec-t">동별 접수 현황</h2>
+          <button class="sec-a" onclick="App.openSheet('heatinfo')">보는 법</button>
+        </div>
+        <div class="heat" id="heatBox"></div>
+      </div>
+    </div>
+
+    <div>
+      <div class="sec">
+        <div class="sec-h">
+          <h2 class="sec-t">공사 진행률</h2>
+          <span class="pill n num" id="progPct">0%</span>
+        </div>
+        <div class="card"><div class="cbody">
+          <div class="bar g"><i id="progBar" style="width:0"></i></div>
+          <div style="font-size:.82rem;color:var(--tx-2);margin-top:11px" id="progNote"></div>
+        </div></div>
+      </div>
+
+      <div class="sec">
+        <div class="sec-h">
+          <h2 class="sec-t">게시판 인기글</h2>
+          <button class="sec-a" onclick="App.go('board')">전체보기</button>
+        </div>
+        <div class="list" id="homeBoard"></div>
+      </div>
+
+      <div class="sec">
+        <div class="sec-h">
+          <h2 class="sec-t">최근 소식</h2>
+          <button class="sec-a" onclick="App.go('notice')">전체보기</button>
+        </div>
+        <div class="list" id="homeNotice"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 위임장 ═══ -->
+<section class="page" id="p-delegate">
+  <div class="steps" id="stepBar">
+    <div class="step on"><i></i><span>세대 확인</span></div>
+    <div class="step"><i></i><span>정보 입력</span></div>
+    <div class="step"><i></i><span>서명·제출</span></div>
+  </div>
+
+  <div id="st-1">
+    <div class="card"><div class="cbody">
+      <p class="sec-d" style="margin-top:0">
+        본인 세대를 선택해 주세요. 한 세대당 한 번만 접수됩니다.</p>
+      <div class="grid2">
+        <div class="field" style="margin-bottom:0">
+          <label class="lbl">동<em>*</em></label>
+          <select class="inp" id="inDong"></select>
+        </div>
+        <div class="field" style="margin-bottom:0">
+          <label class="lbl">호수<em>*</em></label>
+          <input class="inp" id="inHo" inputmode="numeric" placeholder="예) 1203">
+        </div>
+      </div>
+      <div class="hint">호수를 모르시면 계약서 또는 분양계약 문자에서 확인하실 수 있습니다.</div>
+    </div></div>
+    <button class="btn" style="margin-top:14px" onclick="Deleg.step(2)">다음</button>
+  </div>
+
+  <div id="st-2" hidden>
+    <div class="card"><div class="cbody">
+      <div class="field">
+        <label class="lbl">성명<em>*</em></label>
+        <input class="inp" id="inName" placeholder="계약자 본인 성명">
+      </div>
+      <div class="field">
+        <label class="lbl">생년월일<em>*</em></label>
+        <input class="inp" id="inBirth" inputmode="numeric" placeholder="예) 800115">
+      </div>
+      <div class="field">
+        <label class="lbl">휴대전화<em>*</em></label>
+        <input class="inp" id="inTel" inputmode="tel" placeholder="010-0000-0000">
+        <div class="hint">접수 확인 및 총회 안내 목적으로만 사용합니다.</div>
+      </div>
+      <label class="act" style="box-shadow:none;padding:13px 14px">
+        <input type="checkbox" id="inJoint" onchange="Deleg.joint()" style="width:20px;height:20px;accent-color:var(--acc)">
+        <div class="tx"><div class="tt" style="font-size:.9rem">부부 공동명의입니다</div>
+          <div class="ds">체크하시면 배우자 서명란이 함께 표시됩니다.</div></div>
+      </label>
+    </div></div>
+    <div style="display:flex;gap:9px;margin-top:14px">
+      <button class="btn ghost" style="flex:0 0 96px" onclick="Deleg.step(1)">이전</button>
+      <button class="btn" onclick="Deleg.step(3)">다음</button>
+    </div>
+  </div>
+
+  <div id="st-3" hidden>
+    <div class="card"><div class="cbody">
+      <p class="sec-d" style="margin-top:0">
+        아래 내용에 동의하며, 입주예정자협의회에 권한을 위임합니다.</p>
+      <div style="background:var(--surf-2);border-radius:var(--r-s);padding:13px 14px;
+                  font-size:.82rem;color:var(--tx-2);line-height:1.65;margin-bottom:16px" id="agreeTx"></div>
+      <label class="act" style="box-shadow:none;padding:13px 14px;margin-bottom:18px">
+        <input type="checkbox" id="inAgree" onchange="Deleg.agree()"
+               style="width:20px;height:20px;accent-color:var(--acc);flex:none">
+        <div class="tx"><div class="tt" style="font-size:.9rem">위 내용에 동의하고 위임합니다 <span style="color:var(--bad)">*</span></div>
+          <div class="ds">동의하셔야 서명란이 열립니다.</div></div>
+      </label>
+
+      <div id="signArea" hidden>
+      <label class="lbl">위임인(계약자) 서명<em>*</em></label>
+      <div class="signer">
+        <div class="signer-h"><span class="sname" id="nm1">계약자</span>
+          <button class="btn ghost sm" onclick="Deleg.clearPad(1)">다시 서명</button></div>
+        <div class="sign" id="wrap1">
+          <canvas id="pad1"></canvas>
+          <div class="ph">이곳에 손가락 또는 마우스로<br>서명해 주세요</div>
+        </div>
+      </div>
+
+      <div id="spouseBox" hidden style="margin-top:20px">
+        <label class="lbl">배우자(공동명의자) 서명<em>*</em></label>
+        <div class="field" style="margin-bottom:12px">
+          <input class="inp" id="inName2" placeholder="배우자 성명">
+        </div>
+        <div class="signer">
+          <div class="signer-h"><span class="sname" id="nm2">배우자</span>
+            <button class="btn ghost sm" onclick="Deleg.clearPad(2)">다시 서명</button></div>
+          <div class="sign" id="wrap2">
+            <canvas id="pad2"></canvas>
+            <div class="ph">배우자께서 직접<br>서명해 주세요</div>
+          </div>
+        </div>
+        <div class="hint">공동명의 세대는 두 분의 서명이 모두 있어야 접수됩니다.</div>
+      </div>
+      </div>
+    </div></div>
+    <div style="display:flex;gap:9px;margin-top:14px">
+      <button class="btn ghost" style="flex:0 0 96px" onclick="Deleg.step(2)">이전</button>
+      <button class="btn" onclick="Deleg.submit()">위임장 제출하기</button>
+    </div>
+  </div>
+
+  <div id="st-done" hidden>
+    <div class="card"><div class="cbody" style="text-align:center;padding:34px 20px">
+      <div style="width:66px;height:66px;border-radius:22px;background:var(--ok-soft);color:var(--ok);
+                  display:grid;place-items:center;font-size:1.9rem;margin:0 auto 16px">✓</div>
+      <div style="font-size:1.16rem;font-weight:800;letter-spacing:-.03em">접수가 완료되었습니다</div>
+      <div style="font-size:.88rem;color:var(--tx-2);margin-top:7px;line-height:1.6" id="doneMsg"></div>
+      <button class="btn ghost" style="margin-top:22px" onclick="Deleg.reset()">처음으로</button>
+    </div></div>
+  </div>
+</section>
+
+<!-- ═══ 투표 ═══ -->
+<section class="page" id="p-vote">
+  <div id="voteBox"></div>
+</section>
+
+<!-- ═══ 소식 ═══ -->
+<section class="page" id="p-notice">
+  <div class="sec" style="margin-top:6px">
+    <div class="sec-h"><h2 class="sec-t">공지사항</h2></div>
+    <div class="list" id="noticeBox"></div>
+  </div>
+  <div class="sec">
+    <div class="sec-h"><h2 class="sec-t">일정 타임라인</h2></div>
+    <div class="card"><div class="cbody"><div class="tl" id="tlBox"></div></div></div>
+  </div>
+</section>
+
+<!-- ═══ 단지 개요 ═══ -->
+<section class="page" id="p-apt">
+  <div class="sec" style="margin-top:6px">
+    <div class="sec-h"><h2 class="sec-t">단지 개요</h2></div>
+    <div class="list" id="aptBox"></div>
+  </div>
+  <div class="sec">
+    <div class="sec-h"><h2 class="sec-t">주택형</h2></div>
+    <div class="card"><div class="cbody" id="typeBox"></div></div>
+  </div>
+</section>
+
+<!-- ═══ 임원진 ═══ -->
+<section class="page" id="p-org">
+  <div class="sec" style="margin-top:6px">
+    <div class="sec-h"><h2 class="sec-t">임원진</h2></div>
+    <div class="list" id="orgBox"></div>
+  </div>
+</section>
+
+<!-- ═══ 회비 ═══ -->
+<section class="page" id="p-budget">
+  <div class="sec" style="margin-top:6px">
+    <div class="sec-h"><h2 class="sec-t">회비 납부 현황</h2>
+      <span class="pill n num" id="feeRate">0%</span></div>
+    <div class="card"><div class="cbody">
+      <div class="bar"><i id="feeBar" style="width:0"></i></div>
+      <div class="feegrid" id="feeSum"></div>
+      <div class="q-foot" id="feeNote"></div>
+    </div></div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-h"><h2 class="sec-t">우리 집 납부 확인</h2></div>
+    <div class="card"><div class="cbody">
+      <div class="grid2">
+        <div class="field" style="margin-bottom:0"><label class="lbl">동</label>
+          <select class="inp" id="feDong"></select></div>
+        <div class="field" style="margin-bottom:0"><label class="lbl">호수</label>
+          <input class="inp" id="feHo" inputmode="numeric" placeholder="예) 1203"></div>
+      </div>
+      <button class="btn" style="margin-top:14px" onclick="Fee.check()">확인</button>
+      <div id="feResult" hidden style="margin-top:14px"></div>
+    </div></div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-h"><h2 class="sec-t">동별 납부율</h2></div>
+    <div class="heat" id="feeHeat"></div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-h"><h2 class="sec-t">수입 · 지출 내역</h2>
+      <span class="pill n">영수증 첨부</span></div>
+    <p class="sec-d">모든 지출에 증빙이 붙습니다. 10만원 이상은 임원 과반 승인 후 집행됩니다.</p>
+    <div class="list" id="budBox"></div>
+  </div>
+</section>
+
+<!-- ═══ 현장 사진 ═══ -->
+<section class="page" id="p-gallery">
+  <div class="sec" style="margin-top:6px">
+    <div class="sec-h"><h2 class="sec-t">현장 사진</h2></div>
+    <p class="sec-d">임원진이 현장을 방문해 촬영한 공사 진행 사진입니다.</p>
+    <div class="gal" id="galBox"></div>
+  </div>
+</section>
+
+<!-- ═══ 게시판 ═══ -->
+<section class="page" id="p-board">
+  <div id="bdList">
+    <div class="sec" style="margin-top:6px">
+      <div class="sec-h">
+        <h2 class="sec-t">입주민 게시판</h2>
+        <button class="btn sm" onclick="Board.write()">✏️ 글쓰기</button>
+      </div>
+      <div class="segs" id="bdSegs"></div>
+      <div class="searchbar">
+        <span>🔎</span>
+        <input id="bdQ" placeholder="제목·내용 검색" oninput="Board.paint()">
+      </div>
+      <div class="list" id="bdRows"></div>
+    </div>
+  </div>
+
+  <div id="bdView" hidden>
+    <button class="backlink" onclick="Board.back()">‹ 목록으로</button>
+    <div class="card"><div class="cbody">
+      <div class="post-h">
+        <span class="pill n" id="pvCat">자유</span>
+        <h2 class="post-t" id="pvTitle"></h2>
+        <div class="post-m" id="pvMeta"></div>
+      </div>
+      <div class="post-b" id="pvBody"></div>
+      <div class="post-act">
+        <button class="reactbtn" id="pvLike" onclick="Board.like()">👍 <b id="pvLikeN">0</b></button>
+        <span class="post-views" id="pvViews"></span>
+      </div>
+    </div></div>
+
+    <div class="sec">
+      <div class="sec-h"><h2 class="sec-t">댓글 <span id="pvCmtN" class="num">0</span></h2></div>
+      <div class="list" id="pvCmts"></div>
+      <div class="card" style="margin-top:10px"><div class="cbody">
+        <textarea class="inp" id="pvNew" rows="3" placeholder="댓글을 남겨주세요"
+                  style="resize:vertical;min-height:78px"></textarea>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;gap:10px">
+          <label style="display:flex;align-items:center;gap:7px;font-size:.82rem;color:var(--tx-2)">
+            <input type="checkbox" id="pvAnon" style="width:17px;height:17px;accent-color:var(--acc)">익명
+          </label>
+          <button class="btn sm" onclick="Board.comment()">등록</button>
+        </div>
+      </div></div>
+    </div>
+  </div>
+
+  <div id="bdWrite" hidden>
+    <button class="backlink" onclick="Board.back()">‹ 취소</button>
+    <div class="card"><div class="cbody">
+      <div class="field">
+        <label class="lbl">분류</label>
+        <select class="inp" id="wrCat"></select>
+      </div>
+      <div class="field">
+        <label class="lbl">제목</label>
+        <input class="inp" id="wrTitle" placeholder="제목을 입력하세요">
+      </div>
+      <div class="field" style="margin-bottom:0">
+        <label class="lbl">내용</label>
+        <textarea class="inp" id="wrBody" rows="8" placeholder="내용을 입력하세요"
+                  style="resize:vertical;min-height:170px"></textarea>
+      </div>
+    </div></div>
+    <button class="btn" style="margin-top:14px" onclick="Board.save()">등록하기</button>
+  </div>
+</section>
+
+<!-- ═══ 한마디 ═══ -->
+<section class="page" id="p-say">
+  <div class="sec" style="margin-top:6px">
+    <div class="sec-h"><h2 class="sec-t">입주민 한마디</h2>
+      <span class="pill n" id="sayCnt">0</span></div>
+    <p class="sec-d">긴 글은 부담스러우니까. 한 줄이면 충분합니다.</p>
+
+    <div class="saybox">
+      <div class="say-av" id="sayMeAv">?</div>
+      <div class="say-in">
+        <textarea id="sayText" rows="2" maxlength="150"
+                  placeholder="지금 하고 싶은 말, 궁금한 것 한 줄" oninput="Say.count()"></textarea>
+        <div class="say-tags" id="sayTags"></div>
+        <div class="say-foot">
+          <label class="say-anon">
+            <input type="checkbox" id="sayAnon" style="width:16px;height:16px;accent-color:var(--acc)">익명
+          </label>
+          <span class="say-n num" id="sayLen">0 / 150</span>
+          <button class="btn sm" onclick="Say.post()">남기기</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="segs" id="sayFilter"></div>
+    <div id="sayFeed"></div>
+  </div>
+</section>
+
+<!-- ═══ 총회 ═══ -->
+<section class="page" id="p-assembly">
+  <div class="sec" style="margin-top:6px">
+    <div class="sec-h"><h2 class="sec-t">제1차 정기총회</h2>
+      <span class="pill b" id="asD">D-0</span></div>
+    <div class="card"><div class="cbody">
+      <div class="as-grid" id="asInfo"></div>
+      <div class="as-legal" id="asLegal"></div>
+    </div></div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-h"><h2 class="sec-t">참석 · 위임 집계</h2></div>
+    <div class="card"><div class="cbody">
+      <div class="asbar" id="asBar"></div>
+      <div class="aslegend" id="asLeg"></div>
+      <div class="q-foot" id="asFoot" style="margin-top:16px"></div>
+    </div></div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-h"><h2 class="sec-t">내 참석 의사</h2></div>
+    <div id="asPick"></div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-h"><h2 class="sec-t">안건</h2></div>
+    <div class="list" id="asAgenda"></div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-h"><h2 class="sec-t">문서</h2></div>
+    <div class="list">
+      <button class="row" onclick="Assembly.doc('소집공고')"><div class="tick">📄</div>
+        <div class="rl"><div class="rt">총회 소집공고문</div>
+        <div class="rd">법정 공고기한을 반영해 자동 작성됩니다</div></div><div class="ar">›</div></button>
+      <button class="row" onclick="Assembly.doc('의결서')"><div class="tick">⚖️</div>
+        <div class="rl"><div class="rt">총회 의결서</div>
+        <div class="rd">안건별 찬반 집계가 그대로 들어갑니다</div></div><div class="ar">›</div></button>
+      <button class="row" onclick="Assembly.doc('회의록')"><div class="tick">📝</div>
+        <div class="rl"><div class="rt">총회 회의록</div>
+        <div class="rd">참석·위임 인원과 의결 결과 기록</div></div><div class="ar">›</div></button>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 임원 선거 ═══ -->
+<section class="page" id="p-election">
+  <div class="sec" style="margin-top:6px">
+    <div class="sec-h"><h2 class="sec-t" id="elTitle">임원 선거</h2>
+      <span class="pill" id="elState">진행중</span></div>
+    <p class="sec-d" id="elDesc"></p>
+    <div class="card"><div class="cbody">
+      <div class="el-guard" id="elGuard"></div>
+    </div></div>
+  </div>
+  <div class="sec">
+    <div class="sec-h"><h2 class="sec-t">후보자</h2></div>
+    <div id="elCands"></div>
+  </div>
+</section>
+
+<!-- ═══ 계약 분석 ═══ -->
+<section class="page" id="p-legal">
+  <div class="sec" style="margin-top:6px">
+    <div class="sec-h"><h2 class="sec-t">입주자모집공고 분석</h2></div>
+    <p class="sec-d">법무법인 제이엘이 분양공고문 전문을 검토해 입주민에게 불리한 조항을 뽑았습니다.</p>
+    <div class="riskbar" id="lgSum"></div>
+    <div id="lgList"></div>
+  </div>
+  <div class="sec">
+    <div class="sec-h"><h2 class="sec-t">법률 상담 신청</h2></div>
+    <p class="sec-d">협의회 운영·계약 관련 질문을 남기시면 법무법인 제이엘이 검토 후 회신합니다.</p>
+    <div class="card"><div class="cbody">
+      <div class="field">
+        <label class="lbl">분류</label>
+        <select class="inp" id="lgCat">
+          <option>분양계약 관련</option><option>협의회 운영</option>
+          <option>하자·품질</option><option>입주·잔금</option><option>기타</option>
+        </select>
+      </div>
+      <div class="field">
+        <label class="lbl">질문 내용</label>
+        <textarea class="inp" id="lgQ" rows="5" placeholder="구체적으로 적어주실수록 정확한 회신이 가능합니다"
+                  style="resize:vertical;min-height:120px"></textarea>
+      </div>
+      <div class="field" style="margin-bottom:0">
+        <label class="lbl">회신받을 연락처</label>
+        <input class="inp" id="lgTel" inputmode="tel" placeholder="010-0000-0000">
+      </div>
+    </div></div>
+    <button class="btn" style="margin-top:14px" onclick="Legal.ask()">상담 신청하기</button>
+    <div class="sec" id="lgMineWrap" hidden>
+      <div class="sec-h"><h2 class="sec-t">내 상담 내역</h2></div>
+      <div class="list" id="lgMine"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 자료실 ═══ -->
+<section class="page" id="p-docs">
+  <div class="sec" style="margin-top:6px">
+    <div class="sec-h"><h2 class="sec-t">자료실</h2></div>
+    <p class="sec-d">공문·계약서·회의록을 한곳에 보관합니다. 분쟁 시 증거 자료가 됩니다.</p>
+    <div class="segs" id="dcSegs"></div>
+    <div class="list" id="dcRows"></div>
+  </div>
+</section>
+
+<!-- ═══ 명의변경 신고 ═══ -->
+<section class="page" id="p-transfer">
+  <div class="sec" style="margin-top:6px">
+    <div class="sec-h"><h2 class="sec-t">전매 · 명의변경 신고</h2></div>
+    <div class="warnbox">
+      세대 명의가 바뀌면 <b>기존 위임장은 효력을 잃습니다.</b>
+      신고하지 않으면 총회 의결 정족수 산정이 틀어져 의결 자체가 무효가 될 수 있습니다.
+    </div>
+    <div class="card"><div class="cbody">
+      <div class="grid2">
+        <div class="field"><label class="lbl">동</label><select class="inp" id="tfDong"></select></div>
+        <div class="field"><label class="lbl">호수</label>
+          <input class="inp" id="tfHo" inputmode="numeric" placeholder="예) 1203"></div>
+      </div>
+      <div class="field">
+        <label class="lbl">구분</label>
+        <select class="inp" id="tfKind">
+          <option>분양권 전매 (소유자 변경)</option>
+          <option>부부 공동명의 추가</option>
+          <option>상속 · 증여</option>
+          <option>기타 명의변경</option>
+        </select>
+      </div>
+      <div class="field">
+        <label class="lbl">새 소유자 성명</label>
+        <input class="inp" id="tfName" placeholder="변경 후 계약자 성명">
+      </div>
+      <div class="field" style="margin-bottom:0">
+        <label class="lbl">변경일</label>
+        <input class="inp" id="tfDate" type="date">
+      </div>
+    </div></div>
+    <button class="btn" style="margin-top:14px" onclick="Transfer.send()">신고하기</button>
+  </div>
+</section>
+
+<!-- ═══ 내 접수 확인 ═══ -->
+<section class="page" id="p-check">
+  <div class="sec" style="margin-top:6px">
+    <div class="sec-h"><h2 class="sec-t">내 위임장 접수 확인</h2></div>
+    <p class="sec-d">본인 세대의 접수 여부만 확인합니다. 다른 세대 정보는 보이지 않습니다.</p>
+    <div class="card"><div class="cbody">
+      <div class="grid2">
+        <div class="field"><label class="lbl">동</label>
+          <select class="inp" id="ckDong"></select></div>
+        <div class="field"><label class="lbl">호수</label>
+          <input class="inp" id="ckHo" inputmode="numeric" placeholder="예) 1203"></div>
+      </div>
+      <div class="field" style="margin-bottom:0">
+        <label class="lbl">생년월일 6자리</label>
+        <input class="inp" id="ckBirth" inputmode="numeric" placeholder="예) 800115">
+        <div class="hint">본인 확인용입니다. 접수 시 입력하신 번호와 같아야 합니다.</div>
+      </div>
+    </div></div>
+    <button class="btn" style="margin-top:14px" onclick="Check.run()">접수 여부 확인</button>
+    <div id="ckResult" hidden style="margin-top:14px"></div>
+  </div>
+</section>
+
+<!-- ═══ 관리자 ═══ -->
+<section class="page" id="p-admin">
+  <div id="adminGate">
+    <div class="card" style="margin-top:6px"><div class="cbody" style="text-align:center;padding:30px 20px">
+      <div style="font-size:2rem;margin-bottom:12px">🔒</div>
+      <div style="font-weight:800;font-size:1.05rem;letter-spacing:-.03em">임원 전용 화면</div>
+      <div style="font-size:.85rem;color:var(--tx-2);margin:7px 0 20px">입장 코드를 입력해 주세요.</div>
+      <input class="inp" id="inPin" inputmode="numeric" placeholder="• • • •"
+             style="text-align:center;letter-spacing:.5em;font-size:1.2rem;max-width:220px;margin:0 auto">
+      <button class="btn" style="max-width:220px;margin:14px auto 0" onclick="Admin.unlock()">입장</button>
+      <div class="hint" style="margin-top:12px">데모 코드 : <b>1234</b></div>
+    </div></div>
+  </div>
+  <div id="adminBody" hidden>
+    <div class="sec" style="margin-top:6px">
+      <div class="sec-h"><h2 class="sec-t">접수 내역</h2>
+        <button class="sec-a" onclick="Admin.csv()">CSV 내려받기</button></div>
+      <div class="list" id="recBox"></div>
+    </div>
+    <div class="sec">
+      <div class="sec-h"><h2 class="sec-t">미접수 세대</h2>
+        <button class="sec-a" onclick="Admin.feeCsv()">회비 미납 명단 CSV</button></div>
+      <div class="card"><div class="cbody" id="missBox"></div></div>
+    </div>
+    <div class="sec">
+      <div class="sec-h"><h2 class="sec-t">대표성 증명 · 공문 첨부용</h2></div>
+      <p class="sec-d">시행사·시공사에 보내는 공문에 첨부합니다. 위임 현황을 법무법인이 확인한 문서입니다.</p>
+      <button class="btn ink" onclick="Cert.open()">📜 위임 현황 확인서 발급</button>
+    </div>
+
+    <div class="sec">
+      <div class="sec-h"><h2 class="sec-t">카카오 알림톡 발송</h2></div>
+      <p class="sec-d">위임장 접수 시 수집한 연락처로 발송합니다. 앱 설치 없이 카카오톡으로 바로 전달됩니다.</p>
+      <div class="card"><div class="cbody">
+        <div class="field">
+          <label class="lbl">받는 대상</label>
+          <select class="inp" id="atTarget" onchange="Notify.preview()"></select>
+        </div>
+        <div class="field" style="margin-bottom:0">
+          <label class="lbl">템플릿</label>
+          <select class="inp" id="atTpl" onchange="Notify.preview()"></select>
+        </div>
+      </div></div>
+
+      <div class="kt">
+        <div class="kt-phone">
+          <div class="kt-bar">카카오톡</div>
+          <div class="kt-body">
+            <div class="kt-row">
+              <div class="kt-prof" id="ktProf">협</div>
+              <div>
+                <div class="kt-name" id="ktName">입주예정자협의회</div>
+                <div class="kt-bubble">
+                  <div class="kt-head">알림톡 도착</div>
+                  <div class="kt-msg" id="ktMsg"></div>
+                  <div class="kt-btn" id="ktBtn">플랫폼 바로가기</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="kt-side">
+          <div class="kt-stat"><span>발송 대상</span><b class="num" id="atN">0명</b></div>
+          <div class="kt-stat"><span>건당 단가</span><b class="num">9원</b></div>
+          <div class="kt-stat hi"><span>예상 비용</span><b class="num" id="atCost">0원</b></div>
+          <button class="btn" style="margin-top:14px" id="atGo" onclick="Notify.send()">알림톡 발송</button>
+          <div class="hint" id="atHint">데모 화면이므로 실제로 발송되지 않습니다.</div>
+        </div>
+      </div>
+
+      <div class="sec" id="atLogWrap" hidden>
+        <div class="sec-h"><h2 class="sec-t">발송 이력</h2></div>
+        <div class="list" id="atLog"></div>
+      </div>
+    </div>
+
+    <div class="sec">
+      <div class="sec-h"><h2 class="sec-t">지출 승인 대기</h2></div>
+      <div class="list" id="apprBox"></div>
+    </div>
+
+    <div class="sec">
+      <div class="sec-h"><h2 class="sec-t">법률 상담 접수</h2></div>
+      <div class="list" id="askBox"></div>
+    </div>
+
+    <div class="sec">
+      <div class="sec-h"><h2 class="sec-t">명의변경 신고</h2></div>
+      <div class="list" id="tfBox"></div>
+    </div>
+
+    <div class="sec">
+      <div class="sec-h"><h2 class="sec-t">데모 관리</h2></div>
+      <button class="btn ghost" onclick="App.reset()">데모 데이터 처음 상태로 되돌리기</button>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="site-foot">
+  <div class="sf-in">
+    <div>
+      <div class="sf-b"><span class="emblem sf-em" id="footEm">협</span><b id="footOrg">입주예정자협의회</b></div>
+      <p class="sf-p" id="footAddr"></p>
+    </div>
+    <div class="sf-links">
+      <button onclick="App.go('delegate')">위임장 제출</button>
+      <button onclick="App.go('check')">내 접수 확인</button>
+      <button onclick="App.go('vote')">투표·설문</button>
+      <button onclick="App.go('notice')">공지사항</button>
+      <button onclick="App.go('apt')">단지 개요</button>
+      <button onclick="App.go('admin')">임원 로그인</button>
+    </div>
+  </div>
+  <div class="sf-law">법률자문 <b>법무법인 제이엘</b> · 본 플랫폼의 위임장은 「전자문서 및 전자거래 기본법」에 따라 서면과 동일한 효력을 가집니다.</div>
+</footer>
+
+<nav class="tabbar" id="tabbar"></nav>
+
+<div class="scrim" id="scrim" onclick="App.closeSheet()"></div>
+<div class="sheet" id="sheet"><div class="grab"></div><div id="sheetBody"></div></div>
+<div class="toast" id="toast"></div>
+
+<div class="certwrap" id="certWrap" hidden>
+  <div class="certbar">
+    <button class="btn ghost sm" onclick="Cert.close()">닫기</button>
+    <button class="btn sm" onclick="window.print()">인쇄 · PDF 저장</button>
+  </div>
+  <div class="cert" id="certPage"></div>
+</div>
+
+<script>
+/* ══════════════════════════════════════════════════════════════
+   단지 설정 파일 — 새 단지를 만들 때 이 파일만 교체하면 됩니다.
+   ══════════════════════════════════════════════════════════════ */
+window.CONFIG = {
+
+  /* ── 단지 유형 ──
+     'newbuild'   : 신축 입주 단지 (입주예정자협의회)
+     'conversion' : 분양전환 단지 (분양전환추진위원회) */
+  type: 'newbuild',
+
+  /* ── 기본 정보 ── */
+  apt:      'OO아파트',                 // 단지명
+  org:      'OO아파트 입주예정자협의회',   // 협의회 정식 명칭
+  emblem:   '협',                       // 좌측 상단 마크 글자
+  address:  '○○시 ○○구 ○○동 123번지',
+  builder:  '○○건설(주)',
+  owner:    '○○개발(주)',
+  moveIn:   '2027년 3월 예정',
+  totalUnits: 900,
+
+  /* ── 동 구성 ── [동번호, 세대수] ── */
+  dongs: [
+    ['101', 120], ['102', 118], ['103', 96],  ['104', 110],
+    ['105', 104], ['106', 92],  ['107', 130], ['108', 130]
+  ],
+
+  /* ── 주택형 ── */
+  types: [
+    { t:'59㎡A', u:220 }, { t:'74㎡A', u:180 },
+    { t:'84㎡A', u:330 }, { t:'84㎡B', u:170 }
+  ],
+
+  /* ── 공사 진행 ── */
+  progress: 40,
+  progressNote: '지하 골조 완료 · 지상 12층 골조 진행중 (2026년 9월 기준)',
+
+  /* ── 위임 동의문 ── */
+  agree:
+    '본인은 위 아파트의 분양계약자로서, 입주예정자협의회의 구성 및 운영, ' +
+    '시공사·시행사에 대한 하자 및 품질 관련 협의, 총회 의결권 행사에 관한 일체의 권한을 ' +
+    '입주예정자협의회에 위임합니다. 본 전자서명은 「전자문서 및 전자거래 기본법」에 따라 ' +
+    '서면 위임장과 동일한 효력을 가집니다.',
+
+  /* ── 총회 정족수 기준 ──
+     재적 세대의 몇 %가 모여야 의결이 되는지 (보통 과반 50%) */
+  quorum: 50,
+
+  /* ── 상단 배너 밝기 ── true = 밝은 배너, false = 어두운 배너 */
+  heroLight: true,
+
+  /* ── 단지 고유색 (없으면 제이엘 기본 파랑) ──
+     acc  : 버튼·강조색   acc2 : 밝은 보조색
+     ink  : 상단 히어로 배경   ink2 : 히어로 그라데이션 끝색 */
+  theme: null,
+
+  /* ── 서버 (데모는 비워둡니다) ── */
+  worker: '',
+  repo:   '',
+
+  /* ── 데모 모드 ── */
+  demo: true,
+  pin:  '1234'
+};
+
+</script>
+<script>
+/* ══════════════════════════════════════════════════════════════
+   입주예정자협의회 플랫폼 — v2
+   단지별 설정은 config.js 에만 있습니다. 이 파일은 공통입니다.
+   ══════════════════════════════════════════════════════════════ */
+(function () {
+'use strict';
+
+var C  = window.CONFIG;
+var KEY = 'jl2_' + (C.repo || 'demo');
+
+/* ───────── 저장소 ───────── */
+var DB = {
+  load: function () {
+    try { var v = localStorage.getItem(KEY); if (v) return JSON.parse(v); } catch (e) {}
+    return null;
+  },
+  save: function () {
+    try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {}
+  },
+  wipe: function () { try { localStorage.removeItem(KEY); } catch (e) {} }
+};
+
+/* ───────── 상태 ───────── */
+var S = null;
+
+function seed() {
+  var recs = [];
+  var names = ['김','이','박','최','정','강','조','윤','장','임','한','오','서','신','권','황','안','송','전','홍'];
+
+  /* 동별 전체 호수 목록을 만든 뒤 그 중 일부를 무작위로 접수 처리 */
+  C.dongs.forEach(function (row) {
+    var d = row[0], n = row[1];
+    var lines = 4;                                   // 한 층 4세대 기준
+    var floors = Math.max(1, Math.ceil(n / lines));
+    var units = [], f, l;
+    for (f = 1; f <= floors && units.length < n; f++) {
+      for (l = 1; l <= lines && units.length < n; l++) {
+        units.push(String(f) + '0' + l);
+      }
+    }
+    /* 셔플 후 앞에서 k개만 사용 */
+    for (var i = units.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var t = units[i]; units[i] = units[j]; units[j] = t;
+    }
+    var k = Math.round(n * (0.58 + Math.random() * 0.32));
+    units.slice(0, k).forEach(function (ho) {
+      var jt = Math.random() < 0.34;
+      recs.push({
+        dong: d, ho: ho,
+        name: names[Math.floor(Math.random() * names.length)] + '○○',
+        joint: jt,
+        name2: jt ? names[Math.floor(Math.random() * names.length)] + '○○' : null,
+        at: Date.now() - Math.floor(Math.random() * 26) * 86400000
+      });
+    });
+  });
+
+  recs.sort(function (a, b) { return b.at - a.at; });
+
+  /* 회비 납부 — 위임장 접수 세대 중 약 70% */
+  var fees = {};
+  recs.forEach(function (r) {
+    if (Math.random() < 0.7) fees[r.dong + '-' + r.ho] = { at: r.at + 86400000, amt: 20000 };
+  });
+
+  return {
+    recs: recs,
+    votes: [
+      { id:'v1', q:'단지 공식 명칭을 무엇으로 할까요?', end:'2026-10-05', mine:null,
+        opts:[{t:'OO아파트', v:412},{t:'OO 센트럴파크', v:288},{t:'OO 더퍼스트', v:151}] },
+      { id:'v2', q:'커뮤니티 시설 중 우선 요청 항목은?', end:'2026-10-12', mine:null,
+        opts:[{t:'실내 골프연습장', v:301},{t:'키즈카페·돌봄센터', v:377},{t:'피트니스 확장', v:164}] }
+    ],
+    notices: [
+      { t:'제1차 정기총회 개최 안내', k:'중요', d:'2026-09-12',
+        s:'10월 4일(토) 오후 2시, ○○구민회관 대강당에서 제1차 정기총회를 개최합니다. 위임장을 제출하신 세대는 별도 참석 없이도 의결권이 행사됩니다.' },
+      { t:'시공사 현장 실사 결과 공유', k:'공지', d:'2026-09-08',
+        s:'9월 5일 임원진 6인이 현장을 방문하여 지하주차장 골조 상태를 확인하였습니다. 세부 사진은 현장 사진 메뉴에 올렸습니다.' },
+      { t:'위임장 미제출 세대 안내문 부착', k:'안내', d:'2026-09-02',
+        s:'각 동 엘리베이터에 QR 안내문을 부착하였습니다. 아직 제출하지 않으신 세대는 QR로 1분 내 접수 가능합니다.' },
+      { t:'협의회 계좌 개설 완료', k:'공지', d:'2026-08-21',
+        s:'○○은행 협의회 명의 계좌 개설이 완료되었습니다. 회비 입금 내역은 회비 메뉴에서 전 세대가 확인하실 수 있습니다.' }
+    ],
+    timeline: [
+      { d:'2026-07-15', t:'입주예정자협의회 발족', s:'발기인 12인, 창립총회 개최', st:'past' },
+      { d:'2026-08-02', t:'법무법인 자문 계약 체결', s:'법률 자문 및 플랫폼 운영 지원', st:'past' },
+      { d:'2026-08-20', t:'전자 위임장 접수 개시', s:'QR 기반 모바일 접수 시작', st:'past' },
+      { d:'2026-10-04', t:'제1차 정기총회', s:'임원 선출 · 사업계획 의결', st:'now' },
+      { d:'2026-12-00', t:'사전점검 대응 준비', s:'하자 체크리스트 배포 예정', st:'next' },
+      { d:'2027-03-00', t:'입주 및 협의회 이관', s:'입주자대표회의 구성 지원', st:'next' }
+    ],
+    org: [
+      { r:'회장',   n:'김○○', d:'103동', c:'총괄 · 대외 협의' },
+      { r:'부회장', n:'이○○', d:'107동', c:'회의 운영 · 총회 준비' },
+      { r:'총무',   n:'박○○', d:'101동', c:'회계 · 회비 관리' },
+      { r:'감사',   n:'최○○', d:'105동', c:'지출 감사' },
+      { r:'홍보이사', n:'정○○', d:'108동', c:'공지 · 플랫폼 운영' },
+      { r:'법률자문', n:'법무법인 제이엘', d:'—', c:'계약 검토 · 분쟁 대응' }
+    ],
+    budget: [
+      { d:'2026-09-12', t:'현수막 제작 · 게시', a: -420000, type:'out', rc:true, st:'대기' },
+      { d:'2026-09-10', t:'회비 납부 (9월분 48세대)', a:  960000, type:'in'  },
+      { d:'2026-09-05', t:'총회 장소 대관료',          a: -350000, type:'out', rc:true, st:'승인' },
+      { d:'2026-08-28', t:'회비 납부 (8월분 121세대)',  a: 2420000, type:'in'  },
+      { d:'2026-08-22', t:'안내문 인쇄 · 부착',        a: -186000, type:'out', rc:true, st:'승인' },
+      { d:'2026-08-12', t:'법률 자문료',              a: -550000, type:'out', rc:true, st:'승인' },
+      { d:'2026-08-01', t:'회비 납부 (초기 발기인)',    a: 1200000, type:'in'  }
+    ],
+    gallery: [
+      { e:'🏗️', t:'지하 2층 골조', s:'2026.09.05 · 임원진 현장 실사' },
+      { e:'🚧', t:'지상 12층 진행', s:'2026.09.05 · 타워크레인 2기 가동' },
+      { e:'🅿️', t:'지하주차장 슬래브', s:'2026.08.28 · 누수 여부 확인' },
+      { e:'📐', t:'견본주택 내부', s:'2026.08.14 · 마감재 확인' },
+      { e:'🌳', t:'단지 조경 예정지', s:'2026.08.14 · 배치도 대조' },
+      { e:'🧱', t:'외벽 조적 시작', s:'2026.07.30' }
+    ],
+    posts: [
+      { id:'p1', cat:'질문', t:'사전점검 때 뭘 준비해 가야 하나요?',
+        b:'다음 달 사전점검인데 처음이라 뭘 봐야 할지 모르겠습니다.\n선배님들 조언 부탁드립니다. 줄자랑 포스트잇은 챙기려고요.',
+        n:'103동 주민', at:Date.now()-3*3600000, v:284, like:12,
+        c:[{n:'107동 주민', b:'손전등 꼭 챙기세요. 몰딩 틈이랑 도배 들뜸은 어두우면 안 보입니다.', at:Date.now()-2.4*3600000},
+           {n:'익명', b:'수평계 앱 깔아가시면 문틀 기울기 바로 확인됩니다.', at:Date.now()-1.7*3600000},
+           {n:'총무', b:'협의회에서 체크리스트 배포 예정입니다. 공지 확인해 주세요.', at:Date.now()-40*60000}] },
+      { id:'p2', cat:'정보', t:'커뮤니티 시설 관련 시행사 답변 정리',
+        b:'지난주 시행사 면담 내용 공유드립니다.\n\n1. 실내 골프연습장 — 설계 변경 검토 중\n2. 어린이집 — 원안 유지\n3. 피트니스 — 면적 확대 불가 회신\n\n자세한 내용은 총회에서 보고드리겠습니다.',
+        n:'부회장', at:Date.now()-26*3600000, v:612, like:47,
+        c:[{n:'101동 주민', b:'정리 감사합니다. 골프연습장은 계속 요청해야 할 것 같네요.', at:Date.now()-20*3600000}] },
+      { id:'p3', cat:'자유', t:'입주 전에 인터넷 미리 신청하신 분 계신가요',
+        b:'통신사 사전 가입 혜택이 있다고 해서 문의드립니다. 입주지정기간 전에 신청해도 되는지 아시는 분?',
+        n:'익명', at:Date.now()-2*86400000, v:197, like:5,
+        c:[{n:'105동 주민', b:'입주 2개월 전부터 가능하다고 들었습니다.', at:Date.now()-1.7*86400000}] },
+      { id:'p4', cat:'질문', t:'발코니 확장 옵션 안 하신 분 계신가요?',
+        b:'확장을 안 하면 나중에 개별 시공이 어렵다고 하던데 사실인가요?',
+        n:'익명', at:Date.now()-4*86400000, v:341, like:8, c:[] },
+      { id:'p5', cat:'정보', t:'단지 앞 버스 노선 신설 민원 결과',
+        b:'시청에 접수한 민원 회신이 왔습니다. 입주 시점에 맞춰 노선 조정을 검토하겠다는 원론적 답변입니다.\n지속적으로 요청이 필요해 보입니다.',
+        n:'홍보이사', at:Date.now()-6*86400000, v:508, like:31, c:[] }
+    ],
+    fees: fees,
+    assembly: {
+      no:'제1차 정기총회', date:'2026-10-04', time:'오후 2시',
+      place:'○○구민회관 대강당', noticedAt:'2026-09-12',
+      agenda:[
+        { t:'제1호 의안 — 협의회 규약 제정(안)', s:'재적 과반 찬성', y:0, n:0 },
+        { t:'제2호 의안 — 2026년 사업계획 및 예산(안)', s:'출석 과반 찬성', y:0, n:0 },
+        { t:'제3호 의안 — 시행사 협의 대표단 구성(안)', s:'출석 과반 찬성', y:0, n:0 }
+      ],
+      attend:{}, myPick:null
+    },
+    election: {
+      pos:'회장', end:'2026-10-04', myVote:null,
+      cands:[
+        { id:'c1', n:'김○○', d:'103동 1502호', j:'IT기업 20년 · 前 자치회 총무',
+          p:'1. 시행사 협의 창구 일원화\n2. 회계 전액 공개 및 영수증 첨부 의무화\n3. 사전점검 전문업체 공동 계약 추진', v:218 },
+        { id:'c2', n:'이○○', d:'107동 903호', j:'건축시공기술사 · 現 감리업 종사',
+          p:'1. 시공 품질 상시 점검단 운영\n2. 마감재 변경 이력 전수 확인\n3. 하자 데이터 축적 후 일괄 대응', v:271 },
+        { id:'c3', n:'박○○', d:'101동 2104호', j:'세무사 · 회계 실무 15년',
+          p:'1. 회비 사용 내역 월별 공시\n2. 지출 사전 승인제 도입\n3. 협의회 해산 시 잔여금 세대 환급 규정 마련', v:164 }
+      ]
+    },
+    risks: [
+      { lv:'high', c:'제23조 (입주지정기간)', t:'입주지정기간 경과 시 미입주라도 관리비 부과',
+        b:'입주 지연 사유가 시공사에 있더라도 입주지정기간이 지나면 관리비가 부과되는 구조입니다.',
+        jl:'준공 지연·하자로 인한 입주 불능 기간은 제외한다는 단서 조항 삽입을 요구해야 합니다. 협의회 명의 공문으로 요청하고 회신을 문서로 남기십시오.' },
+      { lv:'high', c:'제31조 (마감재)', t:'동등 이상 자재로 변경 가능 — 사전 통지 의무 없음',
+        b:'"동등 이상"의 판단 주체가 시공사이며, 변경 시 입주민에게 알릴 의무가 없습니다.',
+        jl:'분양 카탈로그·견본주택 사진을 지금 전부 확보해 자료실에 보관하십시오. 변경 사실을 나중에 입증하는 유일한 수단입니다.' },
+      { lv:'mid', c:'제18조 (중도금 대출)', t:'금리 인상분은 전액 계약자 부담',
+        b:'집단대출 금리가 오르면 계약자가 전부 부담하며 시행사는 책임지지 않습니다.',
+        jl:'취급 은행 변경 협상은 협의회 단위로 하는 것이 유리합니다. 개별 교섭은 사실상 불가능합니다.' },
+      { lv:'mid', c:'제27조 (하자담보책임)', t:'하자 보수 청구 창구를 시공사 단일화',
+        b:'협의회를 통한 집단 청구 경로가 명시되어 있지 않습니다.',
+        jl:'세대별 개별 접수는 유지하되, 동일 하자 집계는 협의회가 별도로 축적해야 협상력이 생깁니다.' },
+      { lv:'low', c:'제9조 (전매제한)', t:'전매제한 기간 중 명의변경 제한',
+        b:'법령상 기준과 동일하며 특별히 불리한 조항은 아닙니다.',
+        jl:'다만 명의변경 시 협의회 위임장이 실효되므로 신고 절차를 반드시 거치셔야 합니다.' }
+    ],
+    asks: [],
+    transfers: [],
+    docs: [
+      { cat:'공문', t:'시행사 앞 커뮤니티시설 개선 요청 공문', d:'2026-09-10', sz:'1.2MB', k:'PDF' },
+      { cat:'공문', t:'시공사 회신 — 마감재 변경 관련', d:'2026-09-03', sz:'860KB', k:'PDF' },
+      { cat:'계약', t:'입주자모집공고문 전문', d:'2026-06-14', sz:'4.8MB', k:'PDF' },
+      { cat:'계약', t:'분양계약서 표준양식', d:'2026-06-14', sz:'2.1MB', k:'PDF' },
+      { cat:'회의록', t:'제3차 임원회의 회의록', d:'2026-09-08', sz:'420KB', k:'HWP' },
+      { cat:'회의록', t:'창립총회 회의록', d:'2026-07-15', sz:'510KB', k:'HWP' },
+      { cat:'카탈로그', t:'견본주택 마감재 사양서', d:'2026-06-20', sz:'12.4MB', k:'PDF' },
+      { cat:'카탈로그', t:'견본주택 내부 촬영본', d:'2026-06-20', sz:'38.2MB', k:'ZIP' }
+    ],
+    says: [
+      { id:'s1', tag:'궁금', n:'104동 주민', anon:false, b:'사전점검 날짜 확정됐나요? 연차 써야 해서요', at:Date.now()-18*60000, l:7,
+        r:[{n:'총무', b:'다음 주 공고 예정입니다', at:Date.now()-9*60000}] },
+      { id:'s2', tag:'정보', n:'익명', anon:true, b:'오늘 현장 지나가는데 타워크레인 한 대 더 들어왔더라구요', at:Date.now()-52*60000, l:23, r:[] },
+      { id:'s3', tag:'응원', n:'107동 주민', anon:false, b:'임원분들 고생 많으십니다. 위임장 오늘 냈습니다!', at:Date.now()-2.4*3600000, l:41, r:[] },
+      { id:'s4', tag:'궁금', n:'익명', anon:true, b:'회비 계좌 어디였죠? 놓쳤습니다', at:Date.now()-4*3600000, l:3,
+        r:[{n:'101동 주민', b:'회비 메뉴에서 우리집 확인 누르면 계좌 나옵니다', at:Date.now()-3.6*3600000},
+           {n:'익명', b:'감사합니다', at:Date.now()-3.2*3600000}] },
+      { id:'s5', tag:'정보', n:'부회장', anon:false, b:'시행사 면담 다녀왔습니다. 자세한 내용은 게시판에 올렸어요', at:Date.now()-7*3600000, l:35, r:[] },
+      { id:'s6', tag:'궁금', n:'105동 주민', anon:false, b:'총회 위임하면 따로 안 가도 되는 거 맞죠?', at:Date.now()-11*3600000, l:9,
+        r:[{n:'총무', b:'네 맞습니다. 위임장 제출하시면 의결권이 행사됩니다', at:Date.now()-10.5*3600000}] },
+      { id:'s7', tag:'응원', n:'익명', anon:true, b:'단톡방보다 여기가 훨씬 편하네요', at:Date.now()-26*3600000, l:52, r:[] },
+      { id:'s8', tag:'정보', n:'103동 주민', anon:false, b:'단지 앞 버스 노선 민원 저도 넣었습니다. 다들 한 번씩 부탁드려요', at:Date.now()-2*86400000, l:64, r:[] }
+    ],
+    sayLikes: {},
+    atLog: [],
+    likes: {},
+    pin: false
+  };
+}
+
+/* ───────── 유틸 ───────── */
+function $(id) { return document.getElementById(id); }
+function el(tag, cls, html) {
+  var e = document.createElement(tag);
+  if (cls) e.className = cls;
+  if (html != null) e.innerHTML = html;
+  return e;
+}
+function esc(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+    return { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c];
+  });
+}
+function won(n) {
+  return (n < 0 ? '−' : '') + Math.abs(n).toLocaleString('ko-KR') + '원';
+}
+function ago(ts) {
+  var m = Math.floor((Date.now() - ts) / 60000);
+  if (m < 60) return m + '분 전';
+  if (m < 1440) return Math.floor(m / 60) + '시간 전';
+  return Math.floor(m / 1440) + '일 전';
+}
+var TOTAL = C.dongs.reduce(function (a, r) { return a + r[1]; }, 0) || C.totalUnits;
+
+/* ══════════════════════════════════════════════════════════════
+   App
+   ══════════════════════════════════════════════════════════════ */
+var TABS = [
+  { id:'home',     ic:'🏠', t:'홈' },
+  { id:'delegate', ic:'✍️', t:'위임장' },
+  { id:'say',      ic:'💬', t:'한마디' },
+  { id:'assembly', ic:'⚖️', t:'총회' },
+  { id:'more',     ic:'⋯',  t:'더보기' }
+];
+var TITLES = {
+  home:'홈', delegate:'위임장 제출', vote:'투표 · 설문', notice:'소식',
+  apt:'단지 개요', org:'임원진', budget:'회비 · 지출', gallery:'현장 사진',
+  board:'게시판', say:'입주민 한마디', check:'내 접수 확인', admin:'관리자',
+  assembly:'총회', election:'임원 선거', legal:'계약 분석 · 법률상담',
+  docs:'자료실', transfer:'명의변경 신고'
+};
+var DESK = [
+  { id:'home',     t:'홈' },
+  { id:'delegate', t:'위임장' },
+  { id:'say',      t:'한마디' },
+  { id:'board',    t:'게시판' },
+  { id:'assembly', t:'총회' },
+  { id:'election', t:'임원 선거' },
+  { id:'legal',    t:'계약 분석' },
+  { id:'budget',   t:'회비' },
+  { id:'docs',     t:'자료실' },
+  { id:'notice',   t:'소식' }
+];
+var MORE = [
+  { id:'board',    ic:'📝', t:'게시판' },
+  { id:'vote',     ic:'🗳️', t:'투표·설문' },
+  { id:'election', ic:'🗂️', t:'임원 선거' },
+  { id:'legal',    ic:'⚠️', t:'계약 분석' },
+  { id:'budget',   ic:'💰', t:'회비·지출' },
+  { id:'docs',     ic:'📁', t:'자료실' },
+  { id:'notice',   ic:'📢', t:'소식·일정' },
+  { id:'apt',      ic:'🏗️', t:'단지 개요' },
+  { id:'org',      ic:'👥', t:'임원진' },
+  { id:'gallery',  ic:'📸', t:'현장 사진' },
+  { id:'check',    ic:'🔎', t:'내 접수 확인' },
+  { id:'transfer', ic:'🔁', t:'명의변경 신고' },
+  { id:'admin',    ic:'⚙️', t:'관리자' }
+];
+
+var App = {
+  cur: 'home',
+
+  init: function () {
+    S = DB.load();
+    if (!S || !S.recs || !S.posts) { S = seed(); DB.save(); }
+
+    /* 단지 고유색 — config.theme 가 있으면 악센트/헤더색만 교체합니다 */
+    if (C.theme) {
+      var r = document.documentElement.style;
+      if (C.theme.acc)  r.setProperty('--acc',   C.theme.acc);
+      if (C.theme.acc2) r.setProperty('--acc-2', C.theme.acc2);
+      if (C.theme.ink)  r.setProperty('--ink',   C.theme.ink);
+      if (C.theme.ink2) r.setProperty('--ink-2', C.theme.ink2);
+      if (C.theme.glow) {
+        var st = document.createElement('style');
+        st.textContent = '.hero::before{background:radial-gradient(circle,' +
+          C.theme.glow + ',transparent 68%)!important}';
+        document.head.appendChild(st);
+      }
+      var g = document.querySelector('#gr stop:first-child');
+      if (g && C.theme.acc) g.setAttribute('stop-color', C.theme.acc);
+    }
+
+    if (C.heroLight !== false) document.querySelector('.hero').classList.add('light');
+    document.title = C.org;
+    $('emblem').textContent = C.emblem;
+    $('heroName').textContent = C.apt;
+    $('heroLoc').textContent = C.address;
+    $('barSub').textContent = C.org;
+    $('agreeTx').textContent = C.agree;
+    $('footEm').textContent = C.emblem;
+    $('footOrg').textContent = C.org;
+    $('footAddr').innerHTML = esc(C.apt) + ' · ' + esc(C.address) +
+      '<br>시공 ' + esc(C.builder) + ' · 입주 ' + esc(C.moveIn);
+    if (!C.demo) $('demoFlag').hidden = true;
+
+    this.buildTabs();
+    this.paintHome();
+    this.paintNotice();
+    this.paintVote();
+    this.paintApt();
+    this.paintOrg();
+    this.paintGallery();
+    Deleg.init();
+    Check.init();
+    Board.init();
+    Say.init();
+    Fee.init();
+    Transfer.init();
+    Assembly.paint();
+    Election.paint();
+    Legal.paint();
+    Docs.init();
+    Fee.paint();
+
+    var t = (location.hash || '').replace('#', '');
+    this.go(TITLES[t] ? t : 'home');
+
+    window.addEventListener('resize', function () { App.setBarTitle(); });
+    window.addEventListener('scroll', function () {
+      $('appbar').classList.toggle('stuck', window.scrollY > 6);
+    }, { passive:true });
+
+    try {
+      var th = localStorage.getItem('jl2_theme');
+      if (th) document.documentElement.setAttribute('data-theme', th);
+    } catch (e) {}
+    $('netDot').classList.toggle('off', !!C.demo);
+  },
+
+  /* PC 에서는 상단 브랜드에 단지명을, 모바일에서는 현재 화면 이름을 보여준다 */
+  setBarTitle: function () {
+    var wide = window.matchMedia('(min-width:960px)').matches;
+    $('barTitle').textContent = wide ? C.apt : (TITLES[this.cur] || '');
+  },
+
+  buildTabs: function () {
+    var bar = $('tabbar'); bar.innerHTML = '';
+    TABS.forEach(function (t) {
+      var b = el('button', 'tab', '<span class="ti">' + t.ic + '</span><span>' + t.t + '</span>');
+      b.id = 'tab-' + t.id;
+      b.onclick = function () { t.id === 'more' ? App.openSheet('more') : App.go(t.id); };
+      bar.appendChild(b);
+    });
+
+    var dn = $('deskNav'); dn.innerHTML = '';
+    DESK.forEach(function (t) {
+      var a = el('button', 'dn', t.t);
+      a.id = 'dn-' + t.id;
+      a.onclick = function () { App.go(t.id); };
+      dn.appendChild(a);
+    });
+  },
+
+  go: function (id) {
+    this.closeSheet();
+    var p = $('p-' + id);
+    if (!p) return;
+    Array.prototype.forEach.call(document.querySelectorAll('.page'), function (x) {
+      x.classList.remove('on');
+    });
+    p.classList.add('on');
+    this.cur = id;
+    this.setBarTitle();
+    Array.prototype.forEach.call(document.querySelectorAll('.tab'), function (x) {
+      x.classList.remove('on');
+    });
+    var tb = $('tab-' + id) || (MORE.some(function (m) { return m.id === id; }) ? $('tab-more') : null);
+    if (tb) tb.classList.add('on');
+    Array.prototype.forEach.call(document.querySelectorAll('.dn'), function (x) {
+      x.classList.remove('on');
+    });
+    var dnb = $('dn-' + id);
+    if (dnb) dnb.classList.add('on');
+    location.hash = id;
+    window.scrollTo(0, 0);
+    if (id === 'admin' && S.pin) Admin.paint();
+    if (id === 'board') Board.back();
+    if (id === 'say') Say.init();
+    if (id === 'assembly') Assembly.paint();
+    if (id === 'election') Election.paint();
+    if (id === 'budget') Fee.paint();
+  },
+
+  /* ── 홈 ── */
+  paintHome: function () {
+    var done = S.recs.length;
+    var pct  = Math.round(done / TOTAL * 100);
+
+    $('fDone').innerHTML  = done.toLocaleString() + '<em>세대</em>';
+    $('fLeft').innerHTML  = (TOTAL - done).toLocaleString() + '<em>세대</em>';
+    $('fTotal').innerHTML = TOTAL.toLocaleString() + '<em>세대</em>';
+
+    setTimeout(function () {
+      $('ringBar').style.strokeDashoffset = String(282.7 * (1 - pct / 100));
+    }, 120);
+    var n = 0, tick = setInterval(function () {
+      n += Math.max(1, Math.round(pct / 26));
+      if (n >= pct) { n = pct; clearInterval(tick); }
+      $('ringPct').textContent = n + '%';
+    }, 32);
+
+    this.paintQuorum(done, pct);
+
+    /* 지금 하실 일 */
+    var box = $('todoBox'); box.innerHTML = '';
+    var mine = Deleg.mine();
+    box.appendChild(this.actCard(
+      mine ? '✓' : '✍️',
+      mine ? '위임장 접수 완료' : '위임장 제출하기',
+      mine ? mine.dong + '동 ' + mine.ho + '호 · ' + ago(mine.at) + ' 접수되었습니다'
+           : '동·호수 선택 후 서명까지 약 1분이면 끝납니다',
+      mine ? 'done' : '', 'delegate', mine ? null : ['b', '필수']
+    ));
+    var open = S.votes.filter(function (v) { return v.mine === null; }).length;
+    box.appendChild(this.actCard('🗳️',
+      open ? '진행중인 투표 ' + open + '건' : '투표 참여 완료',
+      open ? '안건에 의견을 남겨주세요' : '진행중인 안건에 모두 참여하셨습니다',
+      open ? '' : 'done', 'vote', open ? ['o', 'D-' + 19] : null));
+    box.appendChild(this.actCard('💬', '입주민 한마디',
+      S.says[0].b.slice(0, 30) + (S.says[0].b.length > 30 ? '…' : ''), '', 'say', null));
+    box.appendChild(this.actCard('📢', '공지사항 확인',
+      S.notices[0].t, '', 'notice', null));
+
+    /* 동별 히트맵 */
+    var heat = $('heatBox'); heat.innerHTML = '';
+    C.dongs.forEach(function (row) {
+      var d = row[0], tot = row[1];
+      var k = S.recs.filter(function (r) { return r.dong === d; }).length;
+      var p = Math.round(k / tot * 100);
+      var c = el('div', 'hcell' + (p >= 80 ? ' hi' : p < 60 ? ' lo' : ''),
+        '<div class="fill" style="height:0"></div>' +
+        '<div class="d">' + esc(d) + '동</div>' +
+        '<div class="p num">' + p + '%</div>' +
+        '<div class="n num">' + k + '/' + tot + '</div>');
+      heat.appendChild(c);
+      setTimeout(function () { c.querySelector('.fill').style.height = p + '%'; }, 200);
+    });
+
+    /* 공정률 */
+    $('progPct').textContent = C.progress + '%';
+    $('progNote').textContent = C.progressNote;
+    setTimeout(function () { $('progBar').style.width = C.progress + '%'; }, 250);
+
+    /* 게시판 인기글 */
+    var hb = $('homeBoard'); hb.innerHTML = '';
+    S.posts.slice().sort(function (a, b) {
+      return (b.like * 3 + b.c.length * 5 + b.v / 40) - (a.like * 3 + a.c.length * 5 + a.v / 40);
+    }).slice(0, 3).forEach(function (p) {
+      var b = el('button', 'row');
+      b.innerHTML =
+        '<div class="tick">💬</div>' +
+        '<div class="rl"><div class="rt" style="font-size:.9rem">' + esc(p.t) + '</div>' +
+        '<div class="rm"><span class="pill n">' + esc(p.cat) + '</span>' +
+        '<span>댓글 ' + p.c.length + '</span><span>공감 ' + p.like + '</span></div></div>';
+      b.onclick = function () { App.go('board'); setTimeout(function () { Board.open(p.id); }, 60); };
+      hb.appendChild(b);
+    });
+
+    /* 최근 소식 */
+    var hn = $('homeNotice'); hn.innerHTML = '';
+    S.notices.slice(0, 3).forEach(function (n2) {
+      hn.appendChild(App.noticeRow(n2, true));
+    });
+  },
+
+  /* ── 총회 의결 정족수 ── */
+  paintQuorum: function (done, pct) {
+    var need = C.quorum || 50;
+    var needUnits = Math.ceil(TOTAL * need / 100);
+    var ok = done >= needUnits;
+    var conv = C.type === 'conversion';
+
+    $('qState').textContent = ok
+      ? '충족 — 총회 의결이 가능합니다'
+      : '미충족 — ' + (needUnits - done).toLocaleString() + '세대 더 필요합니다';
+    var bd = $('qBadge');
+    bd.textContent = ok ? '충족' : '미충족';
+    bd.classList.toggle('no', !ok);
+    $('qMark').style.left = need + '%';
+    $('qMarkLb').textContent = (need === 50 ? '과반 ' : '') + need + '%';
+    $('qMarkLb').style.transform = need > 70 ? 'translateX(-90%)' : 'translateX(-50%)';
+    document.querySelector('.q-track').classList.toggle('ok', ok);
+    setTimeout(function () { $('qFill').style.width = Math.min(100, pct) + '%'; }, 320);
+
+    $('qFoot').innerHTML =
+      '재적 ' + TOTAL.toLocaleString() + '세대 · 위임 접수 <b>' + done.toLocaleString() + '세대(' + pct + '%)</b><br>' +
+      (conv
+        ? '분양전환 협의 및 감정평가 대응 권한 위임 기준 ' + need + '%'
+        : '총회 의결정족수 기준 ' + need + '% (' + needUnits.toLocaleString() + '세대)');
+  },
+
+  actCard: function (ic, tt, ds, cls, target, pill) {
+    var b = el('button', 'act ' + (cls || ''));
+    b.innerHTML =
+      '<div class="ic">' + ic + '</div>' +
+      '<div class="tx"><div class="tt">' + esc(tt) +
+        (pill ? '<span class="pill ' + pill[0] + '">' + esc(pill[1]) + '</span>' : '') +
+      '</div><div class="ds">' + esc(ds) + '</div></div>' +
+      '<div class="ar">›</div>';
+    b.onclick = function () { App.go(target); };
+    return b;
+  },
+
+  noticeRow: function (n, compact) {
+    var k = n.k === '중요' ? 'b' : n.k === '안내' ? 'o' : 'n';
+    var b = el('button', 'row');
+    b.innerHTML =
+      '<div class="tick">' + (n.k === '중요' ? '❗' : '📄') + '</div>' +
+      '<div class="rl"><div class="rt">' + esc(n.t) + '</div>' +
+      (compact ? '' : '<div class="rd">' + esc(n.s) + '</div>') +
+      '<div class="rm"><span class="pill ' + k + '">' + esc(n.k) + '</span><span>' + esc(n.d) + '</span></div></div>';
+    b.onclick = function () {
+      App.sheet(n.t, '<div style="font-size:.88rem;color:var(--tx-2);line-height:1.75">' +
+        esc(n.s) + '</div><div style="font-size:.76rem;color:var(--tx-3);margin-top:16px">' +
+        esc(n.d) + ' · ' + esc(C.org) + '</div>');
+    };
+    return b;
+  },
+
+  paintNotice: function () {
+    var b = $('noticeBox'); b.innerHTML = '';
+    S.notices.forEach(function (n) { b.appendChild(App.noticeRow(n)); });
+
+    var t = $('tlBox'); t.innerHTML = '';
+    S.timeline.forEach(function (x) {
+      t.appendChild(el('div', 'tl-i ' + x.st,
+        '<div class="tl-d">' + esc(x.d) + '</div>' +
+        '<div class="tl-t">' + esc(x.t) + '</div>' +
+        '<div class="tl-s">' + esc(x.s) + '</div>'));
+    });
+  },
+
+  paintVote: function () {
+    var box = $('voteBox'); box.innerHTML = '';
+    S.votes.forEach(function (v) {
+      var tot = v.opts.reduce(function (a, o) { return a + o.v; }, 0);
+      var sec = el('div', 'sec');
+      sec.style.marginTop = '6px';
+      var h = el('div', 'sec-h',
+        '<h2 class="sec-t">' + esc(v.q) + '</h2>' +
+        '<span class="pill ' + (v.mine === null ? 'b' : 'g') + '">' +
+        (v.mine === null ? '참여 전' : '참여 완료') + '</span>');
+      sec.appendChild(h);
+      sec.appendChild(el('p', 'sec-d', '마감 ' + esc(v.end) + ' · 현재 ' +
+        tot.toLocaleString() + '세대 참여'));
+      var wrap = el('div');
+      v.opts.forEach(function (o, i) {
+        var p = tot ? Math.round(o.v / tot * 100) : 0;
+        var b = el('button', 'opt' + (v.mine === i ? ' mine' : ''),
+          '<div class="fill" style="width:0"></div>' +
+          '<div class="in"><span class="ot">' + esc(o.t) + '</span>' +
+          '<span class="ov num">' + p + '%</span></div>');
+        b.onclick = function () { App.vote(v, i); };
+        wrap.appendChild(b);
+        setTimeout(function () { b.querySelector('.fill').style.width = p + '%'; }, 220);
+      });
+      sec.appendChild(wrap);
+      box.appendChild(sec);
+    });
+  },
+
+  vote: function (v, i) {
+    if (v.mine !== null) {
+      if (v.mine === i) { App.toast('이미 이 항목에 투표하셨습니다'); return; }
+      v.opts[v.mine].v--;
+    }
+    v.opts[i].v++;
+    v.mine = i;
+    DB.save();
+    this.paintVote();
+    this.paintHome();
+    this.toast('투표가 반영되었습니다');
+  },
+
+  paintApt: function () {
+    var rows = [
+      ['단지명', C.apt], ['소재지', C.address], ['총 세대수', TOTAL.toLocaleString() + '세대'],
+      ['동 수', C.dongs.length + '개동'], ['시공사', C.builder], ['시행사', C.owner],
+      ['입주 예정', C.moveIn]
+    ];
+    var b = $('aptBox'); b.innerHTML = '';
+    rows.forEach(function (r) {
+      b.appendChild(el('div', 'row',
+        '<div class="rl"><div class="rd" style="margin:0">' + esc(r[0]) + '</div></div>' +
+        '<div class="rr" style="color:var(--tx);font-weight:700;font-size:.9rem">' + esc(r[1]) + '</div>'));
+    });
+
+    var t = $('typeBox'); t.innerHTML = '';
+    C.types.forEach(function (x) {
+      var p = Math.round(x.u / TOTAL * 100);
+      var w = el('div');
+      w.style.marginBottom = '14px';
+      w.innerHTML =
+        '<div style="display:flex;justify-content:space-between;font-size:.87rem;font-weight:700;margin-bottom:6px">' +
+        '<span>' + esc(x.t) + '</span><span class="num" style="color:var(--tx-2);font-weight:600">' +
+        x.u + '세대 · ' + p + '%</span></div>' +
+        '<div class="bar"><i style="width:' + p + '%"></i></div>';
+      t.appendChild(w);
+    });
+  },
+
+  paintOrg: function () {
+    var b = $('orgBox'); b.innerHTML = '';
+    S.org.forEach(function (o) {
+      b.appendChild(el('div', 'row',
+        '<div class="tick">' + esc(o.n.charAt(0)) + '</div>' +
+        '<div class="rl"><div class="rt">' + esc(o.n) +
+        '<span class="pill n" style="margin-left:7px">' + esc(o.r) + '</span></div>' +
+        '<div class="rd">' + esc(o.c) + '</div></div>' +
+        '<div class="rr">' + esc(o.d) + '</div>'));
+    });
+  },
+
+  paintGallery: function () {
+    var g = $('galBox'); g.innerHTML = '';
+    S.gallery.forEach(function (x) {
+      g.appendChild(el('figure', '',
+        '<div class="ph">' + x.e + '</div>' +
+        '<figcaption><b>' + esc(x.t) + '</b>' + esc(x.s) + '</figcaption>'));
+    });
+  },
+
+  /* ── 시트 ── */
+  sheet: function (title, html) {
+    $('sheetBody').innerHTML =
+      '<div style="font-size:1.06rem;font-weight:800;letter-spacing:-.03em;margin-bottom:12px">' +
+      esc(title) + '</div>' + html;
+    $('sheet').classList.add('on');
+    $('scrim').classList.add('on');
+  },
+
+  openSheet: function (kind) {
+    if (kind === 'more') {
+      var h = '<div class="mgrid">';
+      MORE.forEach(function (m) {
+        h += '<button class="mtile" onclick="App.go(\'' + m.id + '\')">' +
+             '<span class="mi">' + m.ic + '</span><span class="mt">' + m.t + '</span></button>';
+      });
+      h += '</div>';
+      this.sheet('더보기', h);
+    } else if (kind === 'status') {
+      this.sheet('연결 상태',
+        '<div style="font-size:.87rem;color:var(--tx-2);line-height:1.75">' +
+        (C.demo
+          ? '현재 <b style="color:var(--tx)">데모 모드</b>입니다.<br>' +
+            '입력하신 위임장·투표는 이 기기 안에만 임시로 남고, 어디에도 전송되지 않습니다. ' +
+            '관리자 화면에서 언제든 처음 상태로 되돌릴 수 있습니다.'
+          : '서버에 정상 연결되어 있습니다.<br>제출하신 내용은 즉시 협의회 서버에 기록됩니다.') +
+        '</div>');
+    } else if (kind === 'heatinfo') {
+      this.sheet('동별 접수 현황 보는 법',
+        '<div style="font-size:.87rem;color:var(--tx-2);line-height:1.8">' +
+        '각 칸의 채워진 높이가 그 동의 위임장 접수율입니다.<br><br>' +
+        '<span style="color:var(--ok);font-weight:700">■ 초록</span> 80% 이상 — 목표 도달<br>' +
+        '<span style="color:var(--acc);font-weight:700">■ 파랑</span> 60~79% — 진행중<br>' +
+        '<span style="color:var(--warn);font-weight:700">■ 주황</span> 60% 미만 — 집중 독려 필요' +
+        '</div>');
+    }
+  },
+
+  closeSheet: function () {
+    $('sheet').classList.remove('on');
+    $('scrim').classList.remove('on');
+  },
+
+  toggleTheme: function () {
+    var r = document.documentElement;
+    var cur = r.getAttribute('data-theme');
+    var dark = matchMedia('(prefers-color-scheme:dark)').matches;
+    var next = cur ? (cur === 'dark' ? 'light' : 'dark') : (dark ? 'light' : 'dark');
+    r.setAttribute('data-theme', next);
+    try { localStorage.setItem('jl2_theme', next); } catch (e) {}
+  },
+
+  toast: function (msg) {
+    var t = $('toast');
+    t.textContent = msg;
+    t.classList.add('on');
+    clearTimeout(t._t);
+    t._t = setTimeout(function () { t.classList.remove('on'); }, 2400);
+  },
+
+  reset: function () {
+    if (!confirm('데모 데이터를 처음 상태로 되돌립니다. 계속할까요?')) return;
+    DB.wipe();
+    location.reload();
+  }
+};
+
+/* ══════════════════════════════════════════════════════════════
+   위임장
+   ══════════════════════════════════════════════════════════════ */
+var Deleg = {
+  cur: 1, pads: {},
+
+  init: function () {
+    var sel = $('inDong');
+    sel.innerHTML = '<option value="">선택</option>';
+    C.dongs.forEach(function (r) {
+      var o = document.createElement('option');
+      o.value = r[0]; o.textContent = r[0] + '동';
+      sel.appendChild(o);
+    });
+    this.pads[1] = this.makePad(1);
+    this.pads[2] = this.makePad(2);
+  },
+
+  mine: function () {
+    try {
+      var m = JSON.parse(localStorage.getItem(KEY + '_me') || 'null');
+      if (m && S.recs.some(function (r) { return r.dong === m.dong && r.ho === m.ho; })) return m;
+    } catch (e) {}
+    return null;
+  },
+
+  isJoint: function () { return $('inJoint').checked; },
+
+  agree: function () {
+    var on = $('inAgree').checked;
+    $('signArea').hidden = !on;
+    if (on) {
+      var self = this;
+      setTimeout(function () {
+        self.pads[1].size();
+        if (self.isJoint()) self.pads[2].size();
+      }, 40);
+    }
+  },
+
+  joint: function () {
+    var on = this.isJoint();
+    $('spouseBox').hidden = !on;
+    if (on) {
+      var self = this;
+      setTimeout(function () { self.pads[2].size(); }, 40);
+    }
+  },
+
+  /* ── 서명패드 (번호별로 독립) ── */
+  makePad: function (n) {
+    var canvas = $('pad' + n), wrap = $('wrap' + n);
+    var ctx = canvas.getContext('2d');
+    var drawing = false, lastW = 0;
+    var pad = {
+      drawn: false,
+      size: function () {
+        var r = canvas.getBoundingClientRect();
+        if (!r.width) return;
+        lastW = r.width;
+        var dpr = window.devicePixelRatio || 1;
+        canvas.width = r.width * dpr;
+        canvas.height = r.height * dpr;
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        ctx.lineWidth = 2.4;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctx.strokeStyle = getComputedStyle(document.body).color;
+        pad.drawn = false;
+        wrap.classList.remove('has');
+      },
+      data: function () {
+        try { return pad.drawn ? canvas.toDataURL('image/png') : null; } catch (e) { return null; }
+      }
+    };
+
+    function pos(e) {
+      var r = canvas.getBoundingClientRect();
+      var p = e.touches ? e.touches[0] : e;
+      return { x: p.clientX - r.left, y: p.clientY - r.top };
+    }
+    function start(e) {
+      e.preventDefault(); drawing = true;
+      var p = pos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y);
+    }
+    function move(e) {
+      if (!drawing) return;
+      e.preventDefault();
+      var p = pos(e); ctx.lineTo(p.x, p.y); ctx.stroke();
+      if (!pad.drawn) { pad.drawn = true; wrap.classList.add('has'); }
+    }
+    function end() { drawing = false; }
+
+    ['mousedown', 'touchstart'].forEach(function (t) { canvas.addEventListener(t, start, { passive:false }); });
+    ['mousemove', 'touchmove'].forEach(function (t) { canvas.addEventListener(t, move, { passive:false }); });
+    ['mouseup', 'mouseleave', 'touchend', 'touchcancel'].forEach(function (t) { canvas.addEventListener(t, end); });
+
+    /* 화면 크기가 바뀌어도(회전·주소창 접힘) 서명이 지워지지 않도록 복원합니다 */
+    var rzTimer;
+    window.addEventListener('resize', function () {
+      clearTimeout(rzTimer);
+      rzTimer = setTimeout(function () {
+        if (wrap.offsetParent === null) return;               // 화면에 없으면 무시
+        if (canvas.getBoundingClientRect().width === lastW) return;
+        if (!pad.drawn) { pad.size(); return; }
+        var prev = pad.data();
+        pad.size();
+        if (!prev) return;
+        var img = new Image();
+        img.onload = function () {
+          var r = canvas.getBoundingClientRect();
+          ctx.drawImage(img, 0, 0, r.width, r.height);
+          pad.drawn = true;
+          wrap.classList.add('has');
+        };
+        img.src = prev;
+      }, 160);
+    });
+    return pad;
+  },
+
+  clearPad: function (n) { this.pads[n].size(); },
+
+  step: function (n) {
+    if (n === 2) {
+      if (!$('inDong').value) return App.toast('동을 선택해 주세요');
+      if (!/^\d{3,4}$/.test($('inHo').value.trim())) return App.toast('호수를 숫자로 입력해 주세요');
+      var d = $('inDong').value, h = $('inHo').value.trim();
+      if (S.recs.some(function (r) { return r.dong === d && r.ho === h; }))
+        return App.toast(d + '동 ' + h + '호는 이미 접수된 세대입니다');
+    }
+    if (n === 3) {
+      if (!$('inName').value.trim()) return App.toast('성명을 입력해 주세요');
+      if (!/^\d{6}$/.test($('inBirth').value.replace(/\D/g, '')))
+        return App.toast('생년월일 6자리를 입력해 주세요');
+      if ($('inTel').value.replace(/\D/g, '').length < 10)
+        return App.toast('휴대전화 번호를 확인해 주세요');
+      $('nm1').textContent = $('inName').value.trim();
+      $('spouseBox').hidden = !this.isJoint();
+      $('signArea').hidden = !$('inAgree').checked;
+    }
+    this.cur = n;
+    [1, 2, 3].forEach(function (i) { $('st-' + i).hidden = (i !== n); });
+    $('st-done').hidden = true;
+    Array.prototype.forEach.call($('stepBar').children, function (s, i) {
+      s.className = 'step' + (i + 1 === n ? ' on' : i + 1 < n ? ' did' : '');
+    });
+    window.scrollTo(0, 0);
+    if (n === 3 && $('inAgree').checked) {
+      var self = this;
+      setTimeout(function () {
+        self.pads[1].size();
+        if (self.isJoint()) self.pads[2].size();
+      }, 60);
+    }
+  },
+
+  submit: function () {
+    var joint = this.isJoint();
+    if (!$('inAgree').checked) return App.toast('위임 내용에 동의해 주세요');
+    if (!this.pads[1].drawn) return App.toast('계약자 서명을 해주세요');
+    if (joint) {
+      if (!$('inName2').value.trim()) return App.toast('배우자 성명을 입력해 주세요');
+      if (!this.pads[2].drawn) return App.toast('배우자 서명을 해주세요');
+    }
+
+    var rec = {
+      dong:  $('inDong').value,
+      ho:    $('inHo').value.trim(),
+      name:  $('inName').value.trim().charAt(0) + '○○',
+      joint: joint,
+      name2: joint ? $('inName2').value.trim().charAt(0) + '○○' : null,
+      sign:  this.pads[1].data(),
+      sign2: joint ? this.pads[2].data() : null,
+      at:    Date.now()
+    };
+    S.recs.unshift({ dong:rec.dong, ho:rec.ho, name:rec.name, joint:joint,
+                     name2:rec.name2, at:rec.at });
+    DB.save();
+    try {
+      localStorage.setItem(KEY + '_me',
+        JSON.stringify({ dong:rec.dong, ho:rec.ho, at:rec.at }));
+    } catch (e) {}
+
+    $('doneMsg').innerHTML =
+      esc(rec.dong) + '동 ' + esc(rec.ho) + '호 · ' +
+      (joint ? '공동명의 2인 서명' : '단독명의 1인 서명') + '<br>' +
+      (C.demo
+        ? '데모 화면이므로 실제로는 저장되지 않았습니다.'
+        : '협의회 서버에 정상 접수되었습니다.');
+
+    [1, 2, 3].forEach(function (i) { $('st-' + i).hidden = true; });
+    $('st-done').hidden = false;
+    Array.prototype.forEach.call($('stepBar').children, function (s) { s.className = 'step did'; });
+    App.paintHome();
+    window.scrollTo(0, 0);
+  },
+
+  reset: function () {
+    $('inHo').value = ''; $('inName').value = ''; $('inName2').value = '';
+    $('inBirth').value = ''; $('inTel').value = '';
+    $('inJoint').checked = false;
+    $('inAgree').checked = false;
+    $('spouseBox').hidden = true;
+    $('signArea').hidden = true;
+    this.pads[1].size(); this.pads[2].size();
+    this.step(1);
+    App.go('home');
+  }
+};
+
+/* ══════════════════════════════════════════════════════════════
+   관리자
+   ══════════════════════════════════════════════════════════════ */
+var Admin = {
+  unlock: function () {
+    if ($('inPin').value.trim() !== C.pin) return App.toast('입장 코드가 올바르지 않습니다');
+    S.pin = true; DB.save();
+    $('adminGate').hidden = true;
+    $('adminBody').hidden = false;
+    this.paint();
+  },
+
+  paint: function () {
+    Notify.init();
+    Notify.log();
+    $('adminGate').hidden = true;
+    $('adminBody').hidden = false;
+
+    var b = $('recBox'); b.innerHTML = '';
+    S.recs.slice(0, 20).forEach(function (r) {
+      b.appendChild(el('div', 'row',
+        '<div class="tick">✓</div>' +
+        '<div class="rl"><div class="rt" style="font-size:.9rem">' +
+        esc(r.dong) + '동 ' + esc(r.ho) + '호 · ' + esc(r.name) +
+        (r.joint ? ' · ' + esc(r.name2) + '<span class="pill b" style="margin-left:6px">공동명의</span>' : '') + '</div>' +
+        '<div class="rm"><span>' + ago(r.at) + ' 접수</span></div></div>'));
+    });
+    if (S.recs.length > 20) {
+      b.appendChild(el('div', 'row',
+        '<div class="rl"><div class="rd" style="margin:0;text-align:center">외 ' +
+        (S.recs.length - 20).toLocaleString() + '건 · CSV로 전체 확인</div></div>'));
+    }
+
+    var ap = $('apprBox'); ap.innerHTML = '';
+    var wait = S.budget.filter(function (x) { return x.st === '대기'; });
+    if (!wait.length) ap.innerHTML = '<div class="empty">승인 대기 중인 지출이 없습니다.</div>';
+    wait.forEach(function (x, i) {
+      var r = el('div', 'row');
+      r.innerHTML = '<div class="tick">🧾</div>' +
+        '<div class="rl"><div class="rt" style="font-size:.9rem">' + esc(x.t) + '</div>' +
+        '<div class="rm"><span>' + esc(x.d) + '</span><span class="num">' + won(x.a) + '</span>' +
+        '<span class="rcpt">영수증 첨부됨</span></div>' +
+        '<button class="btn sm" style="margin-top:9px">승인</button></div>';
+      r.querySelector('button').onclick = function () {
+        x.st = '승인'; DB.save(); Admin.paint(); Fee.paint();
+        App.toast('지출이 승인되었습니다');
+      };
+      ap.appendChild(r);
+    });
+
+    var ab = $('askBox'); ab.innerHTML = '';
+    if (!S.asks.length) ab.innerHTML = '<div class="empty">접수된 상담이 없습니다.</div>';
+    S.asks.forEach(function (x) {
+      ab.appendChild(el('div', 'row',
+        '<div class="tick">⚖️</div><div class="rl">' +
+        '<div class="rt" style="font-size:.9rem">' + esc(x.cat) + '</div>' +
+        '<div class="rd">' + esc(x.q.slice(0, 70)) + '</div>' +
+        '<div class="rm"><span class="pill o">' + esc(x.st) + '</span><span>' + ago(x.at) + '</span></div></div>'));
+    });
+
+    var tb = $('tfBox'); tb.innerHTML = '';
+    if (!S.transfers.length) tb.innerHTML = '<div class="empty">신고된 명의변경이 없습니다.</div>';
+    S.transfers.forEach(function (x) {
+      tb.appendChild(el('div', 'row',
+        '<div class="tick">🔁</div><div class="rl">' +
+        '<div class="rt" style="font-size:.9rem">' + esc(x.dong) + '동 ' + esc(x.ho) + '호 → ' + esc(x.name) + '</div>' +
+        '<div class="rm"><span>' + esc(x.kind) + '</span>' +
+        (x.voided ? '<span class="pill o">기존 위임장 해지됨</span>' : '') + '</div></div>'));
+    });
+
+    var m = $('missBox'); m.innerHTML = '';
+    C.dongs.forEach(function (row) {
+      var k = S.recs.filter(function (r) { return r.dong === row[0]; }).length;
+      var left = row[1] - k;
+      var w = el('div');
+      w.style.cssText = 'display:flex;justify-content:space-between;align-items:center;' +
+        'padding:9px 0;border-bottom:1px solid var(--line-2)';
+      w.innerHTML = '<span style="font-weight:700;font-size:.88rem">' + esc(row[0]) + '동</span>' +
+        '<span class="num" style="font-size:.86rem;color:' +
+        (left > row[1] * 0.4 ? 'var(--warn)' : 'var(--tx-2)') + '">미접수 ' + left + '세대</span>';
+      m.appendChild(w);
+    });
+  },
+
+  feeCsv: function () {
+    var rows = [['동', '호', '위임장', '회비']];
+    C.dongs.forEach(function (row) {
+      var d = row[0];
+      var paidD = Object.keys(S.fees).filter(function (k) { return k.split('-')[0] === d; })
+        .map(function (k) { return k.split('-')[1]; });
+      S.recs.filter(function (r) { return r.dong === d; }).forEach(function (r) {
+        if (paidD.indexOf(r.ho) < 0) rows.push([d, r.ho, '제출', '미납']);
+      });
+    });
+    var csv = '\uFEFF' + rows.map(function (r) { return r.join(','); }).join('\n');
+    try {
+      var a = document.createElement('a');
+      a.href = URL.createObjectURL(new Blob([csv], { type:'text/csv' }));
+      a.download = C.apt + '_회비미납세대.csv';
+      a.click();
+      App.toast('미납 세대 ' + (rows.length - 1) + '건을 내려받았습니다');
+    } catch (e) { App.toast('이 환경에서는 내려받기가 제한됩니다'); }
+  },
+
+  csv: function () {
+    var rows = [['동', '호', '성명', '명의구분', '배우자', '접수일시']];
+    S.recs.forEach(function (r) {
+      rows.push([r.dong, r.ho, r.name, r.joint ? '공동명의' : '단독명의',
+        r.joint ? r.name2 : '', new Date(r.at).toLocaleString('ko-KR')]);
+    });
+    var csv = '﻿' + rows.map(function (r) { return r.join(','); }).join('\n');
+    try {
+      var a = document.createElement('a');
+      a.href = URL.createObjectURL(new Blob([csv], { type:'text/csv' }));
+      a.download = C.apt + '_위임장접수내역.csv';
+      a.click();
+      App.toast('CSV를 내려받았습니다');
+    } catch (e) { App.toast('이 환경에서는 내려받기가 제한됩니다'); }
+  }
+};
+
+
+/* ══════════════════════════════════════════════════════════════
+   게시판 — 네이버 카페를 대신하는 입주민 소통 공간
+   ══════════════════════════════════════════════════════════════ */
+var CATS = ['전체', '자유', '질문', '정보', '나눔'];
+
+var Board = {
+  cat: '전체', cur: null,
+
+  init: function () {
+    var segs = $('bdSegs'); segs.innerHTML = '';
+    CATS.forEach(function (c) {
+      var b = el('button', 'seg' + (c === Board.cat ? ' on' : ''), c);
+      b.onclick = function () { Board.cat = c; Board.init(); Board.paint(); };
+      segs.appendChild(b);
+    });
+    var sel = $('wrCat'); sel.innerHTML = '';
+    CATS.slice(1).forEach(function (c) {
+      var o = document.createElement('option'); o.value = c; o.textContent = c;
+      sel.appendChild(o);
+    });
+    this.paint();
+  },
+
+  filtered: function () {
+    var q = ($('bdQ').value || '').trim();
+    var self = this;
+    return S.posts.filter(function (p) {
+      if (self.cat !== '전체' && p.cat !== self.cat) return false;
+      if (q && (p.t + p.b).indexOf(q) < 0) return false;
+      return true;
+    });
+  },
+
+  paint: function () {
+    var box = $('bdRows'); box.innerHTML = '';
+    var list = this.filtered();
+    if (!list.length) {
+      box.innerHTML = '<div class="empty">해당하는 글이 없습니다.</div>';
+      return;
+    }
+    list.forEach(function (p) {
+      var fresh = Date.now() - p.at < 12 * 3600000;
+      var b = el('button', 'row');
+      b.innerHTML =
+        '<div class="rl">' +
+        '<div class="rt">' + esc(p.t) +
+          (fresh ? '<span class="bd-new">N</span>' : '') +
+          (p.c.length ? '<span class="bd-cnt num">[' + p.c.length + ']</span>' : '') + '</div>' +
+        '<div class="rd">' + esc(p.b.replace(/\n/g, ' ').slice(0, 52)) +
+          (p.b.length > 52 ? '…' : '') + '</div>' +
+        '<div class="rm"><span class="pill n">' + esc(p.cat) + '</span>' +
+        '<span>' + esc(p.n) + '</span><span>' + ago(p.at) + '</span>' +
+        '<span class="num">조회 ' + p.v.toLocaleString() + '</span></div></div>';
+      b.onclick = function () { Board.open(p.id); };
+      box.appendChild(b);
+    });
+  },
+
+  open: function (id) {
+    var p = S.posts.filter(function (x) { return x.id === id; })[0];
+    if (!p) return;
+    this.cur = id;
+    p.v++;
+    DB.save();
+
+    $('pvCat').textContent = p.cat;
+    $('pvTitle').textContent = p.t;
+    $('pvMeta').innerHTML = '<span>' + esc(p.n) + '</span><span>' +
+      new Date(p.at).toLocaleString('ko-KR', { month:'long', day:'numeric', hour:'2-digit', minute:'2-digit' }) + '</span>';
+    $('pvBody').textContent = p.b;
+    $('pvViews').textContent = '조회 ' + p.v.toLocaleString();
+    $('pvLikeN').textContent = p.like;
+    $('pvLike').classList.toggle('on', !!S.likes[id]);
+    this.paintCmts(p);
+
+    $('bdList').hidden = true; $('bdWrite').hidden = true; $('bdView').hidden = false;
+    window.scrollTo(0, 0);
+  },
+
+  paintCmts: function (p) {
+    $('pvCmtN').textContent = p.c.length;
+    var box = $('pvCmts'); box.innerHTML = '';
+    if (!p.c.length) { box.innerHTML = '<div class="empty">첫 댓글을 남겨보세요.</div>'; return; }
+    p.c.forEach(function (c) {
+      box.appendChild(el('div', 'row',
+        '<div class="tick">' + esc(c.n.charAt(0)) + '</div>' +
+        '<div class="rl"><div class="rm" style="margin:0"><b style="color:var(--tx);font-size:.83rem">' +
+        esc(c.n) + '</b><span>' + ago(c.at) + '</span></div>' +
+        '<div class="cmt-b">' + esc(c.b) + '</div></div>'));
+    });
+  },
+
+  like: function () {
+    var p = S.posts.filter(function (x) { return x.id === Board.cur; })[0];
+    if (!p) return;
+    if (S.likes[p.id]) { p.like--; delete S.likes[p.id]; }
+    else { p.like++; S.likes[p.id] = 1; App.toast('공감했습니다'); }
+    DB.save();
+    $('pvLikeN').textContent = p.like;
+    $('pvLike').classList.toggle('on', !!S.likes[p.id]);
+  },
+
+  comment: function () {
+    var t = $('pvNew').value.trim();
+    if (!t) return App.toast('댓글 내용을 입력해 주세요');
+    var p = S.posts.filter(function (x) { return x.id === Board.cur; })[0];
+    p.c.push({ n: $('pvAnon').checked ? '익명' : Board.me(), b: t, at: Date.now() });
+    DB.save();
+    $('pvNew').value = '';
+    this.paintCmts(p);
+    App.toast('댓글이 등록되었습니다');
+  },
+
+  me: function () {
+    var m = Deleg.mine();
+    return m ? m.dong + '동 주민' : '입주예정자';
+  },
+
+  write: function () {
+    $('wrTitle').value = ''; $('wrBody').value = '';
+    $('bdList').hidden = true; $('bdView').hidden = true; $('bdWrite').hidden = false;
+    window.scrollTo(0, 0);
+  },
+
+  save: function () {
+    var t = $('wrTitle').value.trim(), b = $('wrBody').value.trim();
+    if (!t) return App.toast('제목을 입력해 주세요');
+    if (!b) return App.toast('내용을 입력해 주세요');
+    S.posts.unshift({ id:'u' + Date.now(), cat:$('wrCat').value, t:t, b:b,
+                      n:Board.me(), at:Date.now(), v:1, like:0, c:[] });
+    DB.save();
+    this.back();
+    App.toast('글이 등록되었습니다');
+  },
+
+  back: function () {
+    $('bdView').hidden = true; $('bdWrite').hidden = true; $('bdList').hidden = false;
+    this.cur = null;
+    this.paint();
+    window.scrollTo(0, 0);
+  }
+};
+
+
+/* ══════════════════════════════════════════════════════════════
+   총회
+   ══════════════════════════════════════════════════════════════ */
+var Assembly = {
+  paint: function () {
+    var a = S.assembly;
+    var days = Math.ceil((new Date(a.date) - new Date()) / 86400000);
+    $('asD').textContent = days > 0 ? 'D-' + days : days === 0 ? 'D-DAY' : '종료';
+
+    $('asInfo').innerHTML =
+      '<dt>일시</dt><dd>' + esc(a.date) + ' ' + esc(a.time) + '</dd>' +
+      '<dt>장소</dt><dd>' + esc(a.place) + '</dd>' +
+      '<dt>소집공고</dt><dd>' + esc(a.noticedAt) + '</dd>' +
+      '<dt>재적</dt><dd class="num">' + TOTAL.toLocaleString() + '세대</dd>';
+
+    /* 법정 공고기한 — 총회 14일 전까지 공고 */
+    var gap = Math.round((new Date(a.date) - new Date(a.noticedAt)) / 86400000);
+    var ok = gap >= 14;
+    $('asLegal').innerHTML =
+      '공고일로부터 총회일까지 <b class="num">' + gap + '일</b> — ' +
+      (ok ? '<b>법정 공고기한(14일) 충족</b>'
+          : '<b class="no">법정 공고기한(14일) 미달 — 의결 무효 위험</b>') +
+      '<br>규약에 따라 총회는 개최 14일 전까지 공고하여야 합니다.';
+
+    /* 참석 · 위임 집계 */
+    var deleg = S.recs.length;
+    var att = Object.keys(a.attend).filter(function (k) { return a.attend[k] === 'y'; }).length + 132;
+    var rest = Math.max(0, TOTAL - deleg - att);
+    var pc = function (n) { return Math.round(n / TOTAL * 100); };
+    $('asBar').innerHTML =
+      '<i class="b" style="width:' + pc(att) + '%">' + (pc(att) > 7 ? pc(att) + '%' : '') + '</i>' +
+      '<i class="a" style="width:' + pc(deleg) + '%">' + (pc(deleg) > 7 ? pc(deleg) + '%' : '') + '</i>' +
+      '<i class="c" style="width:' + pc(rest) + '%"></i>';
+    $('asLeg').innerHTML =
+      '<span><s style="background:var(--ok)"></s>직접 참석 ' + att.toLocaleString() + '세대</span>' +
+      '<span><s style="background:var(--acc)"></s>위임 ' + deleg.toLocaleString() + '세대</span>' +
+      '<span><s style="background:var(--tx-3)"></s>미정 ' + rest.toLocaleString() + '세대</span>';
+    var sum = att + deleg;
+    $('asFoot').innerHTML =
+      '성립 인원 <b class="num">' + sum.toLocaleString() + '세대 (' + pc(sum) + '%)</b> · ' +
+      (sum >= TOTAL / 2 ? '의결정족수 충족' : '의결정족수 미달') +
+      '<br>직접 참석과 위임을 합산해 산정합니다.';
+
+    /* 내 참석 의사 */
+    var box = $('asPick'); box.innerHTML = '';
+    [['y', '✅', '직접 참석합니다', '총회 당일 현장에 갑니다'],
+     ['d', '✍️', '위임하겠습니다', '협의회에 의결권을 위임합니다'],
+     ['n', '❌', '불참합니다', '참석도 위임도 하지 않습니다']].forEach(function (o) {
+      var b = el('button', 'act' + (a.myPick === o[0] ? ' done' : ''));
+      b.innerHTML = '<div class="ic">' + o[1] + '</div><div class="tx"><div class="tt">' + o[2] +
+        (a.myPick === o[0] ? '<span class="pill g">선택함</span>' : '') +
+        '</div><div class="ds">' + o[3] + '</div></div><div class="ar">›</div>';
+      b.onclick = function () { Assembly.pick(o[0]); };
+      box.appendChild(b);
+    });
+
+    /* 안건 */
+    var ag = $('asAgenda'); ag.innerHTML = '';
+    a.agenda.forEach(function (x, i) {
+      ag.appendChild(el('div', 'row',
+        '<div class="tick num">' + (i + 1) + '</div>' +
+        '<div class="rl"><div class="rt">' + esc(x.t) + '</div>' +
+        '<div class="rm"><span class="pill n">의결요건 ' + esc(x.s) + '</span></div></div>'));
+    });
+  },
+
+  pick: function (v) {
+    var m = Deleg.mine();
+    S.assembly.myPick = v;
+    if (m) S.assembly.attend[m.dong + '-' + m.ho] = v;
+    DB.save();
+    this.paint();
+    App.toast(v === 'y' ? '직접 참석으로 등록되었습니다'
+            : v === 'd' ? '위임으로 등록되었습니다' : '불참으로 등록되었습니다');
+    if (v === 'd' && !m) setTimeout(function () { App.go('delegate'); }, 700);
+  },
+
+  doc: function (kind) {
+    var a = S.assembly, deleg = S.recs.length;
+    var att = Object.keys(a.attend).filter(function (k) { return a.attend[k] === 'y'; }).length + 132;
+    var body;
+    if (kind === '소집공고') {
+      body = '<table>' +
+        '<tr><th>총회 명칭</th><td>' + esc(a.no) + '</td></tr>' +
+        '<tr><th>일시</th><td>' + esc(a.date) + ' ' + esc(a.time) + '</td></tr>' +
+        '<tr><th>장소</th><td>' + esc(a.place) + '</td></tr>' +
+        '<tr><th>공고일</th><td>' + esc(a.noticedAt) + '</td></tr></table>' +
+        '<div class="stmt"><b>부의 안건</b><br>' +
+        a.agenda.map(function (x, i) { return (i + 1) + '. ' + esc(x.t); }).join('<br>') +
+        '</div><div class="stmt">위 안건을 의결하기 위하여 ' + esc(C.org) +
+        ' 규약에 따라 총회를 소집하오니 참석하여 주시기 바랍니다. ' +
+        '부득이 참석이 어려운 세대는 전자 위임장을 제출하여 주시기 바랍니다.</div>';
+    } else if (kind === '의결서') {
+      body = '<table>' +
+        '<tr><th>총회 명칭</th><td>' + esc(a.no) + '</td></tr>' +
+        '<tr><th>개최 일시</th><td>' + esc(a.date) + ' ' + esc(a.time) + '</td></tr>' +
+        '<tr><th>재적 세대</th><td class="num">' + TOTAL.toLocaleString() + '세대</td></tr>' +
+        '<tr><th>직접 참석</th><td class="num">' + att.toLocaleString() + '세대</td></tr>' +
+        '<tr><th>위임 참석</th><td class="num">' + deleg.toLocaleString() + '세대</td></tr>' +
+        '<tr><th>성립 인원</th><td class="num big">' + (att + deleg).toLocaleString() + '세대 (' +
+        Math.round((att + deleg) / TOTAL * 100) + '%)</td></tr></table>' +
+        '<div class="stmt">위와 같이 재적 세대 과반수의 참석으로 총회가 적법하게 성립하였으며, ' +
+        '아래 안건을 의결하였음을 확인합니다.<br><br>' +
+        a.agenda.map(function (x, i) { return (i + 1) + '. ' + esc(x.t) + ' — <b>가결</b>'; }).join('<br>') +
+        '</div>';
+    } else {
+      body = '<table>' +
+        '<tr><th>일시</th><td>' + esc(a.date) + ' ' + esc(a.time) + '</td></tr>' +
+        '<tr><th>장소</th><td>' + esc(a.place) + '</td></tr>' +
+        '<tr><th>참석</th><td class="num">직접 ' + att.toLocaleString() +
+        '세대 · 위임 ' + deleg.toLocaleString() + '세대</td></tr></table>' +
+        '<div class="stmt"><b>회의 경과</b><br>' +
+        '1. 개회 선언 및 성원 보고<br>2. 의장 선출<br>' +
+        a.agenda.map(function (x, i) { return (i + 3) + '. ' + esc(x.t) + ' 심의 및 의결'; }).join('<br>') +
+        '<br>' + (a.agenda.length + 3) + '. 폐회</div>';
+    }
+    Cert.render(kind, esc(a.no) + ' ' + kind, body);
+  }
+};
+
+/* ══════════════════════════════════════════════════════════════
+   임원 선거
+   ══════════════════════════════════════════════════════════════ */
+var Election = {
+  paint: function () {
+    var e = S.election;
+    $('elTitle').textContent = e.pos + ' 선거';
+    $('elDesc').textContent = '마감 ' + e.end + ' · 1세대 1표 · 위임장을 제출한 세대만 투표할 수 있습니다.';
+    var st = $('elState');
+    st.textContent = e.myVote === null ? '미투표' : '투표 완료';
+    st.className = 'pill ' + (e.myVote === null ? 'b' : 'g');
+
+    var me = Deleg.mine();
+    $('elGuard').innerHTML = me
+      ? '<b>' + esc(me.dong) + '동 ' + esc(me.ho) + '호</b>로 세대 인증되었습니다. 1표를 행사하실 수 있습니다.' +
+        (e.myVote !== null ? '<br>이미 투표를 마치셨습니다. 마감 전까지 변경할 수 있습니다.' : '')
+      : '<b>아직 세대 인증이 되지 않았습니다.</b><br>위임장을 제출한 세대만 투표할 수 있습니다. ' +
+        '카페 댓글 투표와 달리 1세대 1표가 보장되며 중복·조작이 불가능합니다.' +
+        '<button class="btn sm" style="margin-top:12px" onclick="App.go(\'delegate\')">위임장 제출하기</button>';
+
+    var tot = e.cands.reduce(function (a2, c) { return a2 + c.v; }, 0);
+    var box = $('elCands'); box.innerHTML = '';
+    e.cands.forEach(function (c) {
+      var p = tot ? Math.round(c.v / tot * 100) : 0;
+      var w = el('div', 'cand');
+      w.innerHTML =
+        '<div class="cand-h"><div class="cand-av">' + esc(c.n.charAt(0)) + '</div>' +
+        '<div><div class="cand-n">' + esc(c.n) +
+        (e.myVote === c.id ? '<span class="pill g" style="margin-left:7px">내 선택</span>' : '') +
+        '</div><div class="cand-d">' + esc(c.d) + ' · ' + esc(c.j) + '</div></div></div>' +
+        '<div class="cand-p">' + esc(c.p) + '</div>' +
+        '<div class="cand-f"><div class="bar"><i style="width:' + p + '%"></i></div>' +
+        '<span class="cand-v num">' + p + '% · ' + c.v + '표</span></div>';
+      w.querySelector('.cand-h').style.cursor = 'pointer';
+      w.onclick = function () { Election.vote(c.id); };
+      box.appendChild(w);
+    });
+  },
+
+  vote: function (id) {
+    if (!Deleg.mine()) return App.toast('위임장을 제출한 세대만 투표할 수 있습니다');
+    var e = S.election;
+    if (e.myVote === id) return App.toast('이미 이 후보에게 투표하셨습니다');
+    if (e.myVote) { e.cands.filter(function (c) { return c.id === e.myVote; })[0].v--; }
+    e.cands.filter(function (c) { return c.id === id; })[0].v++;
+    e.myVote = id;
+    DB.save();
+    this.paint();
+    App.toast('투표가 완료되었습니다');
+  }
+};
+
+/* ══════════════════════════════════════════════════════════════
+   계약 분석 · 법률 상담
+   ══════════════════════════════════════════════════════════════ */
+var Legal = {
+  paint: function () {
+    var n = { high:0, mid:0, low:0 };
+    S.risks.forEach(function (r) { n[r.lv]++; });
+    $('lgSum').innerHTML =
+      '<div class="r1"><b class="num">' + n.high + '</b><span>즉시 대응 필요</span></div>' +
+      '<div class="r2"><b class="num">' + n.mid + '</b><span>협의 권고</span></div>' +
+      '<div class="r3"><b class="num">' + n.low + '</b><span>참고</span></div>';
+
+    var box = $('lgList'); box.innerHTML = '';
+    S.risks.forEach(function (r) {
+      var lb = r.lv === 'high' ? '위험' : r.lv === 'mid' ? '주의' : '참고';
+      var cl = r.lv === 'high' ? 'b' : r.lv === 'mid' ? 'o' : 'n';
+      box.appendChild(el('div', 'risk ' + r.lv,
+        '<div class="risk-h"><div class="risk-c">' + esc(r.c) +
+        ' <span class="pill ' + cl + '" style="margin-left:5px">' + lb + '</span></div>' +
+        '<div class="risk-t">' + esc(r.t) + '</div></div>' +
+        '<div class="risk-b">' + esc(r.b) +
+        '<span class="jl"><b>법무법인 제이엘 의견</b><br>' + esc(r.jl) + '</span></div>'));
+    });
+    this.paintMine();
+  },
+
+  paintMine: function () {
+    var wrap = $('lgMineWrap');
+    if (!S.asks.length) { wrap.hidden = true; return; }
+    wrap.hidden = false;
+    var box = $('lgMine'); box.innerHTML = '';
+    S.asks.forEach(function (a) {
+      box.appendChild(el('div', 'row',
+        '<div class="tick">⚖️</div>' +
+        '<div class="rl"><div class="rt" style="font-size:.9rem">' + esc(a.cat) + '</div>' +
+        '<div class="rd">' + esc(a.q.slice(0, 60)) + (a.q.length > 60 ? '…' : '') + '</div>' +
+        '<div class="rm"><span class="pill ' + (a.st === '접수' ? 'o' : 'g') + '">' + esc(a.st) + '</span>' +
+        '<span>' + ago(a.at) + '</span></div></div>'));
+    });
+  },
+
+  ask: function () {
+    var q = $('lgQ').value.trim();
+    if (!q) return App.toast('질문 내용을 입력해 주세요');
+    if ($('lgTel').value.replace(/\D/g, '').length < 10) return App.toast('연락처를 확인해 주세요');
+    S.asks.unshift({ cat:$('lgCat').value, q:q, st:'접수', at:Date.now() });
+    DB.save();
+    $('lgQ').value = '';
+    this.paintMine();
+    App.toast('상담이 접수되었습니다. 영업일 기준 2일 내 회신됩니다');
+    window.scrollTo(0, document.body.scrollHeight);
+  }
+};
+
+/* ══════════════════════════════════════════════════════════════
+   자료실
+   ══════════════════════════════════════════════════════════════ */
+var Docs = {
+  cat: '전체',
+  init: function () {
+    var cats = ['전체'].concat(S.docs.map(function (d) { return d.cat; })
+      .filter(function (v, i, a) { return a.indexOf(v) === i; }));
+    var segs = $('dcSegs'); segs.innerHTML = '';
+    cats.forEach(function (c) {
+      var b = el('button', 'seg' + (c === Docs.cat ? ' on' : ''), c);
+      b.onclick = function () { Docs.cat = c; Docs.init(); };
+      segs.appendChild(b);
+    });
+    var box = $('dcRows'); box.innerHTML = '';
+    S.docs.filter(function (d) { return Docs.cat === '전체' || d.cat === Docs.cat; })
+      .forEach(function (d) {
+        var b = el('button', 'row');
+        b.innerHTML =
+          '<div class="tick">' + (d.k === 'PDF' ? '📕' : d.k === 'HWP' ? '📘' : '🗂️') + '</div>' +
+          '<div class="rl"><div class="rt" style="font-size:.92rem">' + esc(d.t) + '</div>' +
+          '<div class="rm"><span class="pill n">' + esc(d.cat) + '</span><span>' + esc(d.d) +
+          '</span><span>' + esc(d.k) + ' · ' + esc(d.sz) + '</span></div></div>' +
+          '<div class="ar">⤓</div>';
+        b.onclick = function () { App.toast('데모 화면이므로 실제 파일은 없습니다'); };
+        box.appendChild(b);
+      });
+  }
+};
+
+/* ══════════════════════════════════════════════════════════════
+   명의변경 신고
+   ══════════════════════════════════════════════════════════════ */
+var Transfer = {
+  init: function () {
+    var sel = $('tfDong'); sel.innerHTML = '<option value="">선택</option>';
+    C.dongs.forEach(function (r) {
+      var o = document.createElement('option');
+      o.value = r[0]; o.textContent = r[0] + '동';
+      sel.appendChild(o);
+    });
+  },
+  send: function () {
+    var d = $('tfDong').value, h = $('tfHo').value.trim();
+    if (!d) return App.toast('동을 선택해 주세요');
+    if (!/^\d{3,4}$/.test(h)) return App.toast('호수를 숫자로 입력해 주세요');
+    if (!$('tfName').value.trim()) return App.toast('새 소유자 성명을 입력해 주세요');
+    var had = S.recs.some(function (r) { return r.dong === d && r.ho === h; });
+    S.transfers.unshift({ dong:d, ho:h, kind:$('tfKind').value,
+      name:$('tfName').value.trim().charAt(0) + '○○',
+      date:$('tfDate').value || '-', voided:had, at:Date.now() });
+    if (had) S.recs = S.recs.filter(function (r) { return !(r.dong === d && r.ho === h); });
+    DB.save();
+    App.paintHome();
+    App.sheet('신고 접수 완료',
+      '<div style="font-size:.88rem;color:var(--tx-2);line-height:1.75">' +
+      esc(d) + '동 ' + esc(h) + '호 명의변경이 접수되었습니다.<br><br>' +
+      (had
+        ? '<b style="color:var(--warn)">기존 위임장이 효력을 잃어 자동 해지되었습니다.</b><br>' +
+          '새 소유자께서 위임장을 다시 제출하셔야 총회 의결권이 인정됩니다.'
+        : '해당 세대는 위임장 접수 이력이 없어 별도 해지 처리는 없습니다.') +
+      '</div>');
+    $('tfHo').value = ''; $('tfName').value = '';
+  }
+};
+
+/* ══════════════════════════════════════════════════════════════
+   회비
+   ══════════════════════════════════════════════════════════════ */
+var FEE_PER = 20000;
+
+var Fee = {
+  init: function () {
+    var sel = $('feDong'); sel.innerHTML = '<option value="">선택</option>';
+    C.dongs.forEach(function (r) {
+      var o = document.createElement('option');
+      o.value = r[0]; o.textContent = r[0] + '동';
+      sel.appendChild(o);
+    });
+  },
+
+  paid: function (d, h) { return !!S.fees[d + '-' + h]; },
+
+  paint: function () {
+    var keys = Object.keys(S.fees);
+    var n = keys.length, pct = Math.round(n / TOTAL * 100);
+    $('feeRate').textContent = pct + '%';
+    setTimeout(function () { $('feeBar').style.width = pct + '%'; }, 250);
+    $('feeSum').innerHTML =
+      '<div><span>납부</span><b class="num" style="color:var(--ok)">' + n.toLocaleString() + '세대</b></div>' +
+      '<div><span>미납</span><b class="num" style="color:var(--warn)">' + (TOTAL - n).toLocaleString() + '세대</b></div>' +
+      '<div><span>누적 회비</span><b class="num">' + (n * FEE_PER).toLocaleString() + '원</b></div>';
+    $('feeNote').innerHTML =
+      '세대당 <b class="num">' + FEE_PER.toLocaleString() + '원</b> · 재적 ' + TOTAL.toLocaleString() + '세대 기준<br>' +
+      '미납 세대는 임원 화면에서 명단으로 내려받아 안내할 수 있습니다.';
+
+    var heat = $('feeHeat'); heat.innerHTML = '';
+    C.dongs.forEach(function (row) {
+      var d = row[0], tot = row[1];
+      var k = keys.filter(function (x) { return x.split('-')[0] === d; }).length;
+      var p = Math.round(k / tot * 100);
+      var c = el('div', 'hcell' + (p >= 70 ? ' hi' : p < 45 ? ' lo' : ''),
+        '<div class="fill" style="height:0"></div><div class="d">' + esc(d) + '동</div>' +
+        '<div class="p num">' + p + '%</div><div class="n num">' + k + '/' + tot + '</div>');
+      heat.appendChild(c);
+      setTimeout(function () { c.querySelector('.fill').style.height = p + '%'; }, 220);
+    });
+
+    var b = $('budBox'); b.innerHTML = '';
+    S.budget.forEach(function (x) {
+      b.appendChild(el('div', 'row',
+        '<div class="tick">' + (x.type === 'in' ? '↓' : '↑') + '</div>' +
+        '<div class="rl"><div class="rt" style="font-size:.9rem">' + esc(x.t) +
+        (x.rc ? '<span class="rcpt">영수증</span>' : '') +
+        (x.st === '대기' ? '<span class="pill o" style="margin-left:6px">승인대기</span>' : '') +
+        '</div><div class="rm"><span>' + esc(x.d) + '</span></div></div>' +
+        '<div class="rr num" style="font-weight:800;font-size:.9rem;color:' +
+        (x.type === 'in' ? 'var(--ok)' : 'var(--tx)') + '">' + won(x.a) + '</div>'));
+    });
+  },
+
+  check: function () {
+    var d = $('feDong').value, h = $('feHo').value.trim();
+    if (!d) return App.toast('동을 선택해 주세요');
+    if (!/^\d{3,4}$/.test(h)) return App.toast('호수를 숫자로 입력해 주세요');
+    var f = S.fees[d + '-' + h];
+    var box = $('feResult');
+    box.hidden = false;
+    box.innerHTML = f
+      ? '<div class="ck yes"><div class="ci">✓</div><div class="ct">회비 납부 완료</div>' +
+        '<div class="cs">' + esc(d) + '동 ' + esc(h) + '호 · ' + f.amt.toLocaleString() + '원<br>' +
+        new Date(f.at).toLocaleDateString('ko-KR') + ' 입금 확인</div></div>'
+      : '<div class="ck no"><div class="ci">!</div><div class="ct">미납 세대입니다</div>' +
+        '<div class="cs">' + esc(d) + '동 ' + esc(h) + '호 · 회비 ' + FEE_PER.toLocaleString() + '원<br>' +
+        '○○은행 123-456-789012 ' + esc(C.org) + '</div></div>';
+  }
+};
+
+/* ══════════════════════════════════════════════════════════════
+   대표성 증명서 · 문서 출력
+   ══════════════════════════════════════════════════════════════ */
+var Cert = {
+  open: function () {
+    var done = S.recs.length, pct = (done / TOTAL * 100).toFixed(1);
+    var joint = S.recs.filter(function (r) { return r.joint; }).length;
+    var dates = S.recs.map(function (r) { return r.at; });
+    var from = new Date(Math.min.apply(null, dates)).toLocaleDateString('ko-KR');
+    var to   = new Date(Math.max.apply(null, dates)).toLocaleDateString('ko-KR');
+
+    var body =
+      '<table>' +
+      '<tr><th>단지명</th><td>' + esc(C.apt) + '</td></tr>' +
+      '<tr><th>소재지</th><td>' + esc(C.address) + '</td></tr>' +
+      '<tr><th>단체명</th><td>' + esc(C.org) + '</td></tr>' +
+      '<tr><th>재적 세대수</th><td class="num">' + TOTAL.toLocaleString() + ' 세대</td></tr>' +
+      '<tr><th>위임장 접수 세대</th><td class="num big">' + done.toLocaleString() + ' 세대 (' + pct + '%)</td></tr>' +
+      '<tr><th>공동명의 접수</th><td class="num">' + joint.toLocaleString() + ' 세대</td></tr>' +
+      '<tr><th>접수 기간</th><td>' + from + ' ~ ' + to + '</td></tr>' +
+      '<tr><th>접수 방식</th><td>전자 위임장 (자필 전자서명)</td></tr>' +
+      '</table>' +
+      '<div class="stmt">위 단체는 ' + esc(C.apt) + ' 분양계약자 ' + TOTAL.toLocaleString() +
+      '세대 중 <b>' + done.toLocaleString() + '세대(' + pct + '%)</b>로부터 ' +
+      '입주예정자협의회의 구성·운영 및 시공사·시행사에 대한 협의 권한을 적법하게 위임받았음을 확인합니다.<br><br>' +
+      '각 위임장은 「전자문서 및 전자거래 기본법」 제4조에 따라 서면 위임장과 동일한 효력을 가지며, ' +
+      '위임인의 자필 전자서명 원본 ' + done.toLocaleString() + '건이 보관되어 있습니다.</div>';
+
+    this.render('위임 현황 확인서', '위임 현황 확인서', body, true);
+  },
+
+  render: function (title, head, body, sealed) {
+    var d = new Date();
+    $('certPage').innerHTML =
+      '<h1>' + esc(head) + '</h1>' +
+      '<div class="sub">' + esc(C.org) + '</div>' +
+      body +
+      '<div class="date">' + d.getFullYear() + '년 ' + (d.getMonth() + 1) + '월 ' + d.getDate() + '일</div>' +
+      '<div class="sign">' + esc(C.org) + '<br><b>회 장   김 ○ ○   (인)</b></div>' +
+      (sealed
+        ? '<div class="sign" style="margin-top:8mm">법률자문<br><b>법무법인 제이엘   (인)</b></div>'
+        : '') +
+      '<div class="foot">본 문서는 ' + esc(C.org) +
+      ' 전자 위임장 시스템의 기록을 근거로 자동 작성되었습니다.' +
+      (C.demo ? '<br>※ 데모 화면이므로 기재된 수치는 예시입니다.' : '') +
+      '<br>발급일시 ' + d.toLocaleString('ko-KR') + '</div>';
+    $('certWrap').hidden = false;
+    document.body.classList.add('printing');
+    window.scrollTo(0, 0);
+  },
+
+  close: function () {
+    $('certWrap').hidden = true;
+    document.body.classList.remove('printing');
+  }
+};
+
+
+/* ══════════════════════════════════════════════════════════════
+   입주민 한마디 — 짧은 단문 피드
+   ══════════════════════════════════════════════════════════════ */
+var STAGS = ['궁금', '정보', '응원', '건의'];
+
+var Say = {
+  tag: '궁금', filter: '전체',
+
+  init: function () {
+    var box = $('sayTags'); box.innerHTML = '';
+    STAGS.forEach(function (t) {
+      var b = el('button', 'stag' + (t === Say.tag ? ' on' : ''), '#' + t);
+      b.onclick = function () { Say.tag = t; Say.init(); };
+      box.appendChild(b);
+    });
+    var f = $('sayFilter'); f.innerHTML = '';
+    ['전체'].concat(STAGS).forEach(function (t) {
+      var b = el('button', 'seg' + (t === Say.filter ? ' on' : ''), t === '전체' ? '전체' : '#' + t);
+      b.onclick = function () { Say.filter = t; Say.init(); };
+      f.appendChild(b);
+    });
+    var m = Deleg.mine();
+    $('sayMeAv').textContent = m ? m.dong : '?';
+    this.paint();
+  },
+
+  count: function () {
+    var n = $('sayText').value.length;
+    var e = $('sayLen');
+    e.textContent = n + ' / 150';
+    e.classList.toggle('over', n > 140);
+  },
+
+  me: function () {
+    var m = Deleg.mine();
+    return m ? m.dong + '동 주민' : '입주예정자';
+  },
+
+  paint: function () {
+    var list = S.says.filter(function (x) {
+      return Say.filter === '전체' || x.tag === Say.filter;
+    });
+    $('sayCnt').textContent = S.says.length + '개';
+    var box = $('sayFeed'); box.innerHTML = '';
+    if (!list.length) { box.innerHTML = '<div class="empty">아직 한마디가 없습니다.</div>'; return; }
+    list.forEach(function (x) { box.appendChild(Say.card(x)); });
+  },
+
+  card: function (x) {
+    var liked = !!S.sayLikes[x.id];
+    var w = el('div', 'saycard');
+    var reps = x.r.map(function (r) {
+      return '<div class="sc-re-i"><div class="sc-re-av">' +
+        esc(r.n === '익명' ? '익' : r.n.charAt(0)) + '</div>' +
+        '<div class="sc-re-b"><i>' + esc(r.n) + '</i>' + esc(r.b) +
+        '<s>' + ago(r.at) + '</s></div></div>';
+    }).join('');
+
+    w.innerHTML =
+      '<div class="sc-h">' +
+      '<div class="say-av" style="width:34px;height:34px;border-radius:11px;font-size:.74rem">' +
+      esc(x.anon ? '익' : x.n.slice(0, 3)) + '</div>' +
+      '<div><div class="sc-n">' + esc(x.n) + '</div>' +
+      '<div class="sc-t">' + ago(x.at) + '</div></div>' +
+      '<span class="sc-tag">#' + esc(x.tag) + '</span></div>' +
+      '<p class="sc-b">' + esc(x.b) + '</p>' +
+      '<div class="sc-f">' +
+      '<button class="lk' + (liked ? ' on' : '') + '">' + (liked ? '❤️' : '🤍') +
+      ' <span class="num">' + x.l + '</span></button>' +
+      '<button class="rp">💬 <span class="num">' + x.r.length + '</span></button></div>' +
+      (reps ? '<div class="sc-re">' + reps + '</div>' : '') +
+      '<div class="sc-rein" hidden>' +
+      '<input placeholder="답글 달기"><button class="btn sm">등록</button></div>';
+
+    w.querySelector('.lk').onclick = function () { Say.like(x.id); };
+    var rein = w.querySelector('.sc-rein');
+    w.querySelector('.rp').onclick = function () {
+      rein.hidden = !rein.hidden;
+      if (!rein.hidden) rein.querySelector('input').focus();
+    };
+    var inp = rein.querySelector('input');
+    var go = function () {
+      var t = inp.value.trim();
+      if (!t) return;
+      x.r.push({ n: Say.me(), b: t, at: Date.now() });
+      DB.save(); Say.paint(); App.toast('답글을 남겼습니다');
+    };
+    rein.querySelector('button').onclick = go;
+    inp.onkeydown = function (e) { if (e.key === 'Enter') go(); };
+    return w;
+  },
+
+  like: function (id) {
+    var x = S.says.filter(function (s2) { return s2.id === id; })[0];
+    if (S.sayLikes[id]) { x.l--; delete S.sayLikes[id]; }
+    else { x.l++; S.sayLikes[id] = 1; }
+    DB.save();
+    this.paint();
+  },
+
+  post: function () {
+    var t = $('sayText').value.trim();
+    if (!t) return App.toast('한마디를 입력해 주세요');
+    if (t.length > 150) return App.toast('150자 이내로 적어주세요');
+    var anon = $('sayAnon').checked;
+    S.says.unshift({ id:'u' + Date.now(), tag:Say.tag, n:anon ? '익명' : Say.me(),
+      anon:anon, b:t, at:Date.now(), l:0, r:[] });
+    DB.save();
+    $('sayText').value = '';
+    this.count();
+    this.filter = '전체';
+    this.init();
+    App.toast('한마디가 등록되었습니다');
+    window.scrollTo(0, 0);
+  }
+};
+
+/* ══════════════════════════════════════════════════════════════
+   카카오 알림톡 (데모 — 실제 발송 없음)
+   ══════════════════════════════════════════════════════════════ */
+var AT_PRICE = 9;
+
+var Notify = {
+  targets: function () {
+    var feePaid = Object.keys(S.fees);
+    var unpaid = S.recs.filter(function (r) { return feePaid.indexOf(r.dong + '-' + r.ho) < 0; }).length;
+    return [
+      { k:'all',   t:'전체 접수 세대',        n:S.recs.length },
+      { k:'nodel', t:'위임장 미제출 세대',    n:Math.max(0, TOTAL - S.recs.length) },
+      { k:'fee',   t:'회비 미납 세대',        n:unpaid },
+      { k:'as',    t:'총회 참석 미응답 세대',  n:Math.max(0, S.recs.length - 132) }
+    ];
+  },
+
+  tpls: function () {
+    var a = S.assembly;
+    var days = Math.max(0, Math.ceil((new Date(a.date) - new Date()) / 86400000));
+    return [
+      { k:'as', t:'총회 개최 안내',
+        m:'[' + C.org + ']\n\n' + a.no + ' 개최를 안내드립니다.\n\n' +
+          '▪ 일시 : ' + a.date + ' ' + a.time + '\n' +
+          '▪ 장소 : ' + a.place + '\n' +
+          '▪ 남은 기간 : D-' + days + '\n\n' +
+          '참석이 어려우신 세대는 전자 위임장을 제출해 주시기 바랍니다.',
+        b:'참석 여부 등록하기' },
+      { k:'del', t:'위임장 제출 독려',
+        m:'[' + C.org + ']\n\n' + C.apt + ' 전자 위임장 접수가 진행 중입니다.\n\n' +
+          '현재 ' + S.recs.length.toLocaleString() + '세대가 참여하셨습니다.\n' +
+          '동·호수 선택 후 서명까지 약 1분이면 완료됩니다.\n\n' +
+          '앱 설치 없이 아래 링크로 바로 접수하실 수 있습니다.',
+        b:'위임장 제출하기' },
+      { k:'fee', t:'회비 납부 안내',
+        m:'[' + C.org + ']\n\n협의회 운영 회비 납부를 안내드립니다.\n\n' +
+          '▪ 금액 : 세대당 20,000원\n' +
+          '▪ 계좌 : ○○은행 123-456-789012\n' +
+          '▪ 예금주 : ' + C.org + '\n\n' +
+          '납부하신 내역은 플랫폼에서 전 세대가 확인하실 수 있습니다.',
+        b:'우리 집 납부 확인' },
+      { k:'no', t:'새 공지 등록 알림',
+        m:'[' + C.org + ']\n\n새로운 공지사항이 등록되었습니다.\n\n' +
+          '▪ ' + S.notices[0].t + '\n▪ 등록일 : ' + S.notices[0].d + '\n\n' +
+          '자세한 내용은 플랫폼에서 확인해 주세요.',
+        b:'공지 확인하기' }
+    ];
+  },
+
+  init: function () {
+    var ts = $('atTarget'); ts.innerHTML = '';
+    this.targets().forEach(function (x, i) {
+      var o = document.createElement('option');
+      o.value = i; o.textContent = x.t + ' (' + x.n.toLocaleString() + '명)';
+      ts.appendChild(o);
+    });
+    var tp = $('atTpl'); tp.innerHTML = '';
+    this.tpls().forEach(function (x, i) {
+      var o = document.createElement('option');
+      o.value = i; o.textContent = x.t;
+      tp.appendChild(o);
+    });
+    $('ktProf').textContent = C.emblem;
+    $('ktName').textContent = C.org;
+    this.preview();
+  },
+
+  preview: function () {
+    var t = this.targets()[+$('atTarget').value || 0];
+    var p = this.tpls()[+$('atTpl').value || 0];
+    $('ktMsg').textContent = p.m;
+    $('ktBtn').textContent = p.b;
+    $('atN').textContent = t.n.toLocaleString() + '명';
+    $('atCost').textContent = (t.n * AT_PRICE).toLocaleString() + '원';
+  },
+
+  send: function () {
+    var t = this.targets()[+$('atTarget').value || 0];
+    var p = this.tpls()[+$('atTpl').value || 0];
+    if (!t.n) return App.toast('발송 대상이 없습니다');
+
+    var btn = $('atGo'), hint = $('atHint');
+    btn.disabled = true;
+    var i = 0;
+    var timer = setInterval(function () {
+      i += Math.ceil(t.n / 12);
+      if (i >= t.n) i = t.n;
+      btn.textContent = '발송 중… ' + i.toLocaleString() + ' / ' + t.n.toLocaleString();
+      hint.textContent = '카카오 비즈메시지 서버로 전송하고 있습니다.';
+      if (i >= t.n) {
+        clearInterval(timer);
+        var fail = Math.round(t.n * 0.018);
+        S.atLog.unshift({ t:p.t, target:t.t, n:t.n, ok:t.n - fail, fail:fail,
+          cost:(t.n - fail) * AT_PRICE, at:Date.now() });
+        DB.save();
+        btn.disabled = false;
+        btn.textContent = '알림톡 발송';
+        hint.textContent = '데모 화면이므로 실제로 발송되지 않습니다.';
+        Notify.log();
+        App.sheet('발송 완료',
+          '<div style="font-size:.88rem;color:var(--tx-2);line-height:1.8">' +
+          '<b style="color:var(--tx)">' + esc(p.t) + '</b> · ' + esc(t.t) + '<br><br>' +
+          '성공 <b style="color:var(--ok)">' + (t.n - fail).toLocaleString() + '건</b> · ' +
+          '실패 <b style="color:var(--warn)">' + fail.toLocaleString() + '건</b><br>' +
+          '(실패 = 카카오톡 미사용 · 번호 변경 세대 — 문자로 자동 대체 발송)<br><br>' +
+          '집행 비용 <b style="color:var(--tx)">' + ((t.n - fail) * AT_PRICE).toLocaleString() + '원</b><br><br>' +
+          '<span style="color:var(--tx-3);font-size:.82rem">※ 데모 화면입니다. 실제 발송은 카카오 비즈니스 채널 개설 후 가능합니다.</span></div>');
+      }
+    }, 170);
+  },
+
+  log: function () {
+    var w = $('atLogWrap');
+    if (!S.atLog.length) { w.hidden = true; return; }
+    w.hidden = false;
+    var box = $('atLog'); box.innerHTML = '';
+    S.atLog.forEach(function (x) {
+      box.appendChild(el('div', 'row',
+        '<div class="tick">💬</div><div class="rl">' +
+        '<div class="rt" style="font-size:.9rem">' + esc(x.t) + '</div>' +
+        '<div class="rm"><span>' + esc(x.target) + '</span>' +
+        '<span class="num">성공 ' + x.ok.toLocaleString() + '</span>' +
+        '<span class="num">실패 ' + x.fail.toLocaleString() + '</span>' +
+        '<span>' + ago(x.at) + '</span></div></div>' +
+        '<div class="rr num" style="font-weight:800;color:var(--tx)">' + x.cost.toLocaleString() + '원</div>'));
+    });
+  }
+};
+
+/* ══════════════════════════════════════════════════════════════
+   내 접수 확인
+   ══════════════════════════════════════════════════════════════ */
+var Check = {
+  init: function () {
+    var sel = $('ckDong');
+    sel.innerHTML = '<option value="">선택</option>';
+    C.dongs.forEach(function (r) {
+      var o = document.createElement('option');
+      o.value = r[0]; o.textContent = r[0] + '동';
+      sel.appendChild(o);
+    });
+  },
+
+  run: function () {
+    var d = $('ckDong').value, h = $('ckHo').value.trim();
+    if (!d) return App.toast('동을 선택해 주세요');
+    if (!/^\d{3,4}$/.test(h)) return App.toast('호수를 숫자로 입력해 주세요');
+    if (!/^\d{6}$/.test($('ckBirth').value.replace(/\D/g, '')))
+      return App.toast('생년월일 6자리를 입력해 주세요');
+
+    var hit = null;
+    for (var i = 0; i < S.recs.length; i++) {
+      if (S.recs[i].dong === d && S.recs[i].ho === h) { hit = S.recs[i]; break; }
+    }
+    var box = $('ckResult');
+    box.hidden = false;
+    if (hit) {
+      box.innerHTML =
+        '<div class="ck yes"><div class="ci">✓</div>' +
+        '<div class="ct">접수 완료된 세대입니다</div>' +
+        '<div class="cs">' + esc(d) + '동 ' + esc(h) + '호 · ' + esc(hit.name) +
+        (hit.joint ? ' · ' + esc(hit.name2) + ' (공동명의)' : '') + '<br>' +
+        new Date(hit.at).toLocaleDateString('ko-KR') + ' 접수</div></div>';
+    } else {
+      box.innerHTML =
+        '<div class="ck no"><div class="ci">!</div>' +
+        '<div class="ct">아직 접수되지 않았습니다</div>' +
+        '<div class="cs">' + esc(d) + '동 ' + esc(h) + '호<br>' +
+        '지금 제출하시면 1분이면 끝납니다.</div>' +
+        '<button class="btn" style="margin-top:16px" onclick="App.go(\'delegate\')">위임장 제출하러 가기</button></div>';
+    }
+  }
+};
+
+window.App = App; window.Deleg = Deleg; window.Admin = Admin;
+window.Check = Check; window.Board = Board; window.Assembly = Assembly;
+window.Election = Election; window.Legal = Legal; window.Docs = Docs;
+window.Transfer = Transfer; window.Fee = Fee; window.Cert = Cert;
+window.Say = Say; window.Notify = Notify;
+document.addEventListener('DOMContentLoaded', function () {
+  App.init();
+  /* 웹폰트는 화면이 그려진 뒤에 따로 불러옵니다 (로딩 지연 방지) */
+  var f = document.createElement('link');
+  f.rel = 'stylesheet';
+  f.href = 'https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css';
+  document.head.appendChild(f);
+});
+})();
+
+</script>
+</body>
+</html>

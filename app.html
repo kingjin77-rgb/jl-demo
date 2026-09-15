@@ -1,0 +1,1355 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>입주예정자협의회 플랫폼</title>
+
+<style>
+/* ───────── 디자인 토큰 ───────── */
+:root{
+  --ink:#0B1220; --ink-2:#141E33;
+  --acc:#2E5BFF; --acc-2:#5C82FF;
+  --acc-soft:color-mix(in srgb, var(--acc) 9%, #fff);
+  --gold:#B4893C;
+  --ok:#0E9F6E; --ok-soft:#E4F7EF;
+  --warn:#D97706; --warn-soft:#FEF3E2;
+  --bad:#DC2626;
+  --bg:#F7F8FB; --surf:#FFFFFF; --surf-2:#F1F3F8;
+  --tx:#0F172A; --tx-2:#5A6579; --tx-3:#98A1B2;
+  --line:#E4E8F0; --line-2:#EFF2F7;
+  --r:18px; --r-s:12px; --r-l:24px;
+  --sh:0 1px 2px rgba(11,18,32,.04), 0 8px 24px rgba(11,18,32,.06);
+  --sh-l:0 2px 4px rgba(11,18,32,.05), 0 18px 48px rgba(11,18,32,.10);
+  --safe-b:env(safe-area-inset-bottom,0px);
+  --safe-t:env(safe-area-inset-top,0px);
+  --nav-h:64px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --ink:#070B14; --ink-2:#0F1725;
+  --acc:#6E8FFF; --acc-2:#8FA8FF;
+  --acc-soft:color-mix(in srgb, var(--acc) 16%, #0B1220);
+  --ok:#34D399; --ok-soft:#10261F; --warn:#FBBF24; --warn-soft:#2A2011;
+  --bg:#080C15; --surf:#111826; --surf-2:#18202F;
+  --tx:#E9EDF5; --tx-2:#A2ACC0; --tx-3:#6C7688;
+  --line:#222B3C; --line-2:#1B2333;
+  --sh:0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.35);
+  --sh-l:0 2px 6px rgba(0,0,0,.5), 0 20px 50px rgba(0,0,0,.5);
+}}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{
+  background:var(--bg);color:var(--tx);
+  font-family:"Pretendard Variable",Pretendard,-apple-system,BlinkMacSystemFont,system-ui,"Malgun Gothic",sans-serif;
+  font-size:15px;line-height:1.6;letter-spacing:-.015em;word-break:keep-all;
+  -webkit-text-size-adjust:100%;
+  padding-bottom:calc(var(--nav-h) + var(--safe-b));
+}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer;border:0;background:none}
+[hidden]{display:none!important}
+.num{font-variant-numeric:tabular-nums;font-feature-settings:"tnum"}
+
+/* ───────── 레이아웃 ───────── */
+.shell{max-width:1180px;margin:0 auto}
+.page{display:none;padding:0 18px 40px}
+.page.on{display:block;animation:fade .28s ease}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+/* ───────── 상단 앱바 ───────── */
+.appbar{
+  position:sticky;top:0;z-index:40;background:var(--bg);
+  padding:calc(var(--safe-t) + 14px) 18px 12px;
+  display:flex;align-items:center;gap:12px;
+  transition:box-shadow .2s,border-color .2s;
+  border-bottom:1px solid transparent;
+}
+.appbar.stuck{border-bottom-color:var(--line);box-shadow:0 6px 20px rgba(11,18,32,.04)}
+.brand{display:flex;align-items:center;gap:10px;min-width:0;flex:1}
+.emblem{
+  width:38px;height:38px;border-radius:11px;flex:none;
+  background:linear-gradient(145deg,var(--ink),var(--ink-2));
+  color:#fff;display:grid;place-items:center;font-weight:800;font-size:.95rem;
+  letter-spacing:-.04em;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);
+}
+.emblem::after{content:"";position:absolute}
+.bname{font-weight:800;font-size:1.02rem;letter-spacing:-.03em;line-height:1.25;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bsub{font-size:.7rem;color:var(--tx-3);letter-spacing:.04em;font-weight:600}
+.ab-btn{width:38px;height:38px;border-radius:11px;display:grid;place-items:center;
+  background:var(--surf);border:1px solid var(--line);font-size:1rem;flex:none}
+.ab-btn:active{transform:scale(.94)}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--ok);flex:none}
+.dot.off{background:var(--tx-3)}
+
+/* ───────── 히어로(홈) ───────── */
+.hero{
+  position:relative;overflow:hidden;border-radius:var(--r-l);
+  background:linear-gradient(155deg,var(--ink) 0%,var(--ink-2) 62%,#1C2B4A 100%);
+  color:#fff;padding:24px 22px 22px;margin-bottom:14px;
+}
+.hero::before{content:"";position:absolute;right:-70px;top:-90px;width:240px;height:240px;
+  border-radius:50%;background:radial-gradient(circle,rgba(92,130,255,.34),transparent 68%)}
+.hero::after{content:"";position:absolute;left:-40px;bottom:-110px;width:210px;height:210px;
+  border-radius:50%;background:radial-gradient(circle,rgba(180,137,60,.20),transparent 68%)}
+.hero>*{position:relative;z-index:1}
+.hero-tag{display:inline-flex;align-items:center;gap:6px;font-size:.7rem;font-weight:700;
+  letter-spacing:.1em;color:#A9C0FF;background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.12);border-radius:999px;padding:4px 11px;margin-bottom:12px}
+.hero h1{margin:0 0 4px;font-size:1.42rem;font-weight:800;letter-spacing:-.035em;line-height:1.3}
+.hero .loc{color:#93A4C4;font-size:.82rem;margin:0}
+
+.gauge{display:flex;align-items:center;gap:18px;margin-top:20px}
+.ring{position:relative;width:104px;height:104px;flex:none}
+.ring svg{transform:rotate(-90deg)}
+.ring .tr{stroke:rgba(255,255,255,.14)}
+.ring .bar{stroke:url(#gr);stroke-linecap:round;transition:stroke-dashoffset 1.1s cubic-bezier(.22,1,.36,1)}
+.ring .lab{position:absolute;inset:0;display:grid;place-content:center;text-align:center}
+.ring .lab b{font-size:1.66rem;font-weight:800;letter-spacing:-.05em;line-height:1;display:block}
+.ring .lab i{font-style:normal;font-size:.63rem;color:#93A4C4;letter-spacing:.09em;font-weight:700}
+.gfacts{flex:1;min-width:0;display:grid;gap:8px}
+.gfact{display:flex;justify-content:space-between;align-items:baseline;
+  padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,.10)}
+.gfact:last-child{border:0;padding-bottom:0}
+.gfact span{font-size:.78rem;color:#93A4C4}
+.gfact b{font-size:1.02rem;font-weight:700;letter-spacing:-.02em}
+.gfact b em{font-style:normal;font-size:.72rem;color:#93A4C4;font-weight:600;margin-left:2px}
+
+/* 밝은 히어로 (config.heroLight) */
+.hero.light{color:var(--tx);border:1px solid var(--line);
+  background:linear-gradient(145deg,
+    color-mix(in srgb,var(--acc) 13%,var(--surf)) 0%,
+    var(--surf) 52%,
+    color-mix(in srgb,var(--gold) 12%,var(--surf)) 100%)}
+.hero.light::before{background:radial-gradient(circle,color-mix(in srgb,var(--acc) 26%,transparent),transparent 68%)}
+.hero.light::after{background:radial-gradient(circle,color-mix(in srgb,var(--gold) 22%,transparent),transparent 68%)}
+.hero.light .hero-tag{color:var(--acc);background:var(--surf);border-color:var(--line)}
+.hero.light .loc{color:var(--tx-2)}
+.hero.light .ring .tr{stroke:var(--line)}
+.hero.light .ring .lab i{color:var(--tx-3)}
+.hero.light .gfact{border-bottom-color:var(--line)}
+.hero.light .gfact span{color:var(--tx-2)}
+.hero.light .gfact b em{color:var(--tx-3)}
+
+/* ───────── 섹션 / 카드 ───────── */
+.sec{margin-top:26px}
+.sec-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:11px;gap:10px}
+.sec-t{font-size:1rem;font-weight:800;letter-spacing:-.03em;margin:0}
+.sec-a{font-size:.8rem;font-weight:700;color:var(--acc)}
+.sec-d{font-size:.81rem;color:var(--tx-2);margin:-6px 0 12px}
+
+.card{background:var(--surf);border:1px solid var(--line);border-radius:var(--r);
+  box-shadow:var(--sh);overflow:hidden}
+.card+.card{margin-top:10px}
+.cbody{padding:16px 17px}
+
+/* 액션 카드 */
+.act{display:flex;align-items:center;gap:14px;width:100%;text-align:left;
+  background:var(--surf);border:1px solid var(--line);border-radius:var(--r);
+  padding:15px 16px;box-shadow:var(--sh);transition:transform .14s,box-shadow .14s,border-color .14s}
+.act:active{transform:scale(.985)}
+.act:hover{border-color:var(--acc);box-shadow:var(--sh-l)}
+.act+.act{margin-top:10px}
+.act .ic{width:44px;height:44px;border-radius:13px;flex:none;display:grid;place-items:center;font-size:1.2rem;
+  background:var(--acc-soft)}
+.act.done .ic{background:var(--ok-soft)}
+.act .tx{flex:1;min-width:0}
+.act .tt{font-weight:750;font-size:.97rem;letter-spacing:-.025em;display:flex;align-items:center;gap:7px}
+.act .ds{font-size:.8rem;color:var(--tx-2);line-height:1.5;margin-top:2px}
+.act .ar{color:var(--tx-3);font-size:1.1rem;flex:none}
+.pill{font-size:.66rem;font-weight:800;letter-spacing:.02em;border-radius:999px;padding:3px 8px;flex:none}
+.pill.b{background:var(--acc);color:#fff}
+.pill.g{background:var(--ok-soft);color:var(--ok)}
+.pill.o{background:var(--warn-soft);color:var(--warn)}
+.pill.n{background:var(--surf-2);color:var(--tx-2)}
+
+/* 정족수 카드 */
+.quorum{margin-bottom:14px}
+.q-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:30px}
+.q-lb{font-size:.74rem;font-weight:800;color:var(--tx-3);letter-spacing:.09em}
+.q-st{font-size:1.02rem;font-weight:800;letter-spacing:-.03em;margin-top:4px}
+.q-badge{font-size:.74rem;font-weight:800;border-radius:999px;padding:6px 12px;flex:none;
+  background:var(--ok-soft);color:var(--ok)}
+.q-badge.no{background:var(--warn-soft);color:var(--warn)}
+.q-track{position:relative;height:12px;border-radius:999px;background:var(--surf-2);overflow:visible}
+.q-track>i{display:block;height:100%;border-radius:999px;
+  background:linear-gradient(90deg,var(--acc),var(--acc-2));transition:width 1.1s cubic-bezier(.22,1,.36,1)}
+.q-track.ok>i{background:linear-gradient(90deg,var(--ok),#34D399)}
+.q-mark{position:absolute;top:-5px;bottom:-5px;width:2px;background:var(--tx-2);border-radius:2px}
+.q-mark b{position:absolute;top:-19px;left:50%;transform:translateX(-50%);white-space:nowrap;
+  font-size:.64rem;font-weight:800;color:var(--tx-2)}
+.q-foot{font-size:.8rem;color:var(--tx-2);margin-top:18px;line-height:1.6}
+.q-foot b{color:var(--tx)}
+
+/* 조회 결과 */
+.ck{border-radius:var(--r);padding:20px 18px;text-align:center;border:1.5px solid var(--line);background:var(--surf)}
+.ck.yes{border-color:var(--ok);background:var(--ok-soft)}
+.ck.no{border-color:var(--warn);background:var(--warn-soft)}
+.ck .ci{font-size:2rem;line-height:1}
+.ck .ct{font-weight:800;font-size:1.06rem;letter-spacing:-.03em;margin-top:9px}
+.ck .cs{font-size:.85rem;color:var(--tx-2);margin-top:6px;line-height:1.6}
+
+/* 게시판 */
+.segs{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;margin-bottom:11px;scrollbar-width:none}
+.segs::-webkit-scrollbar{display:none}
+.seg{flex:none;padding:8px 14px;border-radius:999px;font-size:.84rem;font-weight:700;
+  background:var(--surf);border:1px solid var(--line);color:var(--tx-2);letter-spacing:-.02em}
+.seg.on{background:var(--acc);border-color:var(--acc);color:#fff}
+.searchbar{display:flex;align-items:center;gap:9px;background:var(--surf);border:1px solid var(--line);
+  border-radius:12px;padding:0 13px;margin-bottom:11px}
+.searchbar span{color:var(--tx-3);font-size:.9rem}
+.searchbar input{flex:1;border:0;background:none;padding:12px 0;font-size:.92rem;outline:0}
+.backlink{font-size:.86rem;font-weight:700;color:var(--tx-2);padding:14px 0 10px}
+.backlink:hover{color:var(--acc)}
+.post-h{border-bottom:1px solid var(--line-2);padding-bottom:14px;margin-bottom:16px}
+.post-t{font-size:1.16rem;font-weight:800;letter-spacing:-.03em;margin:9px 0 7px;line-height:1.45}
+.post-m{font-size:.78rem;color:var(--tx-3);display:flex;gap:9px;flex-wrap:wrap}
+.post-b{font-size:.93rem;line-height:1.8;color:var(--tx);white-space:pre-wrap}
+.post-act{display:flex;align-items:center;justify-content:space-between;gap:12px;
+  margin-top:20px;padding-top:15px;border-top:1px solid var(--line-2)}
+.reactbtn{border:1px solid var(--line);border-radius:999px;padding:8px 16px;font-size:.85rem;
+  font-weight:700;background:var(--surf);transition:border-color .15s,background .15s}
+.reactbtn.on{border-color:var(--acc);background:var(--acc-soft);color:var(--acc)}
+.post-views{font-size:.78rem;color:var(--tx-3)}
+.cmt-b{font-size:.89rem;line-height:1.65;margin-top:4px;white-space:pre-wrap}
+.bd-new{font-size:.62rem;font-weight:800;color:#fff;background:var(--bad);border-radius:5px;
+  padding:1px 5px;margin-left:6px;vertical-align:2px}
+.bd-cnt{font-size:.78rem;font-weight:800;color:var(--acc);margin-left:6px}
+.empty{text-align:center;padding:38px 20px;color:var(--tx-3);font-size:.88rem}
+
+/* 한마디 */
+.saybox{display:flex;gap:11px;background:var(--surf);border:1px solid var(--line);
+  border-radius:var(--r);box-shadow:var(--sh);padding:15px 16px;margin-bottom:14px}
+.say-av{width:40px;height:40px;border-radius:13px;flex:none;display:grid;place-items:center;
+  font-weight:800;font-size:.82rem;background:var(--acc-soft);color:var(--acc);letter-spacing:-.03em}
+.say-in{flex:1;min-width:0}
+.say-in textarea{width:100%;border:0;background:none;outline:0;resize:none;font-size:.97rem;
+  line-height:1.6;padding:6px 0 0;color:var(--tx)}
+.say-in textarea::placeholder{color:var(--tx-3)}
+.say-tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.stag{font-size:.74rem;font-weight:700;border-radius:999px;padding:5px 11px;
+  border:1px solid var(--line);background:var(--surf);color:var(--tx-2)}
+.stag.on{background:var(--acc-soft);border-color:var(--acc);color:var(--acc)}
+.say-foot{display:flex;align-items:center;gap:11px;margin-top:12px;padding-top:11px;
+  border-top:1px solid var(--line-2)}
+.say-anon{display:flex;align-items:center;gap:6px;font-size:.8rem;color:var(--tx-2)}
+.say-n{margin-left:auto;font-size:.76rem;color:var(--tx-3)}
+.say-n.over{color:var(--bad);font-weight:800}
+
+.saycard{background:var(--surf);border:1px solid var(--line);border-radius:var(--r);
+  box-shadow:var(--sh);padding:15px 16px;margin-bottom:9px}
+.sc-h{display:flex;align-items:center;gap:10px}
+.sc-n{font-weight:750;font-size:.89rem;letter-spacing:-.02em}
+.sc-t{font-size:.76rem;color:var(--tx-3)}
+.sc-tag{margin-left:auto;font-size:.68rem;font-weight:800;border-radius:999px;padding:3px 9px;
+  background:var(--surf-2);color:var(--tx-2)}
+.sc-b{font-size:.96rem;line-height:1.65;margin:10px 0 0;white-space:pre-wrap;word-break:keep-all}
+.sc-f{display:flex;gap:6px;margin-top:11px}
+.sc-f button{display:flex;align-items:center;gap:5px;font-size:.8rem;font-weight:700;color:var(--tx-2);
+  padding:6px 11px;border-radius:999px;transition:background .15s,color .15s}
+.sc-f button:hover{background:var(--surf-2)}
+.sc-f button.on{color:var(--acc);background:var(--acc-soft)}
+.sc-re{margin-top:11px;padding-top:11px;border-top:1px solid var(--line-2);display:grid;gap:9px}
+.sc-re-i{display:flex;gap:9px;align-items:flex-start}
+.sc-re-av{width:26px;height:26px;border-radius:9px;flex:none;display:grid;place-items:center;
+  font-size:.68rem;font-weight:800;background:var(--surf-2);color:var(--tx-2)}
+.sc-re-b{font-size:.87rem;line-height:1.6}
+.sc-re-b i{font-style:normal;font-weight:750;margin-right:6px}
+.sc-re-b s{text-decoration:none;color:var(--tx-3);font-size:.74rem;margin-left:6px}
+.sc-rein{display:flex;gap:8px;margin-top:10px}
+.sc-rein input{flex:1;border:1px solid var(--line);background:var(--surf-2);border-radius:10px;
+  padding:9px 12px;font-size:.87rem;outline:0}
+.sc-rein input:focus{border-color:var(--acc)}
+
+/* 알림톡 */
+.kt{display:grid;grid-template-columns:1fr;gap:14px;margin-top:12px}
+.kt-phone{background:#9BBBD4;border-radius:20px;padding:0 0 18px;overflow:hidden;
+  box-shadow:var(--sh-l)}
+.kt-bar{background:#A0BDD6;color:#2B2B2B;font-size:.78rem;font-weight:700;padding:11px 16px;
+  border-bottom:1px solid rgba(0,0,0,.07)}
+.kt-body{padding:16px 14px 0}
+.kt-row{display:flex;gap:9px;align-items:flex-start}
+.kt-prof{width:36px;height:36px;border-radius:12px;background:#3C1E1E;color:#FEE500;flex:none;
+  display:grid;place-items:center;font-weight:800;font-size:.82rem}
+.kt-name{font-size:.76rem;color:#2B2B2B;margin-bottom:5px;font-weight:600}
+.kt-bubble{background:#fff;border-radius:4px 14px 14px 14px;overflow:hidden;max-width:290px;
+  box-shadow:0 1px 3px rgba(0,0,0,.14)}
+.kt-head{background:#FEE500;color:#3C1E1E;font-size:.74rem;font-weight:800;padding:8px 14px}
+.kt-msg{padding:14px;font-size:.85rem;line-height:1.72;color:#111;white-space:pre-wrap;word-break:keep-all}
+.kt-btn{margin:0 14px 14px;text-align:center;background:#F4F4F4;border-radius:8px;padding:10px;
+  font-size:.82rem;font-weight:700;color:#333}
+.kt-side{background:var(--surf);border:1px solid var(--line);border-radius:var(--r);
+  box-shadow:var(--sh);padding:17px 18px}
+.kt-stat{display:flex;justify-content:space-between;align-items:baseline;padding:9px 0;
+  border-bottom:1px solid var(--line-2);font-size:.85rem}
+.kt-stat span{color:var(--tx-2)}
+.kt-stat b{font-weight:800}
+.kt-stat.hi{border-bottom:0}
+.kt-stat.hi b{font-size:1.18rem;color:var(--acc)}
+@media(min-width:860px){.kt{grid-template-columns:1fr 300px;align-items:start}}
+
+/* 총회 */
+.as-grid{display:grid;grid-template-columns:auto 1fr;gap:10px 18px;font-size:.9rem;align-items:baseline}
+.as-grid dt{color:var(--tx-2);font-size:.83rem}
+.as-grid dd{margin:0;font-weight:700;letter-spacing:-.02em}
+.as-legal{margin-top:16px;padding-top:14px;border-top:1px solid var(--line-2);
+  font-size:.8rem;color:var(--tx-2);line-height:1.65}
+.as-legal b{color:var(--ok)}
+.as-legal b.no{color:var(--bad)}
+.asbar{display:flex;height:34px;border-radius:10px;overflow:hidden;background:var(--surf-2)}
+.asbar i{display:block;height:100%;transition:width 1s cubic-bezier(.22,1,.36,1);
+  display:grid;place-items:center;font-size:.72rem;font-weight:800;color:#fff}
+.asbar i.a{background:var(--acc)}.asbar i.b{background:var(--ok)}.asbar i.c{background:var(--tx-3)}
+.aslegend{display:flex;gap:16px;flex-wrap:wrap;margin-top:12px;font-size:.79rem;color:var(--tx-2)}
+.aslegend s{text-decoration:none;width:10px;height:10px;border-radius:3px;display:inline-block;margin-right:6px}
+
+/* 선거 */
+.el-guard{font-size:.85rem;color:var(--tx-2);line-height:1.7}
+.el-guard b{color:var(--tx)}
+.cand{background:var(--surf);border:1px solid var(--line);border-radius:var(--r);
+  box-shadow:var(--sh);overflow:hidden;margin-bottom:11px}
+.cand-h{display:flex;gap:13px;align-items:center;padding:16px 17px 13px}
+.cand-av{width:46px;height:46px;border-radius:14px;background:var(--acc-soft);color:var(--acc);
+  display:grid;place-items:center;font-weight:800;font-size:1.05rem;flex:none}
+.cand-n{font-weight:800;font-size:1.02rem;letter-spacing:-.03em}
+.cand-d{font-size:.8rem;color:var(--tx-2);margin-top:2px}
+.cand-p{padding:0 17px 14px;font-size:.87rem;color:var(--tx-2);line-height:1.7;white-space:pre-wrap}
+.cand-f{display:flex;align-items:center;gap:12px;padding:13px 17px;border-top:1px solid var(--line-2);
+  background:var(--surf-2)}
+.cand-f .bar{flex:1}
+.cand-v{font-size:.85rem;font-weight:800;color:var(--acc);flex:none;min-width:74px;text-align:right}
+
+/* 계약 분석 */
+.riskbar{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:14px}
+.riskbar div{background:var(--surf);border:1px solid var(--line);border-radius:14px;
+  padding:13px 10px;text-align:center;box-shadow:var(--sh)}
+.riskbar b{display:block;font-size:1.3rem;font-weight:800;letter-spacing:-.04em}
+.riskbar span{font-size:.72rem;color:var(--tx-2)}
+.riskbar .r1 b{color:var(--bad)}.riskbar .r2 b{color:var(--warn)}.riskbar .r3 b{color:var(--tx-2)}
+.risk{background:var(--surf);border:1px solid var(--line);border-left:4px solid var(--line);
+  border-radius:var(--r);box-shadow:var(--sh);margin-bottom:10px;overflow:hidden}
+.risk.high{border-left-color:var(--bad)}
+.risk.mid{border-left-color:var(--warn)}
+.risk.low{border-left-color:var(--tx-3)}
+.risk-h{padding:15px 17px 12px}
+.risk-c{font-size:.73rem;font-weight:800;color:var(--tx-3);letter-spacing:.04em}
+.risk-t{font-weight:750;font-size:.96rem;letter-spacing:-.025em;margin-top:5px;line-height:1.5}
+.risk-b{padding:0 17px 15px;font-size:.85rem;color:var(--tx-2);line-height:1.7}
+.risk-b .jl{display:block;margin-top:10px;padding-top:10px;border-top:1px dashed var(--line);
+  color:var(--tx);font-size:.84rem}
+.risk-b .jl b{color:var(--acc)}
+.warnbox{background:var(--warn-soft);border:1px solid color-mix(in srgb,var(--warn) 30%,transparent);
+  border-radius:var(--r);padding:14px 16px;font-size:.85rem;line-height:1.7;color:var(--tx-2);margin-bottom:14px}
+.warnbox b{color:var(--warn)}
+
+/* 회비 */
+.feegrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;text-align:center;margin-top:16px}
+.feegrid div span{font-size:.73rem;color:var(--tx-3);display:block}
+.feegrid div b{font-size:.98rem;font-weight:800;margin-top:3px;display:block}
+.rcpt{font-size:.68rem;font-weight:800;background:var(--surf-2);border:1px solid var(--line);
+  border-radius:6px;padding:2px 6px;color:var(--tx-2);margin-left:6px}
+
+/* 증명서 */
+.certwrap{position:fixed;inset:0;z-index:90;background:var(--surf-2);overflow:auto;padding:0 0 40px}
+.certbar{position:sticky;top:0;display:flex;gap:9px;justify-content:flex-end;padding:14px 18px;
+  background:var(--surf);border-bottom:1px solid var(--line);z-index:2}
+.cert{width:210mm;min-height:297mm;margin:22px auto;background:#fff;color:#111;
+  padding:28mm 22mm;box-shadow:0 10px 40px rgba(0,0,0,.18);
+  font-size:11pt;line-height:1.9;word-break:keep-all}
+.cert h1{font-size:19pt;text-align:center;letter-spacing:.24em;margin:0 0 6mm;font-weight:800}
+.cert .sub{text-align:center;font-size:9.5pt;color:#555;margin-bottom:14mm;letter-spacing:.06em}
+.cert table{width:100%;border-collapse:collapse;margin-bottom:10mm}
+.cert th,.cert td{border:1px solid #999;padding:3.2mm 4mm;font-size:10.5pt;text-align:left}
+.cert th{background:#f2f4f7;width:34%;font-weight:700}
+.cert .big{font-size:15pt;font-weight:800}
+.cert .stmt{font-size:11pt;line-height:2.1;margin:8mm 0 12mm;text-align:left}
+.cert .date{text-align:center;font-size:11pt;margin-bottom:9mm;letter-spacing:.08em}
+.cert .sign{text-align:right;font-size:11.5pt;line-height:2.2}
+.cert .sign b{font-size:13pt;letter-spacing:.06em}
+.cert .foot{margin-top:14mm;padding-top:5mm;border-top:1px solid #ccc;font-size:8.5pt;color:#666;line-height:1.75}
+@media(max-width:820px){.cert{width:auto;min-height:0;margin:14px;padding:22px 20px;font-size:14px}
+  .cert h1{font-size:19px}.cert th,.cert td{font-size:13px;padding:8px 10px}}
+
+/* 동별 히트맵 */
+.heat{display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:8px}
+.hcell{background:var(--surf);border:1px solid var(--line);border-radius:14px;padding:11px 10px;
+  text-align:center;position:relative;overflow:hidden}
+.hcell .fill{position:absolute;left:0;bottom:0;width:100%;background:var(--acc);opacity:.13;transition:height .9s cubic-bezier(.22,1,.36,1)}
+.hcell .d{position:relative;font-weight:800;font-size:.9rem;letter-spacing:-.03em}
+.hcell .p{position:relative;font-size:.74rem;color:var(--tx-2);margin-top:1px}
+.hcell .n{position:relative;font-size:.66rem;color:var(--tx-3)}
+.hcell.hi .fill{background:var(--ok)}
+.hcell.lo .fill{background:var(--warn)}
+
+/* 리스트 */
+.list{background:var(--surf);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--sh);overflow:hidden}
+.row{display:flex;gap:13px;padding:14px 16px;align-items:flex-start;text-align:left;width:100%;background:none}
+.row+.row{border-top:1px solid var(--line-2)}
+.row:active{background:var(--surf-2)}
+.row .rl{flex:1;min-width:0}
+.row .rt{font-weight:700;font-size:.93rem;letter-spacing:-.02em;line-height:1.45}
+.row .rd{font-size:.81rem;color:var(--tx-2);margin-top:3px;line-height:1.5}
+.row .rm{font-size:.72rem;color:var(--tx-3);margin-top:5px;display:flex;gap:8px;align-items:center}
+.row .rr{flex:none;text-align:right;font-size:.74rem;color:var(--tx-3)}
+.tick{width:34px;height:34px;border-radius:11px;flex:none;display:grid;place-items:center;
+  background:var(--surf-2);font-size:.95rem}
+
+/* 타임라인 */
+.tl{position:relative;padding-left:26px}
+.tl::before{content:"";position:absolute;left:8px;top:6px;bottom:6px;width:2px;background:var(--line)}
+.tl-i{position:relative;padding-bottom:20px}
+.tl-i::before{content:"";position:absolute;left:-22px;top:5px;width:11px;height:11px;border-radius:50%;
+  background:var(--surf);border:2.5px solid var(--line)}
+.tl-i.now::before{border-color:var(--acc);box-shadow:0 0 0 4px var(--acc-soft)}
+.tl-i.past::before{background:var(--line);border-color:var(--line)}
+.tl-d{font-size:.72rem;font-weight:800;color:var(--acc);letter-spacing:.02em}
+.tl-i.past .tl-d{color:var(--tx-3)}
+.tl-t{font-weight:700;font-size:.94rem;margin-top:2px;letter-spacing:-.02em}
+.tl-s{font-size:.82rem;color:var(--tx-2);margin-top:3px}
+
+/* 진행바 */
+.bar{height:7px;border-radius:999px;background:var(--surf-2);overflow:hidden}
+.bar i{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,var(--acc),var(--acc-2));
+  transition:width 1s cubic-bezier(.22,1,.36,1)}
+.bar.g i{background:linear-gradient(90deg,var(--ok),#34D399)}
+
+/* 폼 */
+.field{margin-bottom:15px}
+.lbl{display:block;font-size:.81rem;font-weight:700;color:var(--tx-2);margin-bottom:7px;letter-spacing:-.01em}
+.lbl em{font-style:normal;color:var(--bad);margin-left:3px}
+.inp,select.inp{width:100%;background:var(--surf);border:1.5px solid var(--line);border-radius:var(--r-s);
+  padding:13px 14px;font-size:.95rem;transition:border-color .15s,box-shadow .15s;appearance:none}
+.inp:focus{outline:0;border-color:var(--acc);box-shadow:0 0 0 4px var(--acc-soft)}
+select.inp{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2398A1B2' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 14px center;padding-right:36px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.hint{font-size:.76rem;color:var(--tx-3);margin-top:6px;line-height:1.5}
+
+.btn{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;
+  border-radius:14px;padding:15px;font-size:.98rem;font-weight:750;letter-spacing:-.02em;
+  background:var(--acc);color:#fff;transition:transform .12s,opacity .15s;box-shadow:0 6px 18px rgba(46,91,255,.26)}
+.btn:active{transform:scale(.98)}
+.btn[disabled]{opacity:.4;box-shadow:none;pointer-events:none}
+.btn.ghost{background:var(--surf);color:var(--tx);border:1.5px solid var(--line);box-shadow:none}
+.btn.ink{background:var(--ink);box-shadow:none}
+.btn.sm{padding:11px 16px;font-size:.87rem;width:auto;border-radius:11px;box-shadow:none}
+
+/* 스텝퍼 */
+.steps{display:flex;gap:6px;margin-bottom:18px}
+.step{flex:1;text-align:center}
+.step i{display:block;height:4px;border-radius:999px;background:var(--line);margin-bottom:7px;transition:background .3s}
+.step.on i,.step.did i{background:var(--acc)}
+.step span{font-size:.72rem;font-weight:700;color:var(--tx-3);letter-spacing:-.01em}
+.step.on span{color:var(--acc)}
+.step.did span{color:var(--tx-2)}
+
+/* 서명패드 */
+.sign{position:relative;border:1.5px dashed var(--line);border-radius:var(--r-s);background:var(--surf);overflow:hidden}
+.sign canvas{display:block;width:100%;height:190px;touch-action:none}
+.sign .ph{position:absolute;inset:0;display:grid;place-content:center;text-align:center;pointer-events:none;
+  color:var(--tx-3);font-size:.85rem;line-height:1.7}
+.sign.has{border-style:solid;border-color:var(--acc)}
+.sign.has .ph{display:none}
+
+.signer-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;gap:10px}
+.sname{font-size:.82rem;font-weight:700;color:var(--tx-2);background:var(--surf-2);
+  border-radius:999px;padding:4px 11px;letter-spacing:-.01em}
+.signer+.signer{margin-top:18px}
+
+/* 투표 */
+.opt{display:block;width:100%;text-align:left;border:1.5px solid var(--line);border-radius:14px;
+  padding:14px 15px;background:var(--surf);position:relative;overflow:hidden;transition:border-color .15s}
+.opt+.opt{margin-top:9px}
+.opt .fill{position:absolute;left:0;top:0;bottom:0;background:var(--acc-soft);transition:width 1s cubic-bezier(.22,1,.36,1)}
+.opt .in{position:relative;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.opt .ot{font-weight:700;font-size:.93rem;letter-spacing:-.02em}
+.opt .ov{font-size:.87rem;font-weight:800;color:var(--acc)}
+.opt.mine{border-color:var(--acc)}
+.opt.mine .ot::after{content:" ✓";color:var(--acc)}
+
+/* 갤러리 */
+.gal{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.gal figure{margin:0;border-radius:16px;overflow:hidden;background:var(--surf-2);border:1px solid var(--line)}
+.gal .ph{aspect-ratio:4/3;display:grid;place-items:center;font-size:2rem;
+  background:linear-gradient(135deg,var(--surf-2),var(--line-2))}
+.gal figcaption{padding:9px 11px;font-size:.78rem;color:var(--tx-2);line-height:1.45}
+.gal figcaption b{display:block;color:var(--tx);font-size:.85rem;font-weight:700;margin-bottom:1px}
+
+/* 하단 탭바 */
+.tabbar{
+  position:fixed;left:0;right:0;bottom:0;z-index:50;
+  background:color-mix(in srgb,var(--surf) 88%,transparent);
+  backdrop-filter:saturate(180%) blur(18px);-webkit-backdrop-filter:saturate(180%) blur(18px);
+  border-top:1px solid var(--line);
+  padding-bottom:var(--safe-b);
+  display:grid;grid-template-columns:repeat(5,1fr);
+}
+.tab{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+  height:var(--nav-h);color:var(--tx-3);font-size:.68rem;font-weight:700;letter-spacing:-.01em;position:relative}
+.tab .ti{font-size:1.18rem;line-height:1;transition:transform .2s}
+.tab.on{color:var(--acc)}
+.tab.on .ti{transform:translateY(-2px) scale(1.06)}
+.tab .bdg{position:absolute;top:9px;left:calc(50% + 7px);min-width:16px;height:16px;border-radius:999px;
+  background:var(--bad);color:#fff;font-size:.6rem;font-weight:800;display:grid;place-items:center;padding:0 4px}
+
+/* 시트 */
+.scrim{position:fixed;inset:0;z-index:60;background:rgba(6,10,20,.5);
+  opacity:0;pointer-events:none;transition:opacity .25s}
+.scrim.on{opacity:1;pointer-events:auto}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:61;background:var(--surf);
+  border-radius:24px 24px 0 0;padding:10px 18px calc(22px + var(--safe-b));
+  transform:translateY(102%);transition:transform .3s cubic-bezier(.22,1,.36,1);
+  max-height:86vh;overflow:auto;box-shadow:0 -12px 40px rgba(6,10,20,.22)}
+.sheet.on{transform:none}
+.grab{width:38px;height:4px;border-radius:999px;background:var(--line);margin:0 auto 14px}
+.mgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+.mtile{background:var(--surf-2);border:1px solid var(--line-2);border-radius:16px;padding:15px 10px;
+  text-align:center;transition:transform .14s}
+.mtile:active{transform:scale(.96)}
+.mtile .mi{font-size:1.35rem;display:block;margin-bottom:6px}
+.mtile .mt{font-size:.79rem;font-weight:700;letter-spacing:-.02em}
+
+/* 토스트 */
+.toast{position:fixed;left:50%;bottom:calc(var(--nav-h) + var(--safe-b) + 16px);transform:translate(-50%,16px);
+  z-index:80;background:var(--ink);color:#fff;border-radius:14px;padding:12px 18px;font-size:.87rem;font-weight:600;
+  opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;max-width:calc(100% - 36px);
+  box-shadow:0 12px 34px rgba(6,10,20,.3);text-align:center;line-height:1.5}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+
+/* 데모 배너 */
+.demoflag{background:linear-gradient(90deg,var(--gold),#D4A94F);color:#2A1E06;
+  font-size:.74rem;font-weight:800;letter-spacing:-.01em;text-align:center;padding:7px 18px;
+  padding-top:calc(var(--safe-t) + 7px)}
+
+.desknav,.desk-only,.site-foot{display:none}
+.ab-act{display:flex;align-items:center;gap:8px;flex:none}
+
+/* ═══════════ 데스크톱 : 홈페이지 레이아웃 ═══════════ */
+@media(min-width:960px){
+  body{padding-bottom:0;font-size:16px}
+  .tabbar{display:none}
+  .shell{max-width:1120px;padding:0 32px}
+  .page{padding:0 0 72px}
+
+  /* 상단 헤더 */
+  .appbar{
+    background:color-mix(in srgb,var(--surf) 92%,transparent);
+    backdrop-filter:saturate(180%) blur(16px);-webkit-backdrop-filter:saturate(180%) blur(16px);
+    border-bottom:1px solid var(--line);padding:0;height:70px;
+    display:flex;justify-content:center}
+  .appbar.stuck{box-shadow:0 4px 20px rgba(11,18,32,.05)}
+  .appbar>.brand{flex:none}
+  .appbar::before{content:"";position:absolute;inset:0;pointer-events:none}
+  .appbar{position:sticky}
+  .appbar>*{position:relative;z-index:1}
+  .brand{gap:11px}
+  .bname{font-size:1.06rem}
+  .bsub{font-size:.72rem}
+
+  .desknav{display:flex;align-items:center;gap:2px;margin:0 auto;flex:1;justify-content:center}
+  .dn{padding:9px 14px;border-radius:10px;font-size:.92rem;font-weight:650;color:var(--tx-2);
+    letter-spacing:-.02em;white-space:nowrap;transition:color .15s,background .15s}
+  .dn:hover{color:var(--tx);background:var(--surf-2)}
+  .dn.on{color:var(--acc);background:var(--acc-soft);font-weight:750}
+  .desk-only{display:flex}
+  .btn.cta{padding:10px 18px;font-size:.88rem;border-radius:11px;box-shadow:none}
+
+  /* 헤더 안쪽 정렬용 래퍼 */
+  .appbar{padding:0 32px}
+  .appbar{max-width:none}
+
+  /* 히어로 — 와이드 배너 */
+  .hero{border-radius:28px;padding:46px 48px;margin:28px 0 20px;display:grid;
+    grid-template-columns:1.05fr .95fr;gap:46px;align-items:center}
+  .hero-tx{min-width:0}
+  .hero::before{right:-40px;top:-140px;width:420px;height:420px}
+  .hero::after{left:34%;bottom:-180px;width:320px;height:320px}
+  .hero h1{font-size:2.5rem;letter-spacing:-.045em;margin-bottom:8px}
+  .hero .loc{font-size:.95rem}
+  .hero-tag{font-size:.74rem;margin-bottom:16px}
+  .gauge{margin-top:0;gap:26px}
+  .ring{width:132px;height:132px}
+  .ring svg{width:132px;height:132px}
+  .ring .lab b{font-size:2.05rem}
+  .gfact b{font-size:1.14rem}
+  .gfact span{font-size:.84rem}
+
+  /* 본문 그리드 */
+  .quorum{margin-bottom:22px}
+  .two{display:grid;grid-template-columns:1.3fr 1fr;gap:26px;align-items:start}
+  .sec{margin-top:34px}
+  .sec-t{font-size:1.14rem}
+  .sec-d{font-size:.88rem}
+  .heat{grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:10px}
+  .hcell{padding:14px 10px}
+  .act{padding:18px 20px}
+  .act .ic{width:48px;height:48px;font-size:1.3rem}
+  .act .tt{font-size:1.02rem}
+  .row{padding:16px 20px}
+  .cbody{padding:20px 22px}
+  .gal{grid-template-columns:repeat(3,1fr);gap:14px}
+
+  /* 위임장 · 조회 폼은 가운데 좁게 — 문서처럼 */
+  #p-delegate,#p-check{max-width:660px;margin:0 auto}
+  .steps{margin:28px 0 22px}
+  .sign canvas{height:220px}
+
+  /* 나머지 단일 컬럼 페이지 폭 제한 */
+  #p-vote,#p-notice,#p-apt,#p-org,#p-budget,#p-admin{max-width:860px}
+
+  /* 시트 → 가운데 모달 */
+  .sheet{max-width:520px;left:50%;top:50%;bottom:auto;transform:translate(-50%,-44%) scale(.97);
+    border-radius:24px;opacity:0;padding:18px 24px 26px}
+  .sheet.on{transform:translate(-50%,-50%);opacity:1}
+  .toast{bottom:28px}
+
+  /* 푸터 */
+  .site-foot{display:block;border-top:1px solid var(--line);background:var(--surf);
+    padding:44px 32px 34px;margin-top:40px}
+  .sf-in{max-width:1120px;margin:0 auto;display:flex;justify-content:space-between;gap:40px;flex-wrap:wrap}
+  .sf-b{display:flex;align-items:center;gap:11px;font-size:1.02rem;font-weight:800;letter-spacing:-.03em}
+  .sf-em{width:34px;height:34px;border-radius:10px;font-size:.88rem}
+  .sf-p{margin:12px 0 0;font-size:.86rem;color:var(--tx-2)}
+  .sf-links{display:grid;grid-template-columns:1fr 1fr;gap:4px 34px;align-content:start}
+  .sf-links button{text-align:left;font-size:.88rem;color:var(--tx-2);padding:5px 0;font-weight:600}
+  .sf-links button:hover{color:var(--acc)}
+  .sf-law{max-width:1120px;margin:30px auto 0;padding-top:20px;border-top:1px solid var(--line-2);
+    font-size:.78rem;color:var(--tx-3);line-height:1.7}
+  .sf-law b{color:var(--tx-2)}
+  .demoflag{font-size:.8rem;padding:9px 32px}
+}
+@media(min-width:960px) and (max-width:1199px){
+  .appbar{padding:0 20px}
+  .dn{padding:8px 9px;font-size:.85rem}
+  .desk-only{display:none}
+  .hero{padding:36px 34px;gap:30px}
+  .hero h1{font-size:2.1rem}
+}
+@media(min-width:1240px){
+  .shell{max-width:1200px}
+  .sf-in,.sf-law{max-width:1200px}
+  .hero h1{font-size:2.8rem}
+}
+
+@media print{
+  .tabbar,.appbar,.demoflag,.toast,.certbar,.site-foot{display:none!important}
+  body{padding:0;background:#fff}
+  body.printing main{display:none!important}
+  .certwrap{position:static;background:#fff;padding:0;overflow:visible}
+  .cert{width:auto;min-height:0;margin:0;box-shadow:none;padding:20mm 18mm}
+  @page{size:A4 portrait;margin:0}
+}
+</style>
+</head>
+<body>
+
+<div class="demoflag" id="demoFlag">데모 화면입니다 · 입력하신 내용은 저장되지 않습니다</div>
+
+<header class="appbar" id="appbar">
+  <div class="brand">
+    <div class="emblem" id="emblem">협</div>
+    <div style="min-width:0">
+      <div class="bname" id="barTitle">홈</div>
+      <div class="bsub" id="barSub">입주예정자협의회</div>
+    </div>
+  </div>
+  <nav class="desknav" id="deskNav"></nav>
+  <div class="ab-act">
+    <button class="btn sm cta desk-only" onclick="App.go('delegate')">위임장 제출</button>
+    <button class="ab-btn" onclick="App.toggleTheme()" title="화면 모드" id="themeBtn">◐</button>
+    <button class="ab-btn" onclick="App.openSheet('status')" title="연결 상태">
+      <span class="dot" id="netDot"></span>
+    </button>
+  </div>
+</header>
+
+<main class="shell">
+
+<!-- ═══ 홈 ═══ -->
+<section class="page on" id="p-home">
+  <div class="hero">
+    <div class="hero-tx">
+      <div class="hero-tag">● 위임장 접수 진행중</div>
+      <h1 id="heroName">OO아파트</h1>
+      <p class="loc" id="heroLoc"></p>
+    </div>
+    <div class="gauge">
+      <div class="ring">
+        <svg width="104" height="104" viewBox="0 0 104 104">
+          <defs><linearGradient id="gr" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#2E5BFF"/><stop offset="100%" stop-color="#B4893C"/>
+          </linearGradient></defs>
+          <circle class="tr" cx="52" cy="52" r="45" fill="none" stroke-width="9"/>
+          <circle class="bar" id="ringBar" cx="52" cy="52" r="45" fill="none" stroke-width="9"
+                  stroke-dasharray="282.7" stroke-dashoffset="282.7"/>
+        </svg>
+        <div class="lab"><b class="num" id="ringPct">0%</b><i>접수율</i></div>
+      </div>
+      <div class="gfacts">
+        <div class="gfact"><span>접수 완료</span><b class="num" id="fDone">0<em>세대</em></b></div>
+        <div class="gfact"><span>미접수</span><b class="num" id="fLeft">0<em>세대</em></b></div>
+        <div class="gfact"><span>전체 세대</span><b class="num" id="fTotal">0<em>세대</em></b></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card quorum" id="quorumCard"><div class="cbody">
+    <div class="q-top">
+      <div>
+        <div class="q-lb">총회 의결 정족수</div>
+        <div class="q-st" id="qState">산정 중…</div>
+      </div>
+      <div class="q-badge" id="qBadge">—</div>
+    </div>
+    <div class="q-track">
+      <i id="qFill" style="width:0"></i>
+      <span class="q-mark" id="qMark"><b id="qMarkLb">과반 50%</b></span>
+    </div>
+    <div class="q-foot" id="qFoot"></div>
+  </div></div>
+
+  <div class="two">
+    <div>
+      <div class="sec" style="margin-top:14px">
+        <div class="sec-h"><h2 class="sec-t">지금 하실 일</h2></div>
+        <div id="todoBox"></div>
+      </div>
+
+      <div class="sec">
+        <div class="sec-h">
+          <h2 class="sec-t">동별 접수 현황</h2>
+          <button class="sec-a" onclick="App.openSheet('heatinfo')">보는 법</button>
+        </div>
+        <div class="heat" id="heatBox"></div>
+      </div>
+    </div>
+
+    <div>
+      <div class="sec">
+        <div class="sec-h">
+          <h2 class="sec-t">공사 진행률</h2>
+          <span class="pill n num" id="progPct">0%</span>
+        </div>
+        <div class="card"><div class="cbody">
+          <div class="bar g"><i id="progBar" style="width:0"></i></div>
+          <div style="font-size:.82rem;color:var(--tx-2);margin-top:11px" id="progNote"></div>
+        </div></div>
+      </div>
+
+      <div class="sec">
+        <div class="sec-h">
+          <h2 class="sec-t">게시판 인기글</h2>
+          <button class="sec-a" onclick="App.go('board')">전체보기</button>
+        </div>
+        <div class="list" id="homeBoard"></div>
+      </div>
+
+      <div class="sec">
+        <div class="sec-h">
+          <h2 class="sec-t">최근 소식</h2>
+          <button class="sec-a" onclick="App.go('notice')">전체보기</button>
+        </div>
+        <div class="list" id="homeNotice"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 위임장 ═══ -->
+<section class="page" id="p-delegate">
+  <div class="steps" id="stepBar">
+    <div class="step on"><i></i><span>세대 확인</span></div>
+    <div class="step"><i></i><span>정보 입력</span></div>
+    <div class="step"><i></i><span>서명·제출</span></div>
+  </div>
+
+  <div id="st-1">
+    <div class="card"><div class="cbody">
+      <p class="sec-d" style="margin-top:0">
+        본인 세대를 선택해 주세요. 한 세대당 한 번만 접수됩니다.</p>
+      <div class="grid2">
+        <div class="field" style="margin-bottom:0">
+          <label class="lbl">동<em>*</em></label>
+          <select class="inp" id="inDong"></select>
+        </div>
+        <div class="field" style="margin-bottom:0">
+          <label class="lbl">호수<em>*</em></label>
+          <input class="inp" id="inHo" inputmode="numeric" placeholder="예) 1203">
+        </div>
+      </div>
+      <div class="hint">호수를 모르시면 계약서 또는 분양계약 문자에서 확인하실 수 있습니다.</div>
+    </div></div>
+    <button class="btn" style="margin-top:14px" onclick="Deleg.step(2)">다음</button>
+  </div>
+
+  <div id="st-2" hidden>
+    <div class="card"><div class="cbody">
+      <div class="field">
+        <label class="lbl">성명<em>*</em></label>
+        <input class="inp" id="inName" placeholder="계약자 본인 성명">
+      </div>
+      <div class="field">
+        <label class="lbl">생년월일<em>*</em></label>
+        <input class="inp" id="inBirth" inputmode="numeric" placeholder="예) 800115">
+      </div>
+      <div class="field">
+        <label class="lbl">휴대전화<em>*</em></label>
+        <input class="inp" id="inTel" inputmode="tel" placeholder="010-0000-0000">
+        <div class="hint">접수 확인 및 총회 안내 목적으로만 사용합니다.</div>
+      </div>
+      <label class="act" style="box-shadow:none;padding:13px 14px">
+        <input type="checkbox" id="inJoint" onchange="Deleg.joint()" style="width:20px;height:20px;accent-color:var(--acc)">
+        <div class="tx"><div class="tt" style="font-size:.9rem">부부 공동명의입니다</div>
+          <div class="ds">체크하시면 배우자 서명란이 함께 표시됩니다.</div></div>
+      </label>
+    </div></div>
+    <div style="display:flex;gap:9px;margin-top:14px">
+      <button class="btn ghost" style="flex:0 0 96px" onclick="Deleg.step(1)">이전</button>
+      <button class="btn" onclick="Deleg.step(3)">다음</button>
+    </div>
+  </div>
+
+  <div id="st-3" hidden>
+    <div class="card"><div class="cbody">
+      <p class="sec-d" style="margin-top:0">
+        아래 내용에 동의하며, 입주예정자협의회에 권한을 위임합니다.</p>
+      <div style="background:var(--surf-2);border-radius:var(--r-s);padding:13px 14px;
+                  font-size:.82rem;color:var(--tx-2);line-height:1.65;margin-bottom:16px" id="agreeTx"></div>
+      <label class="act" style="box-shadow:none;padding:13px 14px;margin-bottom:18px">
+        <input type="checkbox" id="inAgree" onchange="Deleg.agree()"
+               style="width:20px;height:20px;accent-color:var(--acc);flex:none">
+        <div class="tx"><div class="tt" style="font-size:.9rem">위 내용에 동의하고 위임합니다 <span style="color:var(--bad)">*</span></div>
+          <div class="ds">동의하셔야 서명란이 열립니다.</div></div>
+      </label>
+
+      <div id="signArea" hidden>
+      <label class="lbl">위임인(계약자) 서명<em>*</em></label>
+      <div class="signer">
+        <div class="signer-h"><span class="sname" id="nm1">계약자</span>
+          <button class="btn ghost sm" onclick="Deleg.clearPad(1)">다시 서명</button></div>
+        <div class="sign" id="wrap1">
+          <canvas id="pad1"></canvas>
+          <div class="ph">이곳에 손가락 또는 마우스로<br>서명해 주세요</div>
+        </div>
+      </div>
+
+      <div id="spouseBox" hidden style="margin-top:20px">
+        <label class="lbl">배우자(공동명의자) 서명<em>*</em></label>
+        <div class="field" style="margin-bottom:12px">
+          <input class="inp" id="inName2" placeholder="배우자 성명">
+        </div>
+        <div class="signer">
+          <div class="signer-h"><span class="sname" id="nm2">배우자</span>
+            <button class="btn ghost sm" onclick="Deleg.clearPad(2)">다시 서명</button></div>
+          <div class="sign" id="wrap2">
+            <canvas id="pad2"></canvas>
+            <div class="ph">배우자께서 직접<br>서명해 주세요</div>
+          </div>
+        </div>
+        <div class="hint">공동명의 세대는 두 분의 서명이 모두 있어야 접수됩니다.</div>
+      </div>
+      </div>
+    </div></div>
+    <div style="display:flex;gap:9px;margin-top:14px">
+      <button class="btn ghost" style="flex:0 0 96px" onclick="Deleg.step(2)">이전</button>
+      <button class="btn" onclick="Deleg.submit()">위임장 제출하기</button>
+    </div>
+  </div>
+
+  <div id="st-done" hidden>
+    <div class="card"><div class="cbody" style="text-align:center;padding:34px 20px">
+      <div style="width:66px;height:66px;border-radius:22px;background:var(--ok-soft);color:var(--ok);
+                  display:grid;place-items:center;font-size:1.9rem;margin:0 auto 16px">✓</div>
+      <div style="font-size:1.16rem;font-weight:800;letter-spacing:-.03em">접수가 완료되었습니다</div>
+      <div style="font-size:.88rem;color:var(--tx-2);margin-top:7px;line-height:1.6" id="doneMsg"></div>
+      <button class="btn ghost" style="margin-top:22px" onclick="Deleg.reset()">처음으로</button>
+    </div></div>
+  </div>
+</section>
+
+<!-- ═══ 투표 ═══ -->
+<section class="page" id="p-vote">
+  <div id="voteBox"></div>
+</section>
+
+<!-- ═══ 소식 ═══ -->
+<section class="page" id="p-notice">
+  <div class="sec" style="margin-top:6px">
+    <div class="sec-h"><h2 class="sec-t">공지사항</h2></div>
+    <div class="list" id="noticeBox"></div>
+  </div>
+  <div class="sec">
+    <div class="sec-h"><h2 class="sec-t">일정 타임라인</h2></div>
+    <div class="card"><div class="cbody"><div class="tl" id="tlBox"></div></div></div>
+  </div>
+</section>
+
+<!-- ═══ 단지 개요 ═══ -->
+<section class="page" id="p-apt">
+  <div class="sec" style="margin-top:6px">
+    <div class="sec-h"><h2 class="sec-t">단지 개요</h2></div>
+    <div class="list" id="aptBox"></div>
+  </div>
+  <div class="sec">
+    <div class="sec-h"><h2 class="sec-t">주택형</h2></div>
+    <div class="card"><div class="cbody" id="typeBox"></div></div>
+  </div>
+</section>
+
+<!-- ═══ 임원진 ═══ -->
+<section class="page" id="p-org">
+  <div class="sec" style="margin-top:6px">
+    <div class="sec-h"><h2 class="sec-t">임원진</h2></div>
+    <div class="list" id="orgBox"></div>
+  </div>
+</section>
+
+<!-- ═══ 회비 ═══ -->
+<section class="page" id="p-budget">
+  <div class="sec" style="margin-top:6px">
+    <div class="sec-h"><h2 class="sec-t">회비 납부 현황</h2>
+      <span class="pill n num" id="feeRate">0%</span></div>
+    <div class="card"><div class="cbody">
+      <div class="bar"><i id="feeBar" style="width:0"></i></div>
+      <div class="feegrid" id="feeSum"></div>
+      <div class="q-foot" id="feeNote"></div>
+    </div></div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-h"><h2 class="sec-t">우리 집 납부 확인</h2></div>
+    <div class="card"><div class="cbody">
+      <div class="grid2">
+        <div class="field" style="margin-bottom:0"><label class="lbl">동</label>
+          <select class="inp" id="feDong"></select></div>
+        <div class="field" style="margin-bottom:0"><label class="lbl">호수</label>
+          <input class="inp" id="feHo" inputmode="numeric" placeholder="예) 1203"></div>
+      </div>
+      <button class="btn" style="margin-top:14px" onclick="Fee.check()">확인</button>
+      <div id="feResult" hidden style="margin-top:14px"></div>
+    </div></div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-h"><h2 class="sec-t">동별 납부율</h2></div>
+    <div class="heat" id="feeHeat"></div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-h"><h2 class="sec-t">수입 · 지출 내역</h2>
+      <span class="pill n">영수증 첨부</span></div>
+    <p class="sec-d">모든 지출에 증빙이 붙습니다. 10만원 이상은 임원 과반 승인 후 집행됩니다.</p>
+    <div class="list" id="budBox"></div>
+  </div>
+</section>
+
+<!-- ═══ 현장 사진 ═══ -->
+<section class="page" id="p-gallery">
+  <div class="sec" style="margin-top:6px">
+    <div class="sec-h"><h2 class="sec-t">현장 사진</h2></div>
+    <p class="sec-d">임원진이 현장을 방문해 촬영한 공사 진행 사진입니다.</p>
+    <div class="gal" id="galBox"></div>
+  </div>
+</section>
+
+<!-- ═══ 게시판 ═══ -->
+<section class="page" id="p-board">
+  <div id="bdList">
+    <div class="sec" style="margin-top:6px">
+      <div class="sec-h">
+        <h2 class="sec-t">입주민 게시판</h2>
+        <button class="btn sm" onclick="Board.write()">✏️ 글쓰기</button>
+      </div>
+      <div class="segs" id="bdSegs"></div>
+      <div class="searchbar">
+        <span>🔎</span>
+        <input id="bdQ" placeholder="제목·내용 검색" oninput="Board.paint()">
+      </div>
+      <div class="list" id="bdRows"></div>
+    </div>
+  </div>
+
+  <div id="bdView" hidden>
+    <button class="backlink" onclick="Board.back()">‹ 목록으로</button>
+    <div class="card"><div class="cbody">
+      <div class="post-h">
+        <span class="pill n" id="pvCat">자유</span>
+        <h2 class="post-t" id="pvTitle"></h2>
+        <div class="post-m" id="pvMeta"></div>
+      </div>
+      <div class="post-b" id="pvBody"></div>
+      <div class="post-act">
+        <button class="reactbtn" id="pvLike" onclick="Board.like()">👍 <b id="pvLikeN">0</b></button>
+        <span class="post-views" id="pvViews"></span>
+      </div>
+    </div></div>
+
+    <div class="sec">
+      <div class="sec-h"><h2 class="sec-t">댓글 <span id="pvCmtN" class="num">0</span></h2></div>
+      <div class="list" id="pvCmts"></div>
+      <div class="card" style="margin-top:10px"><div class="cbody">
+        <textarea class="inp" id="pvNew" rows="3" placeholder="댓글을 남겨주세요"
+                  style="resize:vertical;min-height:78px"></textarea>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;gap:10px">
+          <label style="display:flex;align-items:center;gap:7px;font-size:.82rem;color:var(--tx-2)">
+            <input type="checkbox" id="pvAnon" style="width:17px;height:17px;accent-color:var(--acc)">익명
+          </label>
+          <button class="btn sm" onclick="Board.comment()">등록</button>
+        </div>
+      </div></div>
+    </div>
+  </div>
+
+  <div id="bdWrite" hidden>
+    <button class="backlink" onclick="Board.back()">‹ 취소</button>
+    <div class="card"><div class="cbody">
+      <div class="field">
+        <label class="lbl">분류</label>
+        <select class="inp" id="wrCat"></select>
+      </div>
+      <div class="field">
+        <label class="lbl">제목</label>
+        <input class="inp" id="wrTitle" placeholder="제목을 입력하세요">
+      </div>
+      <div class="field" style="margin-bottom:0">
+        <label class="lbl">내용</label>
+        <textarea class="inp" id="wrBody" rows="8" placeholder="내용을 입력하세요"
+                  style="resize:vertical;min-height:170px"></textarea>
+      </div>
+    </div></div>
+    <button class="btn" style="margin-top:14px" onclick="Board.save()">등록하기</button>
+  </div>
+</section>
+
+<!-- ═══ 한마디 ═══ -->
+<section class="page" id="p-say">
+  <div class="sec" style="margin-top:6px">
+    <div class="sec-h"><h2 class="sec-t">입주민 한마디</h2>
+      <span class="pill n" id="sayCnt">0</span></div>
+    <p class="sec-d">긴 글은 부담스러우니까. 한 줄이면 충분합니다.</p>
+
+    <div class="saybox">
+      <div class="say-av" id="sayMeAv">?</div>
+      <div class="say-in">
+        <textarea id="sayText" rows="2" maxlength="150"
+                  placeholder="지금 하고 싶은 말, 궁금한 것 한 줄" oninput="Say.count()"></textarea>
+        <div class="say-tags" id="sayTags"></div>
+        <div class="say-foot">
+          <label class="say-anon">
+            <input type="checkbox" id="sayAnon" style="width:16px;height:16px;accent-color:var(--acc)">익명
+          </label>
+          <span class="say-n num" id="sayLen">0 / 150</span>
+          <button class="btn sm" onclick="Say.post()">남기기</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="segs" id="sayFilter"></div>
+    <div id="sayFeed"></div>
+  </div>
+</section>
+
+<!-- ═══ 총회 ═══ -->
+<section class="page" id="p-assembly">
+  <div class="sec" style="margin-top:6px">
+    <div class="sec-h"><h2 class="sec-t">제1차 정기총회</h2>
+      <span class="pill b" id="asD">D-0</span></div>
+    <div class="card"><div class="cbody">
+      <div class="as-grid" id="asInfo"></div>
+      <div class="as-legal" id="asLegal"></div>
+    </div></div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-h"><h2 class="sec-t">참석 · 위임 집계</h2></div>
+    <div class="card"><div class="cbody">
+      <div class="asbar" id="asBar"></div>
+      <div class="aslegend" id="asLeg"></div>
+      <div class="q-foot" id="asFoot" style="margin-top:16px"></div>
+    </div></div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-h"><h2 class="sec-t">내 참석 의사</h2></div>
+    <div id="asPick"></div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-h"><h2 class="sec-t">안건</h2></div>
+    <div class="list" id="asAgenda"></div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-h"><h2 class="sec-t">문서</h2></div>
+    <div class="list">
+      <button class="row" onclick="Assembly.doc('소집공고')"><div class="tick">📄</div>
+        <div class="rl"><div class="rt">총회 소집공고문</div>
+        <div class="rd">법정 공고기한을 반영해 자동 작성됩니다</div></div><div class="ar">›</div></button>
+      <button class="row" onclick="Assembly.doc('의결서')"><div class="tick">⚖️</div>
+        <div class="rl"><div class="rt">총회 의결서</div>
+        <div class="rd">안건별 찬반 집계가 그대로 들어갑니다</div></div><div class="ar">›</div></button>
+      <button class="row" onclick="Assembly.doc('회의록')"><div class="tick">📝</div>
+        <div class="rl"><div class="rt">총회 회의록</div>
+        <div class="rd">참석·위임 인원과 의결 결과 기록</div></div><div class="ar">›</div></button>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 임원 선거 ═══ -->
+<section class="page" id="p-election">
+  <div class="sec" style="margin-top:6px">
+    <div class="sec-h"><h2 class="sec-t" id="elTitle">임원 선거</h2>
+      <span class="pill" id="elState">진행중</span></div>
+    <p class="sec-d" id="elDesc"></p>
+    <div class="card"><div class="cbody">
+      <div class="el-guard" id="elGuard"></div>
+    </div></div>
+  </div>
+  <div class="sec">
+    <div class="sec-h"><h2 class="sec-t">후보자</h2></div>
+    <div id="elCands"></div>
+  </div>
+</section>
+
+<!-- ═══ 계약 분석 ═══ -->
+<section class="page" id="p-legal">
+  <div class="sec" style="margin-top:6px">
+    <div class="sec-h"><h2 class="sec-t">입주자모집공고 분석</h2></div>
+    <p class="sec-d">법무법인 제이엘이 분양공고문 전문을 검토해 입주민에게 불리한 조항을 뽑았습니다.</p>
+    <div class="riskbar" id="lgSum"></div>
+    <div id="lgList"></div>
+  </div>
+  <div class="sec">
+    <div class="sec-h"><h2 class="sec-t">법률 상담 신청</h2></div>
+    <p class="sec-d">협의회 운영·계약 관련 질문을 남기시면 법무법인 제이엘이 검토 후 회신합니다.</p>
+    <div class="card"><div class="cbody">
+      <div class="field">
+        <label class="lbl">분류</label>
+        <select class="inp" id="lgCat">
+          <option>분양계약 관련</option><option>협의회 운영</option>
+          <option>하자·품질</option><option>입주·잔금</option><option>기타</option>
+        </select>
+      </div>
+      <div class="field">
+        <label class="lbl">질문 내용</label>
+        <textarea class="inp" id="lgQ" rows="5" placeholder="구체적으로 적어주실수록 정확한 회신이 가능합니다"
+                  style="resize:vertical;min-height:120px"></textarea>
+      </div>
+      <div class="field" style="margin-bottom:0">
+        <label class="lbl">회신받을 연락처</label>
+        <input class="inp" id="lgTel" inputmode="tel" placeholder="010-0000-0000">
+      </div>
+    </div></div>
+    <button class="btn" style="margin-top:14px" onclick="Legal.ask()">상담 신청하기</button>
+    <div class="sec" id="lgMineWrap" hidden>
+      <div class="sec-h"><h2 class="sec-t">내 상담 내역</h2></div>
+      <div class="list" id="lgMine"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 자료실 ═══ -->
+<section class="page" id="p-docs">
+  <div class="sec" style="margin-top:6px">
+    <div class="sec-h"><h2 class="sec-t">자료실</h2></div>
+    <p class="sec-d">공문·계약서·회의록을 한곳에 보관합니다. 분쟁 시 증거 자료가 됩니다.</p>
+    <div class="segs" id="dcSegs"></div>
+    <div class="list" id="dcRows"></div>
+  </div>
+</section>
+
+<!-- ═══ 명의변경 신고 ═══ -->
+<section class="page" id="p-transfer">
+  <div class="sec" style="margin-top:6px">
+    <div class="sec-h"><h2 class="sec-t">전매 · 명의변경 신고</h2></div>
+    <div class="warnbox">
+      세대 명의가 바뀌면 <b>기존 위임장은 효력을 잃습니다.</b>
+      신고하지 않으면 총회 의결 정족수 산정이 틀어져 의결 자체가 무효가 될 수 있습니다.
+    </div>
+    <div class="card"><div class="cbody">
+      <div class="grid2">
+        <div class="field"><label class="lbl">동</label><select class="inp" id="tfDong"></select></div>
+        <div class="field"><label class="lbl">호수</label>
+          <input class="inp" id="tfHo" inputmode="numeric" placeholder="예) 1203"></div>
+      </div>
+      <div class="field">
+        <label class="lbl">구분</label>
+        <select class="inp" id="tfKind">
+          <option>분양권 전매 (소유자 변경)</option>
+          <option>부부 공동명의 추가</option>
+          <option>상속 · 증여</option>
+          <option>기타 명의변경</option>
+        </select>
+      </div>
+      <div class="field">
+        <label class="lbl">새 소유자 성명</label>
+        <input class="inp" id="tfName" placeholder="변경 후 계약자 성명">
+      </div>
+      <div class="field" style="margin-bottom:0">
+        <label class="lbl">변경일</label>
+        <input class="inp" id="tfDate" type="date">
+      </div>
+    </div></div>
+    <button class="btn" style="margin-top:14px" onclick="Transfer.send()">신고하기</button>
+  </div>
+</section>
+
+<!-- ═══ 내 접수 확인 ═══ -->
+<section class="page" id="p-check">
+  <div class="sec" style="margin-top:6px">
+    <div class="sec-h"><h2 class="sec-t">내 위임장 접수 확인</h2></div>
+    <p class="sec-d">본인 세대의 접수 여부만 확인합니다. 다른 세대 정보는 보이지 않습니다.</p>
+    <div class="card"><div class="cbody">
+      <div class="grid2">
+        <div class="field"><label class="lbl">동</label>
+          <select class="inp" id="ckDong"></select></div>
+        <div class="field"><label class="lbl">호수</label>
+          <input class="inp" id="ckHo" inputmode="numeric" placeholder="예) 1203"></div>
+      </div>
+      <div class="field" style="margin-bottom:0">
+        <label class="lbl">생년월일 6자리</label>
+        <input class="inp" id="ckBirth" inputmode="numeric" placeholder="예) 800115">
+        <div class="hint">본인 확인용입니다. 접수 시 입력하신 번호와 같아야 합니다.</div>
+      </div>
+    </div></div>
+    <button class="btn" style="margin-top:14px" onclick="Check.run()">접수 여부 확인</button>
+    <div id="ckResult" hidden style="margin-top:14px"></div>
+  </div>
+</section>
+
+<!-- ═══ 관리자 ═══ -->
+<section class="page" id="p-admin">
+  <div id="adminGate">
+    <div class="card" style="margin-top:6px"><div class="cbody" style="text-align:center;padding:30px 20px">
+      <div style="font-size:2rem;margin-bottom:12px">🔒</div>
+      <div style="font-weight:800;font-size:1.05rem;letter-spacing:-.03em">임원 전용 화면</div>
+      <div style="font-size:.85rem;color:var(--tx-2);margin:7px 0 20px">입장 코드를 입력해 주세요.</div>
+      <input class="inp" id="inPin" inputmode="numeric" placeholder="• • • •"
+             style="text-align:center;letter-spacing:.5em;font-size:1.2rem;max-width:220px;margin:0 auto">
+      <button class="btn" style="max-width:220px;margin:14px auto 0" onclick="Admin.unlock()">입장</button>
+      <div class="hint" style="margin-top:12px">데모 코드 : <b>1234</b></div>
+    </div></div>
+  </div>
+  <div id="adminBody" hidden>
+    <div class="sec" style="margin-top:6px">
+      <div class="sec-h"><h2 class="sec-t">접수 내역</h2>
+        <button class="sec-a" onclick="Admin.csv()">CSV 내려받기</button></div>
+      <div class="list" id="recBox"></div>
+    </div>
+    <div class="sec">
+      <div class="sec-h"><h2 class="sec-t">미접수 세대</h2>
+        <button class="sec-a" onclick="Admin.feeCsv()">회비 미납 명단 CSV</button></div>
+      <div class="card"><div class="cbody" id="missBox"></div></div>
+    </div>
+    <div class="sec">
+      <div class="sec-h"><h2 class="sec-t">대표성 증명 · 공문 첨부용</h2></div>
+      <p class="sec-d">시행사·시공사에 보내는 공문에 첨부합니다. 위임 현황을 법무법인이 확인한 문서입니다.</p>
+      <button class="btn ink" onclick="Cert.open()">📜 위임 현황 확인서 발급</button>
+    </div>
+
+    <div class="sec">
+      <div class="sec-h"><h2 class="sec-t">카카오 알림톡 발송</h2></div>
+      <p class="sec-d">위임장 접수 시 수집한 연락처로 발송합니다. 앱 설치 없이 카카오톡으로 바로 전달됩니다.</p>
+      <div class="card"><div class="cbody">
+        <div class="field">
+          <label class="lbl">받는 대상</label>
+          <select class="inp" id="atTarget" onchange="Notify.preview()"></select>
+        </div>
+        <div class="field" style="margin-bottom:0">
+          <label class="lbl">템플릿</label>
+          <select class="inp" id="atTpl" onchange="Notify.preview()"></select>
+        </div>
+      </div></div>
+
+      <div class="kt">
+        <div class="kt-phone">
+          <div class="kt-bar">카카오톡</div>
+          <div class="kt-body">
+            <div class="kt-row">
+              <div class="kt-prof" id="ktProf">협</div>
+              <div>
+                <div class="kt-name" id="ktName">입주예정자협의회</div>
+                <div class="kt-bubble">
+                  <div class="kt-head">알림톡 도착</div>
+                  <div class="kt-msg" id="ktMsg"></div>
+                  <div class="kt-btn" id="ktBtn">플랫폼 바로가기</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="kt-side">
+          <div class="kt-stat"><span>발송 대상</span><b class="num" id="atN">0명</b></div>
+          <div class="kt-stat"><span>건당 단가</span><b class="num">9원</b></div>
+          <div class="kt-stat hi"><span>예상 비용</span><b class="num" id="atCost">0원</b></div>
+          <button class="btn" style="margin-top:14px" id="atGo" onclick="Notify.send()">알림톡 발송</button>
+          <div class="hint" id="atHint">데모 화면이므로 실제로 발송되지 않습니다.</div>
+        </div>
+      </div>
+
+      <div class="sec" id="atLogWrap" hidden>
+        <div class="sec-h"><h2 class="sec-t">발송 이력</h2></div>
+        <div class="list" id="atLog"></div>
+      </div>
+    </div>
+
+    <div class="sec">
+      <div class="sec-h"><h2 class="sec-t">지출 승인 대기</h2></div>
+      <div class="list" id="apprBox"></div>
+    </div>
+
+    <div class="sec">
+      <div class="sec-h"><h2 class="sec-t">법률 상담 접수</h2></div>
+      <div class="list" id="askBox"></div>
+    </div>
+
+    <div class="sec">
+      <div class="sec-h"><h2 class="sec-t">명의변경 신고</h2></div>
+      <div class="list" id="tfBox"></div>
+    </div>
+
+    <div class="sec">
+      <div class="sec-h"><h2 class="sec-t">데모 관리</h2></div>
+      <button class="btn ghost" onclick="App.reset()">데모 데이터 처음 상태로 되돌리기</button>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="site-foot">
+  <div class="sf-in">
+    <div>
+      <div class="sf-b"><span class="emblem sf-em" id="footEm">협</span><b id="footOrg">입주예정자협의회</b></div>
+      <p class="sf-p" id="footAddr"></p>
+    </div>
+    <div class="sf-links">
+      <button onclick="App.go('delegate')">위임장 제출</button>
+      <button onclick="App.go('check')">내 접수 확인</button>
+      <button onclick="App.go('vote')">투표·설문</button>
+      <button onclick="App.go('notice')">공지사항</button>
+      <button onclick="App.go('apt')">단지 개요</button>
+      <button onclick="App.go('admin')">임원 로그인</button>
+    </div>
+  </div>
+  <div class="sf-law">법률자문 <b>법무법인 제이엘</b> · 본 플랫폼의 위임장은 「전자문서 및 전자거래 기본법」에 따라 서면과 동일한 효력을 가집니다.</div>
+</footer>
+
+<nav class="tabbar" id="tabbar"></nav>
+
+<div class="scrim" id="scrim" onclick="App.closeSheet()"></div>
+<div class="sheet" id="sheet"><div class="grab"></div><div id="sheetBody"></div></div>
+<div class="toast" id="toast"></div>
+
+<div class="certwrap" id="certWrap" hidden>
+  <div class="certbar">
+    <button class="btn ghost sm" onclick="Cert.close()">닫기</button>
+    <button class="btn sm" onclick="window.print()">인쇄 · PDF 저장</button>
+  </div>
+  <div class="cert" id="certPage"></div>
+</div>
+
+<script src="config.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
