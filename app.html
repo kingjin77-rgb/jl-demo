@@ -288,6 +288,58 @@ button{cursor:pointer;border:0;background:none}
 .kt-stat.hi b{font-size:1.18rem;color:var(--acc)}
 @media(min-width:860px){.kt{grid-template-columns:1fr 300px;align-items:start}}
 
+/* 재미요소 — D-day · 접속자 · 스탬프 · 순위 · 축하 */
+.hero-tags{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.hero-tag{display:inline-flex;align-items:center;gap:6px;font-size:.7rem;font-weight:700;
+  letter-spacing:.06em;color:#A9C0FF;background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.12);border-radius:999px;padding:4px 11px;margin:0}
+.hero.light .hero-tag{color:var(--acc);background:var(--surf);border-color:var(--line)}
+.hero-tag.dday{color:#E8C06A}
+.hero.light .hero-tag.dday{color:var(--gold)}
+.hero-tag.live{color:#7FE0B0}
+.hero.light .hero-tag.live{color:var(--ok)}
+.hero-tag.live::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor;
+  animation:pulse 1.8s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.25}}
+
+.stamps{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}
+.stamp{text-align:center;border-radius:14px;padding:13px 6px;border:1.5px dashed var(--line);
+  background:var(--surf-2);transition:transform .2s,border-color .2s,background .2s}
+.stamp.on{border-style:solid;border-color:var(--ok);background:var(--ok-soft)}
+.stamp .si{font-size:1.3rem;display:block;filter:grayscale(1);opacity:.35;transition:filter .3s,opacity .3s}
+.stamp.on .si{filter:none;opacity:1;animation:pop .45s cubic-bezier(.22,1.4,.4,1)}
+@keyframes pop{0%{transform:scale(.4)}70%{transform:scale(1.18)}100%{transform:scale(1)}}
+.stamp .st{font-size:.72rem;font-weight:700;color:var(--tx-3);margin-top:5px;letter-spacing:-.02em}
+.stamp.on .st{color:var(--ok)}
+.stamp-msg{font-size:.83rem;color:var(--tx-2);margin-top:14px;line-height:1.6}
+.stamp-msg b{color:var(--tx)}
+
+.myrank{font-size:.8rem;font-weight:800;color:var(--acc)}
+.hcell .medal{position:absolute;top:5px;right:6px;font-size:.82rem}
+
+.cheer{position:relative;overflow:hidden;border-radius:var(--r-l);text-align:center;
+  background:linear-gradient(155deg,var(--ink),var(--ink-2) 62%,#1C2B4A);color:#fff;padding:34px 22px 30px}
+.cheer-in{position:relative;z-index:2}
+.cheer-ic{width:62px;height:62px;border-radius:21px;background:rgba(52,211,153,.18);color:#34D399;
+  display:grid;place-items:center;font-size:1.8rem;margin:0 auto 15px;
+  animation:pop .5s cubic-bezier(.22,1.4,.4,1)}
+.cheer-t{font-size:1.08rem;font-weight:800;letter-spacing:-.03em}
+.cheer-no{margin-top:12px;line-height:1}
+.cheer-no span{font-size:3rem;font-weight:800;letter-spacing:-.06em;
+  background:linear-gradient(120deg,#8FA8FF,#E8C06A);-webkit-background-clip:text;
+  background-clip:text;-webkit-text-fill-color:transparent}
+.cheer-no i{font-style:normal;font-size:.9rem;color:#9FB0C7;margin-left:5px;font-weight:700}
+.cheer-bar{height:7px;border-radius:999px;background:rgba(255,255,255,.14);overflow:hidden;
+  margin:20px 0 9px;max-width:300px;margin-left:auto;margin-right:auto}
+.cheer-bar i{display:block;height:100%;border-radius:999px;
+  background:linear-gradient(90deg,#5C82FF,#E8C06A);transition:width 1.1s cubic-bezier(.22,1,.36,1)}
+.cheer-rate{font-size:.85rem;color:#C9D4E8;font-weight:700}
+.cheer-sub{font-size:.83rem;color:#93A4C4;margin-top:14px;line-height:1.6}
+.cf{position:absolute;inset:0;z-index:1;pointer-events:none;overflow:hidden}
+.cf i{position:absolute;top:-14px;width:8px;height:13px;border-radius:2px;opacity:.9;
+  animation:fall linear forwards}
+@keyframes fall{to{transform:translateY(340px) rotate(620deg);opacity:0}}
+
 /* 회의 */
 .as-grid{display:grid;grid-template-columns:auto 1fr;gap:10px 18px;font-size:.9rem;align-items:baseline}
 .as-grid dt{color:var(--tx-2);font-size:.83rem}
@@ -669,7 +721,11 @@ select.inp{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.
 <section class="page on" id="p-home">
   <div class="hero">
     <div class="hero-tx">
-      <div class="hero-tag">● 위임장 접수 진행중</div>
+      <div class="hero-tags">
+        <span class="hero-tag">● 위임장 접수 진행중</span>
+        <span class="hero-tag dday" id="hDday"></span>
+        <span class="hero-tag live" id="hLive"></span>
+      </div>
       <h1 id="heroName">OO아파트</h1>
       <p class="loc" id="heroLoc"></p>
     </div>
@@ -716,9 +772,18 @@ select.inp{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.
       </div>
 
       <div class="sec">
+        <div class="sec-h"><h2 class="sec-t">나의 참여</h2>
+          <span class="pill n" id="stampN">0 / 4</span></div>
+        <div class="card"><div class="cbody">
+          <div class="stamps" id="stampBox"></div>
+          <div class="stamp-msg" id="stampMsg"></div>
+        </div></div>
+      </div>
+
+      <div class="sec">
         <div class="sec-h">
-          <h2 class="sec-t">동별 접수 현황</h2>
-          <button class="sec-a" onclick="App.openSheet('heatinfo')">보는 법</button>
+          <h2 class="sec-t">동별 접수 순위</h2>
+          <span class="myrank" id="myRank"></span>
         </div>
         <div class="heat" id="heatBox"></div>
       </div>
@@ -857,13 +922,21 @@ select.inp{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.
   </div>
 
   <div id="st-done" hidden>
-    <div class="card"><div class="cbody" style="text-align:center;padding:34px 20px">
-      <div style="width:66px;height:66px;border-radius:22px;background:var(--ok-soft);color:var(--ok);
-                  display:grid;place-items:center;font-size:1.9rem;margin:0 auto 16px">✓</div>
-      <div style="font-size:1.16rem;font-weight:800;letter-spacing:-.03em">접수가 완료되었습니다</div>
-      <div style="font-size:.88rem;color:var(--tx-2);margin-top:7px;line-height:1.6" id="doneMsg"></div>
-      <button class="btn ghost" style="margin-top:22px" onclick="Deleg.reset()">처음으로</button>
-    </div></div>
+    <div class="cheer" id="cheerCard">
+      <div class="cf" id="cfBox"></div>
+      <div class="cheer-in">
+        <div class="cheer-ic">✓</div>
+        <div class="cheer-t">접수가 완료되었습니다</div>
+        <div class="cheer-no"><span class="num" id="doneNo">0</span><i>번째 참여</i></div>
+        <div class="cheer-bar"><i id="doneBar" style="width:0"></i></div>
+        <div class="cheer-rate" id="doneRate"></div>
+        <div class="cheer-sub" id="doneMsg"></div>
+      </div>
+    </div>
+    <div style="display:flex;gap:9px;margin-top:12px">
+      <button class="btn ghost" onclick="Deleg.reset()">처음으로</button>
+      <button class="btn" onclick="Deleg.share()">📣 이웃에게 알리기</button>
+    </div>
   </div>
 </section>
 

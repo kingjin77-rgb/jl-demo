@@ -409,6 +409,7 @@ var App = {
     if (dnb) dnb.classList.add('on');
     location.hash = id;
     window.scrollTo(0, 0);
+    if (id === 'home') this.paintHome();
     if (id === 'admin' && S.pin) Admin.paint();
     if (id === 'board') Board.back();
     if (id === 'say') Say.init();
@@ -435,6 +436,8 @@ var App = {
       $('ringPct').textContent = n + '%';
     }, 32);
 
+    this.paintDday();
+    this.paintStamps();
     this.paintQuorum(done, pct);
 
     /* 지금 하실 일 */
@@ -457,20 +460,32 @@ var App = {
     box.appendChild(this.actCard('📢', '공지사항 확인',
       S.notices[0].t, '', 'notice', null));
 
-    /* 동별 히트맵 */
+    /* 동별 순위 — 접수율 높은 순으로 줄 세웁니다 */
+    var rank = C.dongs.map(function (row) {
+      var k = S.recs.filter(function (r) { return r.dong === row[0]; }).length;
+      return { d: row[0], tot: row[1], k: k, p: Math.round(k / row[1] * 100) };
+    }).sort(function (a, b) { return b.p - a.p; });
+
+    var MEDAL = ['🥇', '🥈', '🥉'];
     var heat = $('heatBox'); heat.innerHTML = '';
-    C.dongs.forEach(function (row) {
-      var d = row[0], tot = row[1];
-      var k = S.recs.filter(function (r) { return r.dong === d; }).length;
-      var p = Math.round(k / tot * 100);
-      var c = el('div', 'hcell' + (p >= 80 ? ' hi' : p < 60 ? ' lo' : ''),
+    rank.forEach(function (x, i) {
+      var c = el('div', 'hcell' + (x.p >= 80 ? ' hi' : x.p < 60 ? ' lo' : ''),
         '<div class="fill" style="height:0"></div>' +
-        '<div class="d">' + esc(d) + '동</div>' +
-        '<div class="p num">' + p + '%</div>' +
-        '<div class="n num">' + k + '/' + tot + '</div>');
+        (i < 3 ? '<span class="medal">' + MEDAL[i] + '</span>' : '') +
+        '<div class="d">' + esc(x.d) + '동</div>' +
+        '<div class="p num">' + x.p + '%</div>' +
+        '<div class="n num">' + x.k + '/' + x.tot + '</div>');
       heat.appendChild(c);
-      setTimeout(function () { c.querySelector('.fill').style.height = p + '%'; }, 200);
+      setTimeout(function () { c.querySelector('.fill').style.height = x.p + '%'; }, 200);
     });
+
+    var me2 = Deleg.mine();
+    var mr = $('myRank');
+    if (me2) {
+      var idx = rank.findIndex(function (x) { return x.d === me2.dong; });
+      mr.textContent = idx >= 0
+        ? '우리 ' + me2.dong + '동 ' + (idx + 1) + '위 / ' + rank.length + '개동' : '';
+    } else mr.textContent = '';
 
     /* 공정률 */
     $('progPct').textContent = C.progress + '%';
@@ -497,6 +512,59 @@ var App = {
     S.notices.slice(0, 3).forEach(function (n2) {
       hn.appendChild(App.noticeRow(n2, true));
     });
+  },
+
+  /* ── 입주 D-day · 실시간 접속자 ── */
+  paintDday: function () {
+    var t = $('hDday');
+    if (C.moveInDate) {
+      var d = Math.ceil((new Date(C.moveInDate) - new Date()) / 86400000);
+      t.textContent = d > 0 ? '입주까지 D-' + d.toLocaleString() : '입주 시작';
+      t.hidden = false;
+    } else t.hidden = true;
+
+    /* 지금 보고 있는 사람 — 접수율에 비례해 자연스럽게 흔들립니다 */
+    var base = Math.max(3, Math.round(S.recs.length / 70));
+    var live = $('hLive');
+    var tick = function () {
+      var n = base + Math.floor(Math.random() * 6);
+      live.textContent = '지금 ' + n + '명이 보는 중';
+    };
+    tick();
+    clearInterval(App._liveT);
+    App._liveT = setInterval(tick, 7000);
+  },
+
+  /* ── 참여 스탬프 4칸 ── */
+  paintStamps: function () {
+    var me = Deleg.mine();
+    var did = {
+      del:  !!me,
+      vote: S.votes.some(function (v) { return v.mine !== null; }),
+      fee:  !!(me && S.fees[me.dong + '-' + me.ho]),
+      say:  S.says.some(function (x) { return (x.id || '').indexOf('u') === 0; })
+    };
+    var items = [
+      { k:'del',  ic:'✍️', t:'위임장',  go:'delegate' },
+      { k:'vote', ic:'🗳️', t:'투표',    go:'vote' },
+      { k:'fee',  ic:'💰', t:'회비',    go:'budget' },
+      { k:'say',  ic:'💬', t:'한마디',  go:'say' }
+    ];
+    var n = 0;
+    var box = $('stampBox'); box.innerHTML = '';
+    items.forEach(function (x) {
+      if (did[x.k]) n++;
+      var b = el('button', 'stamp' + (did[x.k] ? ' on' : ''),
+        '<span class="si">' + x.ic + '</span><span class="st">' + x.t + '</span>');
+      b.onclick = function () { App.go(x.go); };
+      box.appendChild(b);
+    });
+    $('stampN').textContent = n + ' / 4';
+    var left = items.filter(function (x) { return !did[x.k]; });
+    $('stampMsg').innerHTML = n === 4
+      ? '<b>4개 모두 완료하셨습니다.</b> 협의회 활동에 큰 힘이 됩니다. 감사합니다.'
+      : '<b>' + (4 - n) + '개 남았습니다.</b> ' +
+        left.map(function (x) { return x.t; }).join(' · ') + ' 참여가 아직입니다.';
   },
 
   /* ── 의결 성립 요건 ── */
@@ -907,18 +975,64 @@ var Deleg = {
         JSON.stringify({ dong:rec.dong, ho:rec.ho, at:rec.at }));
     } catch (e) {}
 
+    var no = S.recs.length, pct2 = Math.round(no / TOTAL * 100);
+    $('doneNo').textContent = no.toLocaleString();
+    $('doneRate').textContent =
+      '전체 ' + TOTAL.toLocaleString() + '세대 중 ' + no.toLocaleString() + '세대 참여 · ' + pct2 + '%';
+    setTimeout(function () { $('doneBar').style.width = pct2 + '%'; }, 300);
     $('doneMsg').innerHTML =
       esc(rec.dong) + '동 ' + esc(rec.ho) + '호 · ' +
       (joint ? '공동명의 2인 서명' : '단독명의 1인 서명') + '<br>' +
       (C.demo
         ? '데모 화면이므로 실제로는 저장되지 않았습니다.'
         : '협의회 서버에 정상 접수되었습니다.');
+    this.confetti();
 
     [1, 2, 3].forEach(function (i) { $('st-' + i).hidden = true; });
     $('st-done').hidden = false;
     Array.prototype.forEach.call($('stepBar').children, function (s) { s.className = 'step did'; });
     App.paintHome();
     window.scrollTo(0, 0);
+  },
+
+  /* 색종이 — 접수 완료 축하 */
+  confetti: function () {
+    var box = $('cfBox');
+    if (!box) return;
+    box.innerHTML = '';
+    var cols = ['#5C82FF', '#E8C06A', '#34D399', '#F27A9B', '#8FA8FF'];
+    for (var i = 0; i < 34; i++) {
+      var p = document.createElement('i');
+      p.style.left = (Math.random() * 100) + '%';
+      p.style.background = cols[i % cols.length];
+      p.style.animationDuration = (1.5 + Math.random() * 1.4) + 's';
+      p.style.animationDelay = (Math.random() * 0.5) + 's';
+      box.appendChild(p);
+    }
+    setTimeout(function () { box.innerHTML = ''; }, 3600);
+  },
+
+  /* 이웃에게 알리기 */
+  share: function () {
+    var no = S.recs.length, pct2 = Math.round(no / TOTAL * 100);
+    var txt = '[' + C.org + ']\n' +
+      '저는 위임장을 제출했습니다. (' + no.toLocaleString() + '번째 참여)\n' +
+      '현재 ' + TOTAL.toLocaleString() + '세대 중 ' + no.toLocaleString() + '세대 · ' + pct2 + '% 참여\n\n' +
+      '앱 설치 없이 1분이면 됩니다. 우리 단지 일이니 함께해 주세요.';
+    var url = location.href.split('#')[0];
+    if (navigator.share) {
+      navigator.share({ title: C.org, text: txt, url: url })
+        .then(function () { App.toast('공유했습니다'); })
+        .catch(function () {});
+      return;
+    }
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(txt + '\n' + url)
+        .then(function () { App.toast('문구와 링크를 복사했습니다. 단톡방에 붙여넣으세요'); })
+        .catch(function () { App.toast('이 기기에서는 공유가 제한됩니다'); });
+      return;
+    }
+    App.toast('이 기기에서는 공유가 제한됩니다');
   },
 
   reset: function () {

@@ -25,6 +25,7 @@ window.CONFIG = {
   builder:  '○○건설(주)',
   owner:    '○○개발(주)',
   moveIn:   '2027년 3월 예정',
+  moveInDate: '2027-03-02',   // D-day 계산용 (예정일)
   totalUnits: 900,
 
   /* ── 동 구성 ── [동번호, 세대수] ── */
