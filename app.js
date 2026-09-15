@@ -921,7 +921,11 @@ var App = {
     b.onclick = function () {
       App.sheet(n.t, '<div style="font-size:.88rem;color:var(--tx-2);line-height:1.75">' +
         esc(n.s) + '</div><div style="font-size:.76rem;color:var(--tx-3);margin-top:16px">' +
-        esc(n.d) + ' · ' + esc(C.org) + '</div>');
+        esc(n.d) + ' · ' + esc(C.org) + '</div>' +
+        '<button class="btn" style="margin-top:18px" onclick="App.share(' +
+        JSON.stringify(n.t).replace(/"/g, '&quot;') + ',' +
+        JSON.stringify([n.s, '', '등록일 ' + n.d]).replace(/"/g, '&quot;') +
+        ',\'notice\')">💬 단톡방에 공유</button>');
     };
     return b;
   },
@@ -963,6 +967,15 @@ var App = {
         wrap.appendChild(b);
         setTimeout(function () { b.querySelector('.fill').style.width = p + '%'; }, 220);
       });
+      var sh = el('button', 'btn ghost sm', '💬 단톡방에 공유');
+      sh.style.cssText = 'width:100%;margin-top:11px';
+      sh.onclick = function () {
+        App.share('투표가 진행 중입니다 — ' + v.q,
+          v.opts.map(function (o) {
+            return '· ' + o.t + '  ' + (tot ? Math.round(o.v / tot * 100) : 0) + '%';
+          }).concat(['', '마감 ' + v.end + ' · 현재 ' + tot.toLocaleString() + '세대 참여']), 'vote');
+      };
+      wrap.appendChild(sh);
       sec.appendChild(wrap);
       box.appendChild(sec);
     });
@@ -1080,6 +1093,26 @@ var App = {
     var next = cur ? (cur === 'dark' ? 'light' : 'dark') : (dark ? 'light' : 'dark');
     r.setAttribute('data-theme', next);
     try { localStorage.setItem('jl2_theme', next); } catch (e) {}
+  },
+
+  /* 단톡방에 그대로 붙여넣을 문구를 만들어 공유합니다 */
+  share: function (title, lines, hash) {
+    var url = location.href.split('#')[0] + (hash ? '#' + hash : '');
+    var txt = '[' + C.org + ']\n\n' + title + '\n' +
+      (lines || []).filter(Boolean).join('\n') + '\n\n▸ 확인하기';
+    if (navigator.share) {
+      navigator.share({ title: C.org, text: txt, url: url })
+        .then(function () { Anim.ok(); }).catch(function () {});
+      return;
+    }
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(txt + '\n' + url).then(function () {
+        App.toast('복사했습니다. 단톡방에 붙여넣으세요');
+        Anim.ok();
+      }).catch(function () { App.toast('이 기기에서는 공유가 제한됩니다'); });
+      return;
+    }
+    App.toast('이 기기에서는 공유가 제한됩니다');
   },
 
   toast: function (msg) {
@@ -1674,6 +1707,19 @@ var Assembly = {
         '<div class="rl"><div class="rt">' + esc(x.t) + '</div>' +
         '<div class="rm"><span class="pill n">의결요건 ' + esc(x.s) + '</span></div></div>'));
     });
+  },
+
+  share: function () {
+    var a = S.assembly, deleg = S.recs.length;
+    var att = Object.keys(a.attend).filter(function (k) { return a.attend[k] === 'y'; }).length + 132;
+    var days = Math.max(0, Math.ceil((new Date(a.date) - new Date()) / 86400000));
+    App.share(a.no + ' 안내  (D-' + days + ')', [
+      '· 일시 : ' + a.date + ' ' + a.time,
+      '· 장소 : ' + a.place,
+      '',
+      '현재 참석 ' + att.toLocaleString() + '세대 · 위임 ' + deleg.toLocaleString() + '세대',
+      '참석이 어려우시면 위임장을 제출해 주세요. 1분이면 됩니다.'
+    ], 'assembly');
   },
 
   pick: function (v) {
