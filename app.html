@@ -535,6 +535,16 @@ canvas.cf{position:absolute;inset:0;z-index:1;pointer-events:none;width:100%;hei
 .cand-f .bar{flex:1}
 .cand-v{font-size:.85rem;font-weight:800;color:var(--acc);flex:none;min-width:74px;text-align:right}
 
+/* 분양전환 */
+.cv-out{margin-top:18px;padding-top:16px;border-top:1px solid var(--line-2);text-align:center}
+.cv-range{font-size:1.5rem;font-weight:800;letter-spacing:-.04em;line-height:1.3}
+.cv-range em{font-style:normal;font-size:.9rem;color:var(--tx-2);font-weight:600;margin:0 5px}
+.cv-mid{font-size:.85rem;color:var(--tx-2);margin-top:8px}
+.cv-mid b{color:var(--acc)}
+.cv-adj{display:flex;gap:7px;justify-content:center;flex-wrap:wrap;margin-top:13px}
+.cv-adj span{font-size:.72rem;font-weight:700;background:var(--surf-2);border-radius:999px;
+  padding:4px 10px;color:var(--tx-2)}
+
 /* 계약 분석 */
 .riskbar{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:14px}
 .riskbar div{background:var(--surf);border:1px solid var(--line);border-radius:14px;
@@ -973,7 +983,7 @@ select.inp{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.
     </div>
 
     <div>
-      <div class="sec">
+      <div class="sec" id="progSec">
         <div class="sec-h">
           <h2 class="sec-t">공사 진행률</h2>
           <span class="pill n num" id="progPct">0%</span>
@@ -981,6 +991,18 @@ select.inp{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.
         <div class="card"><div class="cbody">
           <div class="bar g"><i id="progBar" style="width:0"></i></div>
           <div style="font-size:.82rem;color:var(--tx-2);margin-top:11px" id="progNote"></div>
+        </div></div>
+      </div>
+
+      <div class="sec" id="convSec" hidden>
+        <div class="sec-h">
+          <h2 class="sec-t">분양전환 진행</h2>
+          <span class="pill n num" id="convPct">—</span>
+        </div>
+        <div class="card"><div class="cbody">
+          <div class="bar g"><i id="convBar" style="width:0"></i></div>
+          <div style="font-weight:750;font-size:.95rem;margin-top:12px" id="convNow"></div>
+          <div style="font-size:.82rem;color:var(--tx-2);margin-top:3px" id="convNote"></div>
         </div></div>
       </div>
 
@@ -1309,6 +1331,62 @@ select.inp{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.
 
     <div class="segs" id="sayFilter"></div>
     <div id="sayFeed"></div>
+  </div>
+</section>
+
+<!-- ═══ 분양전환 (분양전환 단지 전용) ═══ -->
+<section class="page" id="p-convert">
+  <div class="sec" style="margin-top:6px">
+    <div class="sec-h"><h2 class="sec-t">분양전환 진행 단계</h2>
+      <span class="pill b" id="cvStage">—</span></div>
+    <div class="card"><div class="cbody"><div class="tl" id="cvSteps"></div></div></div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-h"><h2 class="sec-t">우리 집 예상 전환가</h2></div>
+    <div class="warnbox">
+      아래 금액은 <b>감정평가 전 참고용 추정치</b>입니다.
+      실제 전환가는 감정평가 결과에 따라 달라지며, 본 화면의 수치는 어떠한 효력도 갖지 않습니다.
+    </div>
+    <div class="card"><div class="cbody">
+      <div class="field">
+        <label class="lbl">주택형</label>
+        <select class="inp" id="cvType" onchange="Convert.calc()"></select>
+      </div>
+      <div class="grid2">
+        <div class="field" style="margin-bottom:0">
+          <label class="lbl">층</label>
+          <select class="inp" id="cvFloor" onchange="Convert.calc()">
+            <option value="-6">저층 (1~3층)</option>
+            <option value="0" selected>중층</option>
+            <option value="4">고층 (최상층)</option>
+          </select>
+        </div>
+        <div class="field" style="margin-bottom:0">
+          <label class="lbl">향</label>
+          <select class="inp" id="cvDir" onchange="Convert.calc()">
+            <option value="2">남향</option>
+            <option value="0" selected>동·서향</option>
+            <option value="-3">북향·측면</option>
+          </select>
+        </div>
+      </div>
+      <div class="cv-out" id="cvOut"></div>
+    </div></div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-h"><h2 class="sec-t">전환 의사 집계</h2>
+      <span class="pill n" id="cvIntentN">0세대 응답</span></div>
+    <p class="sec-d">협상 전에 세대별 의사를 파악해야 추진위가 정확한 요구를 할 수 있습니다.</p>
+    <div class="asbar" id="cvBar"></div>
+    <div class="aslegend" id="cvLeg"></div>
+    <div id="cvPick" style="margin-top:14px"></div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-h"><h2 class="sec-t">단지 현황</h2></div>
+    <div class="list" id="cvInfo"></div>
   </div>
 </section>
 

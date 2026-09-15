@@ -235,6 +235,7 @@ var TOTAL = C.dongs.reduce(function (a, r) { return a + r[1]; }, 0) || C.totalUn
 
 /* 회의 명칭 — 조합이 아니므로 '총회'를 쓰지 않습니다. config.meeting 에서 정합니다. */
 function MT()  { return C.meeting || '전체회의'; }
+function CONV() { return C.type === 'conversion'; }
 function MTS() { return C.meetingShort || '회의'; }
 
 
@@ -519,13 +520,15 @@ var TABS = [
   { id:'home',     ic:'🏠', t:'홈' },
   { id:'delegate', ic:'✍️', t:'위임장' },
   { id:'say',      ic:'💬', t:'한마디' },
-  { id:'assembly', ic:'⚖️', t:MTS() },
+  CONV() ? { id:'convert', ic:'🔑', t:'분양전환' }
+         : { id:'assembly', ic:'⚖️', t:MTS() },
   { id:'more',     ic:'⋯',  t:'더보기' }
 ];
 var TITLES = {
   home:'홈', delegate:'위임장 제출', vote:'투표 · 설문', notice:'소식',
   apt:'단지 개요', org:'임원진', budget:'회비 · 지출', gallery:'현장 사진',
   board:'게시판', say:'입주민 한마디', check:'내 접수 확인', admin:'관리자',
+  convert:'분양전환',
   assembly:MT(), election:'임원 선거', legal:'계약 분석 · 법률상담',
   docs:'자료실', transfer:'명의변경 신고'
 };
@@ -534,15 +537,17 @@ var DESK = [
   { id:'delegate', t:'위임장' },
   { id:'say',      t:'한마디' },
   { id:'board',    t:'게시판' },
+  CONV() ? { id:'convert', t:'분양전환' } : null,
   { id:'assembly', t:MT() },
   { id:'election', t:'임원 선거' },
   { id:'legal',    t:'계약 분석' },
   { id:'budget',   t:'회비' },
   { id:'docs',     t:'자료실' },
   { id:'notice',   t:'소식' }
-];
+].filter(Boolean);
 var MORE = [
   { id:'board',    ic:'📝', t:'게시판' },
+  CONV() ? { id:'assembly', ic:'⚖️', t:MT() } : { id:'convert', ic:'🔑', t:'분양전환' },
   { id:'vote',     ic:'🗳️', t:'투표·설문' },
   { id:'election', ic:'🗂️', t:'임원 선거' },
   { id:'legal',    ic:'⚠️', t:'계약 분석' },
@@ -555,7 +560,7 @@ var MORE = [
   { id:'check',    ic:'🔎', t:'내 접수 확인' },
   { id:'transfer', ic:'🔁', t:'명의변경 신고' },
   { id:'admin',    ic:'⚙️', t:'관리자' }
-];
+].filter(Boolean);
 
 var App = {
   cur: 'home',
@@ -583,6 +588,7 @@ var App = {
     }
 
     if (C.heroLight !== false) document.querySelector('.hero').classList.add('light');
+    this.applyType();
     document.title = C.org;
     /* 홈 화면에 추가했을 때 뜨는 이름을 단지명으로 바꿉니다 */
     try {
@@ -634,6 +640,7 @@ var App = {
     Election.paint();
     Legal.paint();
     Docs.init();
+    Convert.init();
     Fee.paint();
 
     var t = (location.hash || '').replace('#', '');
@@ -667,6 +674,29 @@ var App = {
   setBarTitle: function () {
     var wide = window.matchMedia('(min-width:960px)').matches;
     $('barTitle').textContent = wide ? C.apt : (TITLES[this.cur] || '');
+  },
+
+  /* 신축 단지와 분양전환 단지는 화면 구성이 다릅니다 */
+  applyType: function () {
+    var conv = CONV();
+    /* 분양전환 단지에는 공사 진행률이 없습니다 — 진행 단계로 바꿉니다 */
+    var pg = $('progSec');
+    if (pg) pg.hidden = conv;
+    var cs = $('convSec');
+    if (cs) cs.hidden = !conv;
+    if (conv) {
+      var lg = document.querySelector('#p-legal .sec-t');
+      if (lg) lg.textContent = '임대차계약 · 분양전환 조건 분석';
+      var ld = document.querySelector('#p-legal .sec-d');
+      if (ld) ld.textContent =
+        '법무법인 제이엘이 임대차계약서와 분양전환 관련 조항을 검토해 ' +
+        '임차인에게 불리한 부분을 뽑았습니다.';
+      var gt = document.querySelector('#p-gallery .sec-t');
+      if (gt) gt.textContent = '단지 현황 사진';
+      var gd = document.querySelector('#p-gallery .sec-d');
+      if (gd) gd.textContent =
+        '노후 상태는 전환가 산정에 영향을 줍니다. 임원진이 기록한 현장 사진입니다.';
+    }
   },
 
   buildTabs: function () {
@@ -719,6 +749,7 @@ var App = {
     if (id === 'assembly') Assembly.paint();
     if (id === 'election') Election.paint();
     if (id === 'budget') Fee.paint();
+    if (id === 'convert') Convert.paint();
   },
 
   /* ── 홈 ── */
@@ -792,10 +823,23 @@ var App = {
         ? '우리 ' + me2.dong + '동 ' + (idx + 1) + '위 / ' + rank.length + '개동' : '';
     } else mr.textContent = '';
 
-    /* 공정률 */
-    $('progPct').textContent = C.progress + '%';
-    $('progNote').textContent = C.progressNote;
-    setTimeout(function () { $('progBar').style.width = C.progress + '%'; }, 250);
+    /* 공정률(신축) 또는 분양전환 진행 단계 */
+    if (CONV() && C.conv) {
+      var done2 = C.conv.steps.filter(function (x) { return x.st === 'done'; }).length;
+      var nowS = C.conv.steps.filter(function (x) { return x.st === 'now'; })[0];
+      var idx = C.conv.steps.indexOf(nowS);
+      $('convPct').textContent = (idx < 0 ? done2 : idx + 1) + ' / ' + C.conv.steps.length + '단계';
+      $('convNow').textContent = nowS ? nowS.t : '진행 전';
+      $('convNote').textContent = nowS ? nowS.s : '';
+      setTimeout(function () {
+        $('convBar').style.width = Math.round(((idx < 0 ? done2 : idx + 0.5) /
+          C.conv.steps.length) * 100) + '%';
+      }, 250);
+    } else {
+      $('progPct').textContent = C.progress + '%';
+      $('progNote').textContent = C.progressNote;
+      setTimeout(function () { $('progBar').style.width = C.progress + '%'; }, 250);
+    }
 
     /* 게시판 인기글 */
     var hb = $('homeBoard'); hb.innerHTML = '';
@@ -996,11 +1040,13 @@ var App = {
   },
 
   paintApt: function () {
-    var rows = [
-      ['단지명', C.apt], ['소재지', C.address], ['총 세대수', TOTAL.toLocaleString() + '세대'],
-      ['동 수', C.dongs.length + '개동'], ['시공사', C.builder], ['시행사', C.owner],
-      ['입주 예정', C.moveIn]
-    ];
+    var rows = CONV() && C.conv
+      ? [['단지명', C.apt], ['소재지', C.address], ['총 세대수', TOTAL.toLocaleString() + '세대'],
+         ['동 수', C.dongs.length + '개동'], ['시공사', C.builder],
+         ['준공', C.conv.built], ['임대 개시', C.conv.rentFrom], ['거주 경과', C.conv.years]]
+      : [['단지명', C.apt], ['소재지', C.address], ['총 세대수', TOTAL.toLocaleString() + '세대'],
+         ['동 수', C.dongs.length + '개동'], ['시공사', C.builder], ['시행사', C.owner],
+         ['입주 예정', C.moveIn]];
     var b = $('aptBox'); b.innerHTML = '';
     rows.forEach(function (r) {
       b.appendChild(el('div', 'row',
@@ -1641,6 +1687,118 @@ var Board = {
   }
 };
 
+
+
+/* ══════════════════════════════════════════════════════════════
+   분양전환 — 분양전환 단지(분추위) 전용
+   ══════════════════════════════════════════════════════════════ */
+var Convert = {
+  init: function () {
+    if (!CONV() || !C.conv) return;
+    var sel = $('cvType'); sel.innerHTML = '';
+    C.conv.prices.forEach(function (p, i) {
+      var o = document.createElement('option');
+      o.value = i; o.textContent = p.t;
+      sel.appendChild(o);
+    });
+    this.paint();
+  },
+
+  paint: function () {
+    if (!CONV() || !C.conv) return;
+    var cv = C.conv;
+
+    /* 진행 단계 */
+    var now = cv.steps.filter(function (x) { return x.st === 'now'; })[0];
+    $('cvStage').textContent = now ? now.t : '진행 전';
+    var t = $('cvSteps'); t.innerHTML = '';
+    cv.steps.forEach(function (x, i) {
+      t.appendChild(el('div', 'tl-i ' + (x.st === 'done' ? 'past' : x.st),
+        '<div class="tl-d">' + (i + 1) + '단계</div>' +
+        '<div class="tl-t">' + esc(x.t) + '</div>' +
+        '<div class="tl-s">' + esc(x.s) + '</div>'));
+    });
+
+    /* 단지 현황 */
+    var rows = [
+      ['준공', cv.built], ['임대 개시', cv.rentFrom], ['거주 경과', cv.years],
+      ['전체 세대', TOTAL.toLocaleString() + '세대'], ['분양전환 대상', cv.target],
+      ['사업 시행자', cv.owner]
+    ];
+    var b = $('cvInfo'); b.innerHTML = '';
+    rows.forEach(function (r) {
+      b.appendChild(el('div', 'row',
+        '<div class="rl"><div class="rd" style="margin:0">' + esc(r[0]) + '</div></div>' +
+        '<div class="rr" style="color:var(--tx);font-weight:700;font-size:.9rem">' + esc(r[1]) + '</div>'));
+    });
+
+    this.calc();
+    this.intent();
+  },
+
+  /* 우리 집 예상 전환가 */
+  calc: function () {
+    var cv = C.conv;
+    var p = cv.prices[+$('cvType').value || 0];
+    var f = +$('cvFloor').value || 0;
+    var d = +$('cvDir').value || 0;
+    var r = 1 + (f + d) / 100;
+    var lo = Math.round(p.low * r / 100) * 100;
+    var hi = Math.round(p.high * r / 100) * 100;
+    var mid = Math.round((lo + hi) / 2 / 100) * 100;
+    var man = function (n) { return (n / 10000).toFixed(2) + '억'; };
+
+    $('cvOut').innerHTML =
+      '<div class="cv-range num">' + man(lo) + '<em>~</em>' + man(hi) + '</div>' +
+      '<div class="cv-mid">중간값 <b class="num">' + mid.toLocaleString() + '만원</b> · ' +
+      esc(p.t) + '</div>' +
+      '<div class="cv-adj">' +
+      (f ? '<span>층 보정 ' + (f > 0 ? '+' : '') + f + '%</span>' : '') +
+      (d ? '<span>향 보정 ' + (d > 0 ? '+' : '') + d + '%</span>' : '') +
+      '<span>감정평가 전 추정</span></div>';
+  },
+
+  /* 전환 / 퇴거 의사 */
+  intent: function () {
+    if (!S.intent) S.intent = { y: 412, n: 63, u: 188, mine: null };
+    var x = S.intent;
+    var tot = x.y + x.n + x.u;
+    var pc = function (v) { return Math.round(v / tot * 100); };
+    $('cvIntentN').textContent = tot.toLocaleString() + '세대 응답';
+    $('cvBar').innerHTML =
+      '<i class="b" style="width:' + pc(x.y) + '%">' + (pc(x.y) > 8 ? pc(x.y) + '%' : '') + '</i>' +
+      '<i class="a" style="width:' + pc(x.u) + '%">' + (pc(x.u) > 8 ? pc(x.u) + '%' : '') + '</i>' +
+      '<i class="c" style="width:' + pc(x.n) + '%">' + (pc(x.n) > 8 ? pc(x.n) + '%' : '') + '</i>';
+    $('cvLeg').innerHTML =
+      '<span><s style="background:var(--ok)"></s>전환 희망 ' + x.y.toLocaleString() + '세대</span>' +
+      '<span><s style="background:var(--acc)"></s>조건에 따라 결정 ' + x.u.toLocaleString() + '세대</span>' +
+      '<span><s style="background:var(--tx-3)"></s>퇴거 예정 ' + x.n.toLocaleString() + '세대</span>';
+
+    var box = $('cvPick'); box.innerHTML = '';
+    [['y', '🏠', '분양전환을 받겠습니다', '조건이 맞으면 계약할 의사가 있습니다'],
+     ['u', '🤔', '조건을 보고 결정하겠습니다', '전환가에 따라 달라집니다'],
+     ['n', '📦', '퇴거하겠습니다', '분양전환을 받지 않습니다']].forEach(function (o) {
+      var b2 = el('button', 'act' + (x.mine === o[0] ? ' done' : ''));
+      b2.innerHTML = '<div class="ic">' + o[1] + '</div><div class="tx"><div class="tt">' + o[2] +
+        (x.mine === o[0] ? '<span class="pill g">선택함</span>' : '') +
+        '</div><div class="ds">' + o[3] + '</div></div><div class="ar">›</div>';
+      b2.onclick = function () { Convert.pick(o[0]); };
+      box.appendChild(b2);
+    });
+  },
+
+  pick: function (v) {
+    var x = S.intent;
+    if (x.mine === v) return App.toast('이미 선택하셨습니다');
+    if (x.mine) x[x.mine]--;
+    x[v]++;
+    x.mine = v;
+    DB.save();
+    this.intent();
+    Anim.ok();
+    App.toast('의사가 등록되었습니다. 언제든 바꾸실 수 있습니다');
+  }
+};
 
 /* ══════════════════════════════════════════════════════════════
    전체회의
@@ -2340,7 +2498,7 @@ window.App = App; window.Deleg = Deleg; window.Admin = Admin;
 window.Check = Check; window.Board = Board; window.Assembly = Assembly;
 window.Election = Election; window.Legal = Legal; window.Docs = Docs;
 window.Transfer = Transfer; window.Fee = Fee; window.Cert = Cert;
-window.Say = Say; window.Install = Install;
+window.Say = Say; window.Install = Install; window.Convert = Convert;
 document.addEventListener('DOMContentLoaded', function () {
   App.init();
   /* 웹폰트는 화면이 그려진 뒤에 따로 불러옵니다 (로딩 지연 방지) */
