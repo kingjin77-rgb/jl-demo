@@ -575,6 +575,46 @@ canvas.cf{position:absolute;inset:0;z-index:1;pointer-events:none;width:100%;hei
 .rcpt{font-size:.68rem;font-weight:800;background:var(--surf-2);border:1px solid var(--line);
   border-radius:6px;padding:2px 6px;color:var(--tx-2);margin-left:6px}
 
+/* ── 위임장 인쇄 서식 (A4) ─────────────────────────────────
+   규격 210×297mm · 본문 11pt · 줄간격 2.0
+   어절 단위로만 줄이 바뀌고, 기호 뒤에서도 줄을 넘길 수 있게 합니다. */
+.dl{width:210mm;min-height:297mm;margin:22px auto;background:#fff;color:#111;
+  padding:20mm 20mm 16mm;box-shadow:0 10px 40px rgba(0,0,0,.18);
+  display:flex;flex-direction:column;
+  font-family:"Pretendard Variable",Pretendard,"Malgun Gothic","맑은 고딕",serif;
+  font-size:10.5pt;line-height:1.85;letter-spacing:-.01em;
+  word-break:keep-all;overflow-wrap:break-word;line-break:strict;text-align:left}
+.dl h1{font-size:19pt;font-weight:800;letter-spacing:.5em;text-align:center;
+  margin:0 0 3mm;text-indent:.5em}
+.dl .dl-org{text-align:center;font-size:10pt;color:#444;letter-spacing:.1em;margin-bottom:6.5mm}
+.dl table{width:100%;border-collapse:collapse;margin-bottom:7mm}
+.dl th,.dl td{border:1px solid #888;padding:2.2mm 3.5mm;font-size:10pt;line-height:1.6;
+  text-align:left;vertical-align:middle}
+.dl th{background:#F2F4F7;width:26%;font-weight:700;letter-spacing:.02em}
+.dl .dl-lead{margin:0 0 4mm}
+.dl ol{margin:0 0 6mm;padding-left:6mm}
+.dl ol li{margin-bottom:1.9mm;line-height:1.75}
+.dl .dl-note{font-size:9pt;color:#555;line-height:1.75;
+  border-top:1px solid #DDD;padding-top:3.5mm;margin-bottom:6mm}
+.dl .dl-tail{margin-top:auto}
+.dl .dl-date{text-align:center;font-size:11pt;letter-spacing:.12em;margin-bottom:7mm}
+.dl .dl-sign{display:flex;flex-direction:column;gap:4mm;align-items:flex-end}
+.dl .dl-row{display:flex;align-items:flex-end;gap:5mm;font-size:11pt}
+.dl .dl-row .lb{color:#444;font-size:10pt;letter-spacing:.06em}
+.dl .dl-row .nm{font-weight:700;min-width:28mm;text-align:right}
+.dl .dl-row .sg{width:32mm;height:14mm;border-bottom:1px solid #999;
+  display:flex;align-items:flex-end;justify-content:center}
+.dl .dl-row .sg img{max-width:100%;max-height:14mm;display:block}
+.dl .dl-to{margin-top:7mm;text-align:center;font-size:12pt;letter-spacing:.06em}
+.dl .dl-to b{font-size:13.5pt;letter-spacing:.1em}
+.dl .dl-foot{margin-top:6mm;padding-top:3.5mm;border-top:1px solid #DDD;
+  font-size:8pt;color:#666;line-height:1.7}
+@media(max-width:820px){
+  .dl{width:auto;min-height:0;margin:14px;padding:22px 20px;font-size:14px;line-height:1.9}
+  .dl h1{font-size:20px}
+  .dl th,.dl td{font-size:13px;padding:8px 10px}
+}
+
 /* 증명서 */
 .certwrap{position:fixed;inset:0;z-index:90;background:var(--surf-2);overflow:auto;padding:0 0 40px}
 .certbar{position:sticky;top:0;display:flex;gap:9px;justify-content:flex-end;padding:14px 18px;
@@ -874,6 +914,7 @@ select.inp{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.
   body.printing main{display:none!important}
   .certwrap{position:static;background:#fff;padding:0;overflow:visible}
   .cert{width:auto;min-height:0;margin:0;box-shadow:none;padding:20mm 18mm}
+  .dl{width:auto;height:auto;min-height:0;margin:0;box-shadow:none;padding:20mm 20mm 16mm;page-break-inside:avoid}
   @page{size:A4 portrait;margin:0}
 }
 </style>
@@ -1161,6 +1202,8 @@ select.inp{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.
       <button class="btn ghost" onclick="Deleg.reset()">처음으로</button>
       <button class="btn" onclick="Deleg.share()">📣 이웃에게 알리기</button>
     </div>
+    <button class="btn ghost" style="margin-top:9px"
+            onclick="if(Deleg.last)Deed.open(Deleg.last)">🖨 내 위임장 인쇄 · PDF 저장</button>
   </div>
 </section>
 
@@ -1663,10 +1706,11 @@ select.inp{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.
 
 <div class="certwrap" id="certWrap" hidden>
   <div class="certbar">
-    <button class="btn ghost sm" onclick="Cert.close()">닫기</button>
+    <button class="btn ghost sm" onclick="Cert.close();Deed.close()">닫기</button>
     <button class="btn sm" onclick="window.print()">인쇄 · PDF 저장</button>
   </div>
   <div class="cert" id="certPage"></div>
+  <div class="dl" id="dlPage" hidden></div>
 </div>
 
 <script src="config.js"></script>

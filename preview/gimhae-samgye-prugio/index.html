@@ -575,6 +575,46 @@ canvas.cf{position:absolute;inset:0;z-index:1;pointer-events:none;width:100%;hei
 .rcpt{font-size:.68rem;font-weight:800;background:var(--surf-2);border:1px solid var(--line);
   border-radius:6px;padding:2px 6px;color:var(--tx-2);margin-left:6px}
 
+/* ── 위임장 인쇄 서식 (A4) ─────────────────────────────────
+   규격 210×297mm · 본문 11pt · 줄간격 2.0
+   어절 단위로만 줄이 바뀌고, 기호 뒤에서도 줄을 넘길 수 있게 합니다. */
+.dl{width:210mm;min-height:297mm;margin:22px auto;background:#fff;color:#111;
+  padding:20mm 20mm 16mm;box-shadow:0 10px 40px rgba(0,0,0,.18);
+  display:flex;flex-direction:column;
+  font-family:"Pretendard Variable",Pretendard,"Malgun Gothic","맑은 고딕",serif;
+  font-size:10.5pt;line-height:1.85;letter-spacing:-.01em;
+  word-break:keep-all;overflow-wrap:break-word;line-break:strict;text-align:left}
+.dl h1{font-size:19pt;font-weight:800;letter-spacing:.5em;text-align:center;
+  margin:0 0 3mm;text-indent:.5em}
+.dl .dl-org{text-align:center;font-size:10pt;color:#444;letter-spacing:.1em;margin-bottom:6.5mm}
+.dl table{width:100%;border-collapse:collapse;margin-bottom:7mm}
+.dl th,.dl td{border:1px solid #888;padding:2.2mm 3.5mm;font-size:10pt;line-height:1.6;
+  text-align:left;vertical-align:middle}
+.dl th{background:#F2F4F7;width:26%;font-weight:700;letter-spacing:.02em}
+.dl .dl-lead{margin:0 0 4mm}
+.dl ol{margin:0 0 6mm;padding-left:6mm}
+.dl ol li{margin-bottom:1.9mm;line-height:1.75}
+.dl .dl-note{font-size:9pt;color:#555;line-height:1.75;
+  border-top:1px solid #DDD;padding-top:3.5mm;margin-bottom:6mm}
+.dl .dl-tail{margin-top:auto}
+.dl .dl-date{text-align:center;font-size:11pt;letter-spacing:.12em;margin-bottom:7mm}
+.dl .dl-sign{display:flex;flex-direction:column;gap:4mm;align-items:flex-end}
+.dl .dl-row{display:flex;align-items:flex-end;gap:5mm;font-size:11pt}
+.dl .dl-row .lb{color:#444;font-size:10pt;letter-spacing:.06em}
+.dl .dl-row .nm{font-weight:700;min-width:28mm;text-align:right}
+.dl .dl-row .sg{width:32mm;height:14mm;border-bottom:1px solid #999;
+  display:flex;align-items:flex-end;justify-content:center}
+.dl .dl-row .sg img{max-width:100%;max-height:14mm;display:block}
+.dl .dl-to{margin-top:7mm;text-align:center;font-size:12pt;letter-spacing:.06em}
+.dl .dl-to b{font-size:13.5pt;letter-spacing:.1em}
+.dl .dl-foot{margin-top:6mm;padding-top:3.5mm;border-top:1px solid #DDD;
+  font-size:8pt;color:#666;line-height:1.7}
+@media(max-width:820px){
+  .dl{width:auto;min-height:0;margin:14px;padding:22px 20px;font-size:14px;line-height:1.9}
+  .dl h1{font-size:20px}
+  .dl th,.dl td{font-size:13px;padding:8px 10px}
+}
+
 /* 증명서 */
 .certwrap{position:fixed;inset:0;z-index:90;background:var(--surf-2);overflow:auto;padding:0 0 40px}
 .certbar{position:sticky;top:0;display:flex;gap:9px;justify-content:flex-end;padding:14px 18px;
@@ -874,6 +914,7 @@ select.inp{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.
   body.printing main{display:none!important}
   .certwrap{position:static;background:#fff;padding:0;overflow:visible}
   .cert{width:auto;min-height:0;margin:0;box-shadow:none;padding:20mm 18mm}
+  .dl{width:auto;height:auto;min-height:0;margin:0;box-shadow:none;padding:20mm 20mm 16mm;page-break-inside:avoid}
   @page{size:A4 portrait;margin:0}
 }
 </style>
@@ -1161,6 +1202,8 @@ select.inp{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.
       <button class="btn ghost" onclick="Deleg.reset()">처음으로</button>
       <button class="btn" onclick="Deleg.share()">📣 이웃에게 알리기</button>
     </div>
+    <button class="btn ghost" style="margin-top:9px"
+            onclick="if(Deleg.last)Deed.open(Deleg.last)">🖨 내 위임장 인쇄 · PDF 저장</button>
   </div>
 </section>
 
@@ -1663,10 +1706,11 @@ select.inp{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.
 
 <div class="certwrap" id="certWrap" hidden>
   <div class="certbar">
-    <button class="btn ghost sm" onclick="Cert.close()">닫기</button>
+    <button class="btn ghost sm" onclick="Cert.close();Deed.close()">닫기</button>
     <button class="btn sm" onclick="window.print()">인쇄 · PDF 저장</button>
   </div>
   <div class="cert" id="certPage"></div>
+  <div class="dl" id="dlPage" hidden></div>
 </div>
 
 <script>
@@ -1752,6 +1796,12 @@ var S = null;
 function seed() {
   var recs = [];
   var names = ['김','이','박','최','정','강','조','윤','장','임','한','오','서','신','권','황','안','송','전','홍'];
+  var given = ['민준','서연','도윤','하은','지호','수아','예준','지우','시우','서윤',
+               '주원','채원','건우','다인','현우','유진','정우','소율','태민','아린'];
+  var rname = function () {
+    return names[Math.floor(Math.random() * names.length)] +
+           given[Math.floor(Math.random() * given.length)];
+  };
 
   /* 동별 전체 호수 목록을 만든 뒤 그 중 일부를 무작위로 접수 처리 */
   C.dongs.forEach(function (row) {
@@ -1774,9 +1824,9 @@ function seed() {
       var jt = Math.random() < 0.34;
       recs.push({
         dong: d, ho: ho,
-        name: names[Math.floor(Math.random() * names.length)] + '○○',
+        name: rname(),
         joint: jt,
-        name2: jt ? names[Math.floor(Math.random() * names.length)] + '○○' : null,
+        name2: jt ? rname() : null,
         at: Date.now() - Math.floor(Math.random() * 26) * 86400000
       });
     });
@@ -1948,6 +1998,13 @@ function esc(s) {
     return { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c];
   });
 }
+/* 이름 가리기 — 임원 화면이 아닌 곳에서는 성만 보여줍니다 */
+function mask(n) {
+  n = String(n || '').trim();
+  if (!n) return '';
+  return n.charAt(0) + (n.length > 1 ? '○'.repeat(Math.min(n.length - 1, 2)) : '○');
+}
+
 function won(n) {
   return (n < 0 ? '−' : '') + Math.abs(n).toLocaleString('ko-KR') + '원';
 }
@@ -2920,7 +2977,7 @@ var App = {
    위임장
    ══════════════════════════════════════════════════════════════ */
 var Deleg = {
-  cur: 1, pads: {},
+  cur: 1, pads: {}, last: null,
 
   init: function () {
     var sel = $('inDong');
@@ -3085,16 +3142,20 @@ var Deleg = {
     var rec = {
       dong:  $('inDong').value,
       ho:    $('inHo').value.trim(),
-      name:  $('inName').value.trim().charAt(0) + '○○',
+      name:  $('inName').value.trim(),
+      birth: $('inBirth').value.replace(/\D/g, ''),
+      tel:   $('inTel').value.trim(),
       joint: joint,
-      name2: joint ? $('inName2').value.trim().charAt(0) + '○○' : null,
+      name2: joint ? $('inName2').value.trim() : null,
       sign:  this.pads[1].data(),
       sign2: joint ? this.pads[2].data() : null,
       at:    Date.now()
     };
-    S.recs.unshift({ dong:rec.dong, ho:rec.ho, name:rec.name, joint:joint,
-                     name2:rec.name2, at:rec.at });
+    S.recs.unshift({ dong:rec.dong, ho:rec.ho, name:rec.name, birth:rec.birth,
+                     tel:rec.tel, joint:joint, name2:rec.name2,
+                     sign:rec.sign, sign2:rec.sign2, at:rec.at });
     DB.save();
+    Deleg.last = rec;
     try {
       localStorage.setItem(KEY + '_me',
         JSON.stringify({ dong:rec.dong, ho:rec.ho, at:rec.at }));
@@ -3182,12 +3243,15 @@ var Admin = {
 
     var b = $('recBox'); b.innerHTML = '';
     S.recs.slice(0, 20).forEach(function (r) {
-      b.appendChild(el('div', 'row',
+      var row = el('div', 'row',
         '<div class="tick">✓</div>' +
         '<div class="rl"><div class="rt" style="font-size:.9rem">' +
         esc(r.dong) + '동 ' + esc(r.ho) + '호 · ' + esc(r.name) +
         (r.joint ? ' · ' + esc(r.name2) + '<span class="pill b" style="margin-left:6px">공동명의</span>' : '') + '</div>' +
-        '<div class="rm"><span>' + ago(r.at) + ' 접수</span></div></div>'));
+        '<div class="rm"><span>' + ago(r.at) + ' 접수</span></div></div>' +
+        '<button class="btn ghost sm">🖨 출력</button>');
+      row.querySelector('button').onclick = function () { Deed.open(r); };
+      b.appendChild(row);
     });
     if (S.recs.length > 20) {
       b.appendChild(el('div', 'row',
@@ -3919,6 +3983,102 @@ var Fee = {
   }
 };
 
+
+/* ══════════════════════════════════════════════════════════════
+   위임장 인쇄 서식 (A4)
+   ══════════════════════════════════════════════════════════════ */
+var Deed = {
+  /* 한 줄에 다 못 들어가면 기호 뒤에서 줄을 넘길 수 있게 표시를 넣습니다.
+     어절 중간에서는 절대 끊기지 않습니다. */
+  brk: function (s) {
+    return esc(s).replace(/([\/,:;=·])/g, '$1<wbr>');
+  },
+
+  /* 조사·마침표가 줄 첫머리에 오지 않도록 앞말과 붙여 둡니다 */
+  wrap: function (s) {
+    return this.brk(s).replace(/\s+/g, ' ').trim();
+  },
+
+  open: function (rec) {
+    var d = new Date(rec.at || Date.now());
+    var today = new Date();
+    var joint = !!rec.joint;
+
+    var terms = [
+      '입주예정자협의회의 구성 · 운영 및 규약 제정에 관한 사항',
+      '시공사 · 시행사에 대한 하자 · 품질 · 공사 일정 관련 협의 및 요구',
+      '분양계약 · 입주지정기간 · 관리비 부과에 관한 협의',
+      '협의회 회의에서의 의결권 행사 및 임원 선출에 관한 사항',
+      '위 각 호에 부수하는 일체의 행위'
+    ];
+
+    var row = function (lb, nm, img) {
+      return '<div class="dl-row">' +
+        '<span class="lb">' + lb + '</span>' +
+        '<span class="nm">' + esc(nm || '') + '</span>' +
+        '<span class="sg">' + (img ? '<img src="' + img + '" alt="">' : '') + '</span>' +
+        '</div>';
+    };
+
+    $('dlPage').innerHTML =
+      '<h1>위 임 장</h1>' +
+      '<div class="dl-org">' + esc(C.org) + '</div>' +
+
+      '<table>' +
+      '<tr><th>단지명</th><td>' + this.wrap(C.apt) + '</td></tr>' +
+      '<tr><th>소재지</th><td>' + this.wrap(C.address) + '</td></tr>' +
+      '<tr><th>동 / 호수</th><td>' + esc(rec.dong) + '동 ' + esc(rec.ho) + '호</td></tr>' +
+      '<tr><th>위임인 성명</th><td>' + esc(rec.name || '') +
+        (joint ? ' , ' + esc(rec.name2 || '') + ' <span style="font-size:9.5pt;color:#555">(공동명의)</span>' : '') +
+        '</td></tr>' +
+      '<tr><th>접수일시</th><td>' +
+        d.getFullYear() + '. ' + (d.getMonth() + 1) + '. ' + d.getDate() + '. ' +
+        ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2) +
+        '</td></tr>' +
+      '</table>' +
+
+      '<p class="dl-lead">' + this.wrap(
+        '본인은 위 아파트의 분양계약자로서, 아래 각 호의 사항에 관한 일체의 권한을 ' +
+        C.org + '에 위임합니다.') + '</p>' +
+
+      '<ol>' + terms.map(function (t) {
+        return '<li>' + Deed.wrap(t) + '</li>';
+      }).join('') + '</ol>' +
+
+      '<div class="dl-note">' + this.wrap(
+        '※ 본 위임장은 「전자문서 및 전자거래 기본법」 제4조에 따라 서면 위임장과 동일한 효력을 가집니다. ' +
+        '위임인의 자필 전자서명 원본은 협의회가 보관하며, 위임인은 언제든지 서면으로 위임을 철회할 수 있습니다. ' +
+        '수집한 개인정보는 협의회 운영 및 회의 안내 목적에 한하여 사용합니다.') + '</div>' +
+
+      '<div class="dl-tail">' +
+        '<div class="dl-date">' + today.getFullYear() + ' 년 ' +
+          (today.getMonth() + 1) + ' 월 ' + today.getDate() + ' 일</div>' +
+        '<div class="dl-sign">' +
+          row('위 임 인', rec.name, rec.sign) +
+          (joint ? row('공동명의인', rec.name2, rec.sign2) : '') +
+        '</div>' +
+        '<div class="dl-to">' + esc(C.org) + ' <b>귀중</b></div>' +
+        '<div class="dl-foot">' + this.wrap(
+          '본 문서는 ' + C.org + ' 전자 위임장 시스템에서 접수 기록을 근거로 작성되었습니다.') +
+          '<br>출력일시 ' + today.toLocaleString('ko-KR') +
+        '</div>' +
+      '</div>';
+
+    $('certPage').hidden = true;
+    $('dlPage').hidden = false;
+    $('certWrap').hidden = false;
+    document.body.classList.add('printing');
+    window.scrollTo(0, 0);
+  },
+
+  close: function () {
+    $('certWrap').hidden = true;
+    $('dlPage').hidden = true;
+    $('certPage').hidden = false;
+    document.body.classList.remove('printing');
+  }
+};
+
 /* ══════════════════════════════════════════════════════════════
    대표성 증명서 · 문서 출력
    ══════════════════════════════════════════════════════════════ */
@@ -3965,6 +4125,8 @@ var Cert = {
       ' 전자 위임장 시스템의 기록을 근거로 자동 작성되었습니다.' +
       (C.demo ? '<br>※ 데모 화면이므로 기재된 수치는 예시입니다.' : '') +
       '<br>발급일시 ' + d.toLocaleString('ko-KR') + '</div>';
+    $('dlPage').hidden = true;
+    $('certPage').hidden = false;
     $('certWrap').hidden = false;
     document.body.classList.add('printing');
     window.scrollTo(0, 0);
@@ -4220,8 +4382,8 @@ var Check = {
       box.innerHTML =
         '<div class="ck yes"><div class="ci">✓</div>' +
         '<div class="ct">접수 완료된 세대입니다</div>' +
-        '<div class="cs">' + esc(d) + '동 ' + esc(h) + '호 · ' + esc(hit.name) +
-        (hit.joint ? ' · ' + esc(hit.name2) + ' (공동명의)' : '') + '<br>' +
+        '<div class="cs">' + esc(d) + '동 ' + esc(h) + '호 · ' + esc(mask(hit.name)) +
+        (hit.joint ? ' · ' + esc(mask(hit.name2)) + ' (공동명의)' : '') + '<br>' +
         new Date(hit.at).toLocaleDateString('ko-KR') + ' 접수</div></div>';
     } else {
       box.innerHTML =
@@ -4237,7 +4399,7 @@ var Check = {
 window.App = App; window.Deleg = Deleg; window.Admin = Admin;
 window.Check = Check; window.Board = Board; window.Assembly = Assembly;
 window.Election = Election; window.Legal = Legal; window.Docs = Docs;
-window.Transfer = Transfer; window.Fee = Fee; window.Cert = Cert;
+window.Transfer = Transfer; window.Fee = Fee; window.Cert = Cert; window.Deed = Deed;
 window.Say = Say; window.Install = Install; window.Convert = Convert;
 document.addEventListener('DOMContentLoaded', function () {
   App.init();

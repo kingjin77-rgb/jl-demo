@@ -26,6 +26,12 @@ var S = null;
 function seed() {
   var recs = [];
   var names = ['김','이','박','최','정','강','조','윤','장','임','한','오','서','신','권','황','안','송','전','홍'];
+  var given = ['민준','서연','도윤','하은','지호','수아','예준','지우','시우','서윤',
+               '주원','채원','건우','다인','현우','유진','정우','소율','태민','아린'];
+  var rname = function () {
+    return names[Math.floor(Math.random() * names.length)] +
+           given[Math.floor(Math.random() * given.length)];
+  };
 
   /* 동별 전체 호수 목록을 만든 뒤 그 중 일부를 무작위로 접수 처리 */
   C.dongs.forEach(function (row) {
@@ -48,9 +54,9 @@ function seed() {
       var jt = Math.random() < 0.34;
       recs.push({
         dong: d, ho: ho,
-        name: names[Math.floor(Math.random() * names.length)] + '○○',
+        name: rname(),
         joint: jt,
-        name2: jt ? names[Math.floor(Math.random() * names.length)] + '○○' : null,
+        name2: jt ? rname() : null,
         at: Date.now() - Math.floor(Math.random() * 26) * 86400000
       });
     });
@@ -222,6 +228,13 @@ function esc(s) {
     return { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c];
   });
 }
+/* 이름 가리기 — 임원 화면이 아닌 곳에서는 성만 보여줍니다 */
+function mask(n) {
+  n = String(n || '').trim();
+  if (!n) return '';
+  return n.charAt(0) + (n.length > 1 ? '○'.repeat(Math.min(n.length - 1, 2)) : '○');
+}
+
 function won(n) {
   return (n < 0 ? '−' : '') + Math.abs(n).toLocaleString('ko-KR') + '원';
 }
@@ -1194,7 +1207,7 @@ var App = {
    위임장
    ══════════════════════════════════════════════════════════════ */
 var Deleg = {
-  cur: 1, pads: {},
+  cur: 1, pads: {}, last: null,
 
   init: function () {
     var sel = $('inDong');
@@ -1359,16 +1372,20 @@ var Deleg = {
     var rec = {
       dong:  $('inDong').value,
       ho:    $('inHo').value.trim(),
-      name:  $('inName').value.trim().charAt(0) + '○○',
+      name:  $('inName').value.trim(),
+      birth: $('inBirth').value.replace(/\D/g, ''),
+      tel:   $('inTel').value.trim(),
       joint: joint,
-      name2: joint ? $('inName2').value.trim().charAt(0) + '○○' : null,
+      name2: joint ? $('inName2').value.trim() : null,
       sign:  this.pads[1].data(),
       sign2: joint ? this.pads[2].data() : null,
       at:    Date.now()
     };
-    S.recs.unshift({ dong:rec.dong, ho:rec.ho, name:rec.name, joint:joint,
-                     name2:rec.name2, at:rec.at });
+    S.recs.unshift({ dong:rec.dong, ho:rec.ho, name:rec.name, birth:rec.birth,
+                     tel:rec.tel, joint:joint, name2:rec.name2,
+                     sign:rec.sign, sign2:rec.sign2, at:rec.at });
     DB.save();
+    Deleg.last = rec;
     try {
       localStorage.setItem(KEY + '_me',
         JSON.stringify({ dong:rec.dong, ho:rec.ho, at:rec.at }));
@@ -1456,12 +1473,15 @@ var Admin = {
 
     var b = $('recBox'); b.innerHTML = '';
     S.recs.slice(0, 20).forEach(function (r) {
-      b.appendChild(el('div', 'row',
+      var row = el('div', 'row',
         '<div class="tick">✓</div>' +
         '<div class="rl"><div class="rt" style="font-size:.9rem">' +
         esc(r.dong) + '동 ' + esc(r.ho) + '호 · ' + esc(r.name) +
         (r.joint ? ' · ' + esc(r.name2) + '<span class="pill b" style="margin-left:6px">공동명의</span>' : '') + '</div>' +
-        '<div class="rm"><span>' + ago(r.at) + ' 접수</span></div></div>'));
+        '<div class="rm"><span>' + ago(r.at) + ' 접수</span></div></div>' +
+        '<button class="btn ghost sm">🖨 출력</button>');
+      row.querySelector('button').onclick = function () { Deed.open(r); };
+      b.appendChild(row);
     });
     if (S.recs.length > 20) {
       b.appendChild(el('div', 'row',
@@ -2193,6 +2213,102 @@ var Fee = {
   }
 };
 
+
+/* ══════════════════════════════════════════════════════════════
+   위임장 인쇄 서식 (A4)
+   ══════════════════════════════════════════════════════════════ */
+var Deed = {
+  /* 한 줄에 다 못 들어가면 기호 뒤에서 줄을 넘길 수 있게 표시를 넣습니다.
+     어절 중간에서는 절대 끊기지 않습니다. */
+  brk: function (s) {
+    return esc(s).replace(/([\/,:;=·])/g, '$1<wbr>');
+  },
+
+  /* 조사·마침표가 줄 첫머리에 오지 않도록 앞말과 붙여 둡니다 */
+  wrap: function (s) {
+    return this.brk(s).replace(/\s+/g, ' ').trim();
+  },
+
+  open: function (rec) {
+    var d = new Date(rec.at || Date.now());
+    var today = new Date();
+    var joint = !!rec.joint;
+
+    var terms = [
+      '입주예정자협의회의 구성 · 운영 및 규약 제정에 관한 사항',
+      '시공사 · 시행사에 대한 하자 · 품질 · 공사 일정 관련 협의 및 요구',
+      '분양계약 · 입주지정기간 · 관리비 부과에 관한 협의',
+      '협의회 회의에서의 의결권 행사 및 임원 선출에 관한 사항',
+      '위 각 호에 부수하는 일체의 행위'
+    ];
+
+    var row = function (lb, nm, img) {
+      return '<div class="dl-row">' +
+        '<span class="lb">' + lb + '</span>' +
+        '<span class="nm">' + esc(nm || '') + '</span>' +
+        '<span class="sg">' + (img ? '<img src="' + img + '" alt="">' : '') + '</span>' +
+        '</div>';
+    };
+
+    $('dlPage').innerHTML =
+      '<h1>위 임 장</h1>' +
+      '<div class="dl-org">' + esc(C.org) + '</div>' +
+
+      '<table>' +
+      '<tr><th>단지명</th><td>' + this.wrap(C.apt) + '</td></tr>' +
+      '<tr><th>소재지</th><td>' + this.wrap(C.address) + '</td></tr>' +
+      '<tr><th>동 / 호수</th><td>' + esc(rec.dong) + '동 ' + esc(rec.ho) + '호</td></tr>' +
+      '<tr><th>위임인 성명</th><td>' + esc(rec.name || '') +
+        (joint ? ' , ' + esc(rec.name2 || '') + ' <span style="font-size:9.5pt;color:#555">(공동명의)</span>' : '') +
+        '</td></tr>' +
+      '<tr><th>접수일시</th><td>' +
+        d.getFullYear() + '. ' + (d.getMonth() + 1) + '. ' + d.getDate() + '. ' +
+        ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2) +
+        '</td></tr>' +
+      '</table>' +
+
+      '<p class="dl-lead">' + this.wrap(
+        '본인은 위 아파트의 분양계약자로서, 아래 각 호의 사항에 관한 일체의 권한을 ' +
+        C.org + '에 위임합니다.') + '</p>' +
+
+      '<ol>' + terms.map(function (t) {
+        return '<li>' + Deed.wrap(t) + '</li>';
+      }).join('') + '</ol>' +
+
+      '<div class="dl-note">' + this.wrap(
+        '※ 본 위임장은 「전자문서 및 전자거래 기본법」 제4조에 따라 서면 위임장과 동일한 효력을 가집니다. ' +
+        '위임인의 자필 전자서명 원본은 협의회가 보관하며, 위임인은 언제든지 서면으로 위임을 철회할 수 있습니다. ' +
+        '수집한 개인정보는 협의회 운영 및 회의 안내 목적에 한하여 사용합니다.') + '</div>' +
+
+      '<div class="dl-tail">' +
+        '<div class="dl-date">' + today.getFullYear() + ' 년 ' +
+          (today.getMonth() + 1) + ' 월 ' + today.getDate() + ' 일</div>' +
+        '<div class="dl-sign">' +
+          row('위 임 인', rec.name, rec.sign) +
+          (joint ? row('공동명의인', rec.name2, rec.sign2) : '') +
+        '</div>' +
+        '<div class="dl-to">' + esc(C.org) + ' <b>귀중</b></div>' +
+        '<div class="dl-foot">' + this.wrap(
+          '본 문서는 ' + C.org + ' 전자 위임장 시스템에서 접수 기록을 근거로 작성되었습니다.') +
+          '<br>출력일시 ' + today.toLocaleString('ko-KR') +
+        '</div>' +
+      '</div>';
+
+    $('certPage').hidden = true;
+    $('dlPage').hidden = false;
+    $('certWrap').hidden = false;
+    document.body.classList.add('printing');
+    window.scrollTo(0, 0);
+  },
+
+  close: function () {
+    $('certWrap').hidden = true;
+    $('dlPage').hidden = true;
+    $('certPage').hidden = false;
+    document.body.classList.remove('printing');
+  }
+};
+
 /* ══════════════════════════════════════════════════════════════
    대표성 증명서 · 문서 출력
    ══════════════════════════════════════════════════════════════ */
@@ -2239,6 +2355,8 @@ var Cert = {
       ' 전자 위임장 시스템의 기록을 근거로 자동 작성되었습니다.' +
       (C.demo ? '<br>※ 데모 화면이므로 기재된 수치는 예시입니다.' : '') +
       '<br>발급일시 ' + d.toLocaleString('ko-KR') + '</div>';
+    $('dlPage').hidden = true;
+    $('certPage').hidden = false;
     $('certWrap').hidden = false;
     document.body.classList.add('printing');
     window.scrollTo(0, 0);
@@ -2494,8 +2612,8 @@ var Check = {
       box.innerHTML =
         '<div class="ck yes"><div class="ci">✓</div>' +
         '<div class="ct">접수 완료된 세대입니다</div>' +
-        '<div class="cs">' + esc(d) + '동 ' + esc(h) + '호 · ' + esc(hit.name) +
-        (hit.joint ? ' · ' + esc(hit.name2) + ' (공동명의)' : '') + '<br>' +
+        '<div class="cs">' + esc(d) + '동 ' + esc(h) + '호 · ' + esc(mask(hit.name)) +
+        (hit.joint ? ' · ' + esc(mask(hit.name2)) + ' (공동명의)' : '') + '<br>' +
         new Date(hit.at).toLocaleDateString('ko-KR') + ' 접수</div></div>';
     } else {
       box.innerHTML =
@@ -2511,7 +2629,7 @@ var Check = {
 window.App = App; window.Deleg = Deleg; window.Admin = Admin;
 window.Check = Check; window.Board = Board; window.Assembly = Assembly;
 window.Election = Election; window.Legal = Legal; window.Docs = Docs;
-window.Transfer = Transfer; window.Fee = Fee; window.Cert = Cert;
+window.Transfer = Transfer; window.Fee = Fee; window.Cert = Cert; window.Deed = Deed;
 window.Say = Say; window.Install = Install; window.Convert = Convert;
 document.addEventListener('DOMContentLoaded', function () {
   App.init();
