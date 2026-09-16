@@ -744,8 +744,15 @@ select.inp{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.
 
 /* 데모 배너 */
 .demoflag{background:linear-gradient(90deg,var(--gold),#D4A94F);color:#2A1E06;
-  font-size:.74rem;font-weight:800;letter-spacing:-.01em;text-align:center;padding:7px 18px;
-  padding-top:calc(var(--safe-t) + 7px)}
+  padding:7px 14px;padding-top:calc(var(--safe-t) + 7px)}
+.df-in{max-width:1120px;margin:0 auto;display:flex;align-items:center;gap:10px;
+  justify-content:center;flex-wrap:wrap}
+.df-tx{font-size:.72rem;font-weight:800;letter-spacing:-.01em}
+.df-seg{display:flex;gap:3px;background:rgba(0,0,0,.14);border-radius:999px;padding:3px}
+.df-seg button{border-radius:999px;padding:4px 11px;font-size:.71rem;font-weight:800;
+  color:#3A2A08;letter-spacing:-.02em;transition:background .18s,color .18s}
+.df-seg button.on{background:#2A1E06;color:#FFE9B0}
+@media(max-width:560px){.df-tx{width:100%;text-align:center;font-size:.68rem}}
 
 .desknav,.desk-only,.site-foot{display:none}
 .ab-act{display:flex;align-items:center;gap:8px;flex:none}
@@ -888,7 +895,12 @@ select.inp{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.
   </div>
 </div>
 
-<div class="demoflag" id="demoFlag">데모 화면입니다 · 입력하신 내용은 저장되지 않습니다</div>
+<div class="demoflag" id="demoFlag">
+  <div class="df-in">
+    <span class="df-tx">데모 화면 · 입력하신 내용은 저장되지 않습니다</span>
+    <div class="df-seg" id="demoSeg"></div>
+  </div>
+</div>
 
 <header class="appbar" id="appbar">
   <div class="brand">

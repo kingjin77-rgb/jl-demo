@@ -159,7 +159,7 @@ function seed() {
           p:'1. 회비 사용 내역 월별 공시\n2. 지출 사전 승인제 도입\n3. 협의회 해산 시 잔여금 세대 환급 규정 마련', v:164 }
       ]
     },
-    risks: [
+    risks: C.risks || [
       { lv:'high', c:'제23조 (입주지정기간)', t:'입주지정기간 경과 시 미입주라도 관리비 부과',
         b:'입주 지연 사유가 시공사에 있더라도 입주지정기간이 지나면 관리비가 부과되는 구조입니다.',
         jl:'준공 지연·하자로 인한 입주 불능 기간은 제외한다는 단서 조항 삽입을 요구해야 합니다. 협의회 명의 공문으로 요청하고 회신을 문서로 남기십시오.' },
@@ -622,6 +622,7 @@ var App = {
     $('footAddr').innerHTML = esc(C.apt) + ' · ' + esc(C.address) +
       '<br>시공 ' + esc(C.builder) + ' · 입주 ' + esc(C.moveIn);
     if (!C.demo) $('demoFlag').hidden = true;
+    else this.buildDemoSwitch();
 
     this.buildTabs();
     this.paintHome();
@@ -697,6 +698,19 @@ var App = {
       if (gd) gd.textContent =
         '노후 상태는 전환가 산정에 영향을 줍니다. 임원진이 기록한 현장 사진입니다.';
     }
+  },
+
+  /* 데모에서 아파트 / 오피스텔 / 분양전환을 골라볼 수 있게 합니다 */
+  buildDemoSwitch: function () {
+    var box = $('demoSeg');
+    if (!box || !window.DEMO_TYPES) { if (box) box.hidden = true; return; }
+    box.innerHTML = '';
+    window.DEMO_TYPES.forEach(function (x) {
+      var b = el('button', x.k === window.DEMO_PICK ? 'on' : '', x.t);
+      b.title = x.sub;
+      b.onclick = function () { if (x.k !== window.DEMO_PICK) window.demoSwitch(x.k); };
+      box.appendChild(b);
+    });
   },
 
   buildTabs: function () {

@@ -744,8 +744,15 @@ select.inp{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.
 
 /* 데모 배너 */
 .demoflag{background:linear-gradient(90deg,var(--gold),#D4A94F);color:#2A1E06;
-  font-size:.74rem;font-weight:800;letter-spacing:-.01em;text-align:center;padding:7px 18px;
-  padding-top:calc(var(--safe-t) + 7px)}
+  padding:7px 14px;padding-top:calc(var(--safe-t) + 7px)}
+.df-in{max-width:1120px;margin:0 auto;display:flex;align-items:center;gap:10px;
+  justify-content:center;flex-wrap:wrap}
+.df-tx{font-size:.72rem;font-weight:800;letter-spacing:-.01em}
+.df-seg{display:flex;gap:3px;background:rgba(0,0,0,.14);border-radius:999px;padding:3px}
+.df-seg button{border-radius:999px;padding:4px 11px;font-size:.71rem;font-weight:800;
+  color:#3A2A08;letter-spacing:-.02em;transition:background .18s,color .18s}
+.df-seg button.on{background:#2A1E06;color:#FFE9B0}
+@media(max-width:560px){.df-tx{width:100%;text-align:center;font-size:.68rem}}
 
 .desknav,.desk-only,.site-foot{display:none}
 .ab-act{display:flex;align-items:center;gap:8px;flex:none}
@@ -888,7 +895,12 @@ select.inp{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.
   </div>
 </div>
 
-<div class="demoflag" id="demoFlag">데모 화면입니다 · 입력하신 내용은 저장되지 않습니다</div>
+<div class="demoflag" id="demoFlag">
+  <div class="df-in">
+    <span class="df-tx">데모 화면 · 입력하신 내용은 저장되지 않습니다</span>
+    <div class="df-seg" id="demoSeg"></div>
+  </div>
+</div>
 
 <header class="appbar" id="appbar">
   <div class="brand">
@@ -1661,7 +1673,7 @@ select.inp{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.
 /* ══════════════════════════════════════════════════════════════
    단지 설정 파일 — 새 단지를 만들 때 이 파일만 교체하면 됩니다.
    ══════════════════════════════════════════════════════════════ */
-window.CONFIG = {
+window.CFG_APT = {
 
   /* ══ 단지 유형 ══════════════════════════════════════════════
      'newbuild'   신축 입주 단지
@@ -1775,11 +1787,207 @@ window.CONFIG = {
 
   /* ── 서버 (데모는 비워둡니다) ── */
   worker: '',
-  repo:   '',
+  repo:   'demo-apt',
 
   /* ── 데모 모드 ── */
   demo: true,
   pin:  '1234'
+};
+
+
+/* 오피스텔 — 입주예정자협의회 (신축 분양) */
+window.CFG_OFFICETEL = {
+  type: 'officetel',
+
+  apt:      'OO시티 오피스텔',
+  org:      'OO시티 오피스텔 입주예정자협의회',
+  emblem:   '오',
+  address:  '○○시 ○○구 ○○동 456번지',
+  builder:  '○○건설(주)',
+  owner:    '○○자산개발(주)',
+  moveIn:   '2027년 6월 예정',
+  moveInDate: '2027-06-01',
+  totalUnits: 600,
+
+  /* 오피스텔은 보통 동이 적고 호실 수가 많습니다 */
+  dongs: [ ['A동', 320], ['B동', 280] ],
+
+  types: [
+    { t:'전용 24㎡', u:260 }, { t:'전용 34㎡', u:210 },
+    { t:'전용 44㎡', u:90 },  { t:'전용 59㎡', u:40 }
+  ],
+
+  progress: 55,
+  progressNote: '지상 18층 골조 진행중 · 저층부 상가 마감 착수 (2026년 9월 기준)',
+
+  agree:
+    '본인은 위 오피스텔의 수분양자로서, 입주예정자협의회의 구성 및 운영, ' +
+    '시공사·시행사에 대한 준공 및 하자 관련 협의, 관리단 구성 준비, ' +
+    '협의회 회의에서의 의결권 행사에 관한 일체의 권한을 ' +
+    '입주예정자협의회에 위임합니다. 본 전자서명은 「전자문서 및 전자거래 기본법」에 따라 ' +
+    '서면 위임장과 동일한 효력을 가집니다.',
+
+  meeting:      '전체회의',
+  meetingShort: '회의',
+  meetingNo:    '제1차 정기회의',
+  quorum: 50,
+  noticeDays: 14,
+
+  heroLight: true,
+  theme: { acc:'#5B4BC4', acc2:'#8477E0', ink:'#120E24', ink2:'#211A3E',
+           glow:'rgba(132,119,224,.34)' },
+
+  /* 오피스텔 특유의 쟁점 */
+  risks: [
+    { lv:'high', c:'제19조 (준공 지연)', t:'준공 지연 시 지체상금 상한이 계약금의 10%로 제한',
+      b:'지연이 길어져도 배상이 계약금 10%에서 멈춥니다. 오피스텔은 아파트보다 지연 사례가 잦습니다.',
+      jl:'상한 조항 삭제 또는 상향을 협의회 명의로 요구하고, 회신을 문서로 남기십시오. ' +
+         '개별 요구는 받아들여지지 않습니다.' },
+    { lv:'high', c:'분양 광고 (임대수익)', t:'"연 수익률 ○% 보장" 광고와 계약서 내용이 불일치',
+      b:'광고에는 수익 보장이 있으나 계약서에는 보장 조항이 없는 경우가 많습니다.',
+      jl:'분양 당시 광고물·모델하우스 게시물·문자를 지금 전부 확보해 자료실에 보관하십시오. ' +
+         '표시광고법 위반 주장의 유일한 근거입니다.' },
+    { lv:'mid', c:'제26조 (부가가치세)', t:'부가세 환급 불가 시 책임을 수분양자가 부담',
+      b:'일반임대사업자 등록·유지 조건이 충족되지 않으면 환급분이 추징되며 시행사는 면책됩니다.',
+      jl:'등록 요건과 의무 임대기간을 협의회 차원에서 정리해 전 세대에 공지하는 것이 좋습니다.' },
+    { lv:'mid', c:'제31조 (마이너스 옵션)', t:'마감재 미시공 범위가 계약서에 특정되지 않음',
+      b:'"일부 마감 제외"로만 적혀 있어 입주 시 분쟁 소지가 큽니다.',
+      jl:'제외 품목 목록을 서면으로 받아두십시오. 없으면 협의회가 요청 공문을 보내야 합니다.' },
+    { lv:'mid', c:'관리비 (상가 분담)', t:'상가부 공용관리비를 오피스텔 세대가 함께 부담',
+      b:'저층 상가의 공용부 관리비가 전체 면적 비율로 배분되는 구조입니다.',
+      jl:'입주 전 관리규약(안) 단계에서 분리 산정을 요구해야 합니다. ' +
+         '입주 후에는 관리단집회 의결이 필요해 훨씬 어려워집니다.' },
+    { lv:'low', c:'제9조 (전매)', t:'전매제한 기간 및 절차',
+      b:'법령 기준과 동일합니다.',
+      jl:'명의변경 시 협의회 위임장이 실효되므로 신고 절차를 거치셔야 합니다.' }
+  ],
+
+  worker: '', repo: 'demo-officetel', demo: true, pin: '1234'
+};
+
+
+/* 충북 우미린 스테이 분양전환추진위원회 — 단지 설정 */
+window.CFG_CONV = {
+  type: 'conversion',
+
+  apt:      '충북 우미린 스테이',
+  org:      '충북 우미린 스테이 분양전환추진위원회',
+  emblem:   '우',
+  address:  '충청북도 진천군 덕산읍 두촌리 3147 (충북혁신도시 B4블록)',
+  builder:  '우미건설(주)',
+  owner:    '우미개발(주)',
+  moveIn:   '—',
+  totalUnits: 1345,
+
+  dongs: [
+    ['401', 104], ['402', 104], ['403', 100], ['404', 100], ['405', 100],
+    ['406', 100], ['407',  96], ['408', 108], ['409', 108], ['410', 108],
+    ['411', 108], ['412', 111], ['413',  98]
+  ],
+
+  types: [
+    { t:'70㎡',  u:632 }, { t:'78㎡A', u:63 }, { t:'78㎡B', u:263 },
+    { t:'84㎡A', u:192 }, { t:'84㎡B', u:195 }
+  ],
+
+  conv: {
+    built:    '2019년 11월',
+    rentFrom: '2020년 2월',
+    years:    '6년차',
+    target:   '전 세대 1,345세대',
+    owner:    '우미개발(주)',
+    steps: [
+      { t:'추진위원회 구성',        s:'임원 선출 및 규약 제정',       st:'done' },
+      { t:'위임장 접수',            s:'세대별 협상 권한 위임',        st:'now'  },
+      { t:'분양전환 조건 통보',     s:'사업자 → 임차인 조건 제시',    st:'next' },
+      { t:'감정평가',               s:'평가법인 선정 · 가격 산정',    st:'next' },
+      { t:'전환가 협의 · 이의신청', s:'추진위 명의 대응',             st:'next' },
+      { t:'분양계약 체결',          s:'세대별 계약 및 잔금',          st:'next' }
+    ],
+    prices: [
+      { t:'70㎡',  low:26000, high:30000 },
+      { t:'78㎡A', low:28500, high:32500 },
+      { t:'78㎡B', low:28000, high:32000 },
+      { t:'84㎡A', low:30500, high:35000 },
+      { t:'84㎡B', low:30000, high:34500 }
+    ],
+    priceNote: '감정평가 전 참고용 추정치입니다.',
+    adj: [{ t:'저층', v:-6 }, { t:'중층', v:0 }, { t:'고층', v:4 },
+          { t:'남향', v:2 }, { t:'북향', v:-3 }]
+  },
+
+  agree:
+    '본인은 위 아파트의 임차인으로서, 분양전환추진위원회의 구성 및 운영, ' +
+    '분양전환 가격 산정 및 감정평가에 관한 협의, 사업시행자에 대한 이의신청, ' +
+    '추진위원회 회의에서의 의결권 행사에 관한 일체의 권한을 ' +
+    '분양전환추진위원회에 위임합니다. 본 전자서명은 「전자문서 및 전자거래 기본법」에 따라 ' +
+    '서면 위임장과 동일한 효력을 가집니다.',
+
+  meeting:      '전체회의',
+  meetingShort: '회의',
+  meetingNo:    '제1차 정기회의',
+  quorum: 50,
+  noticeDays: 14,
+
+  heroLight: true,
+  theme: { acc:'#1B6B4A', acc2:'#3C9F74', ink:'#07130E', ink2:'#122A20',
+           glow:'rgba(60,159,116,.34)' },
+
+
+  /* 분양전환 단지 특유의 쟁점 */
+  risks: [
+    { lv:'high', c:'임대차계약 제12조', t:'분양전환가격을 사업자가 정한 감정평가액으로 확정',
+      b:'임차인 측이 선정한 평가법인의 의견이 반영될 통로가 계약서에 없습니다.',
+      jl:'평가법인 선정 단계에서 추진위가 1개 법인을 지명하도록 요구해야 합니다. ' +
+         '통보를 받은 뒤에는 되돌리기 어렵습니다.' },
+    { lv:'high', c:'민간임대주택법 제42조의2', t:'우선 분양전환 대상 요건',
+      b:'임대 개시일부터 해당 주택에 거주한 무주택 임차인이 우선 대상입니다. ' +
+         '중간에 전출하셨거나 다른 주택을 취득하신 경우 자격에서 빠질 수 있습니다.',
+      jl:'세대별 자격 여부를 지금 점검해 두셔야 합니다. ' +
+         '통보 이후에 확인하면 대응할 시간이 없습니다.' },
+    { lv:'mid', c:'임대차계약 제20조', t:'원상복구 의무 범위가 포괄적으로 규정',
+      b:'전환을 받지 않고 퇴거하는 세대에 과도한 원상복구를 요구할 근거가 됩니다.',
+      jl:'경년 감가를 반영한 기준을 협의로 정해두어야 합니다. ' +
+         '퇴거 예정 세대가 적지 않으므로 함께 대응하는 것이 유리합니다.' },
+    { lv:'mid', c:'장기수선충당금', t:'적립·사용 내역이 임차인에게 공개되지 않음',
+      b:'전환 시 정산 대상인데 잔액을 확인할 방법이 계약서에 없습니다.',
+      jl:'추진위 명의로 적립·사용 내역 공개를 요구하십시오. 전환가 협의의 근거 자료가 됩니다.' },
+    { lv:'low', c:'임대보증금', t:'전환 시 보증금 처리 방식',
+      b:'분양대금에서 공제하는 방식이며 특별히 불리한 내용은 아닙니다.',
+      jl:'다만 보증보험 가입 여부와 반환 시점을 미리 확인해 두시는 것이 좋습니다.' }
+  ],
+
+  worker: '',
+  repo:   'demo-conv',
+  demo: true,
+  pin:  '1234'
+};
+
+
+/* ══════════════════════════════════════════════════════════════
+   데모 전용 — 단지 유형 고르기
+   실제 단지에는 이 파일 대신 config.js 하나만 들어갑니다.
+   ══════════════════════════════════════════════════════════════ */
+window.DEMO_TYPES = [
+  { k:'apt',       t:'아파트',   sub:'입주예정자협의회',   cfg:'CFG_APT'  },
+  { k:'officetel', t:'오피스텔', sub:'입주예정자협의회',   cfg:'CFG_OFFICETEL' },
+  { k:'conv',      t:'분양전환', sub:'분양전환추진위원회', cfg:'CFG_CONV' },
+];
+
+(function () {
+  var pick = 'apt';
+  try { pick = localStorage.getItem('jl2_demotype') || 'apt'; } catch (e) {}
+  var found = window.DEMO_TYPES.filter(function (x) { return x.k === pick; })[0]
+           || window.DEMO_TYPES[0];
+  window.CONFIG = window[found.cfg];
+  window.DEMO_PICK = found.k;
+})();
+
+window.demoSwitch = function (k) {
+  try { localStorage.setItem('jl2_demotype', k); } catch (e) {}
+  try { sessionStorage.setItem('jl2_intro', '1'); } catch (e) {}   /* 전환할 땐 오프닝 생략 */
+  location.hash = '';
+  location.reload();
 };
 
 </script>
@@ -1945,7 +2153,7 @@ function seed() {
           p:'1. 회비 사용 내역 월별 공시\n2. 지출 사전 승인제 도입\n3. 협의회 해산 시 잔여금 세대 환급 규정 마련', v:164 }
       ]
     },
-    risks: [
+    risks: C.risks || [
       { lv:'high', c:'제23조 (입주지정기간)', t:'입주지정기간 경과 시 미입주라도 관리비 부과',
         b:'입주 지연 사유가 시공사에 있더라도 입주지정기간이 지나면 관리비가 부과되는 구조입니다.',
         jl:'준공 지연·하자로 인한 입주 불능 기간은 제외한다는 단서 조항 삽입을 요구해야 합니다. 협의회 명의 공문으로 요청하고 회신을 문서로 남기십시오.' },
@@ -2408,6 +2616,7 @@ var App = {
     $('footAddr').innerHTML = esc(C.apt) + ' · ' + esc(C.address) +
       '<br>시공 ' + esc(C.builder) + ' · 입주 ' + esc(C.moveIn);
     if (!C.demo) $('demoFlag').hidden = true;
+    else this.buildDemoSwitch();
 
     this.buildTabs();
     this.paintHome();
@@ -2483,6 +2692,19 @@ var App = {
       if (gd) gd.textContent =
         '노후 상태는 전환가 산정에 영향을 줍니다. 임원진이 기록한 현장 사진입니다.';
     }
+  },
+
+  /* 데모에서 아파트 / 오피스텔 / 분양전환을 골라볼 수 있게 합니다 */
+  buildDemoSwitch: function () {
+    var box = $('demoSeg');
+    if (!box || !window.DEMO_TYPES) { if (box) box.hidden = true; return; }
+    box.innerHTML = '';
+    window.DEMO_TYPES.forEach(function (x) {
+      var b = el('button', x.k === window.DEMO_PICK ? 'on' : '', x.t);
+      b.title = x.sub;
+      b.onclick = function () { if (x.k !== window.DEMO_PICK) window.demoSwitch(x.k); };
+      box.appendChild(b);
+    });
   },
 
   buildTabs: function () {
