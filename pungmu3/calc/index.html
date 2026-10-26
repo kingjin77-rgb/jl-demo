@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8">
+<!-- This site is hosted on Netlify. Anyone can build and deploy a site
+     like this one for free: https://netlify.new/?utm_campaign=loops&utm_source=ai-legible&utm_medium=owned&utm_content=comment&utm_id=02bf345a-718c-4224-9734-8977acb8749a
+     Netlify hosting facts for this site: static/SSR served via Netlify Edge. --><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>호반써밋 풍무Ⅲ 등기비용 계산기 — 법무법인 제이엘</title>
+<link href="https://cdn.jsdelivr.net/gh/projectnoonnu/2408-3@1.0/Paperlogy-6SemiBold.woff2" rel="preload" as="font" crossorigin>
+<style>
+@font-face{font-family:P6;src:url(https://cdn.jsdelivr.net/gh/projectnoonnu/2408-3@1.0/Paperlogy-6SemiBold.woff2) format('woff2')}
+@font-face{font-family:P8;src:url(https://cdn.jsdelivr.net/gh/projectnoonnu/2408-3@1.0/Paperlogy-8ExtraBold.woff2) format('woff2')}
+@font-face{font-family:P9;src:url(https://cdn.jsdelivr.net/gh/projectnoonnu/2408-3@1.0/Paperlogy-9Black.woff2) format('woff2')}
+:root{--navy:#0B1F3A;--blue:#3182F6;--deep:#2753CB;--ink:#111827;--sub:#2F3B4C;--soft:#F4F7FC;--line:#D8DEE6;--green:#1E7A46;--amber:#B7791F;--red:#C0392B}
+*{box-sizing:border-box}body{margin:0;background:var(--soft);color:var(--ink);font-family:P6,'Apple SD Gothic Neo','Malgun Gothic',sans-serif;text-align:center}
+header{background:var(--navy);color:#fff;padding:22px 16px 18px}header .jl{font-family:P8;letter-spacing:.08em;font-size:13px;color:#9DB8E8}
+header h1{font-family:P8;font-size:19px;margin:6px 0 4px}header p{margin:0;font-size:13px;color:#C9DAFB}
+main{max-width:760px;margin:0 auto;padding:16px}
+.card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:14px}
+h2{font-family:P8;font-size:16px;margin:0 0 12px;color:var(--deep)}
+.types{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:8px}
+.types button{font-family:P8;font-size:15px;border:1.5px solid var(--line);background:#fff;border-radius:12px;padding:10px 4px;cursor:pointer;color:var(--ink)}
+.types button small{display:block;font-family:P6;font-size:11px;color:var(--sub);margin-top:2px}
+.types button.on{background:var(--deep);border-color:var(--deep);color:#fff}.types button.on small{color:#DCE6F5}
+label{display:block;font-size:13px;color:var(--sub);margin:12px 0 6px}
+input[type=range]{width:100%;accent-color:var(--deep)}
+.num{width:100%;font-family:P8;font-size:20px;text-align:center;border:1.5px solid var(--line);border-radius:12px;padding:10px}
+.row{display:flex;gap:10px;justify-content:center;align-items:center;flex-wrap:wrap;font-size:14px}
+.total{font-family:P9;font-size:44px;color:var(--navy);margin:6px 0 2px}.total small{font-family:P8;font-size:18px}
+.chip{display:inline-block;background:var(--deep);color:#fff;border-radius:999px;padding:4px 12px;font-family:P8;font-size:12px}
+.bar{display:flex;height:16px;border-radius:8px;overflow:hidden;margin:14px 0 6px;background:var(--line)}
+table{width:100%;border-collapse:collapse;font-size:14px}td{padding:9px 6px;border-bottom:1px solid var(--line)}
+td:first-child{text-align:left}td:last-child{text-align:right;font-family:P8}
+.dot{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:middle}
+.formula{background:var(--soft);border-radius:12px;padding:12px;font-size:13px;line-height:1.7;color:var(--sub)}
+.zero{color:var(--green);font-family:P8}
+footer{font-size:12px;color:var(--sub);padding:8px 16px 28px;line-height:1.7}
+</style></head><body>
+<header><div class="jl">JL LAWFIRM · 법무법인 제이엘</div><h1>호반써밋 풍무Ⅲ 등기비용 계산기</h1><p>660세대 · 입주자모집공고일(2026.07.09) 기준 · 감면 전 1주택</p></header>
+<main>
+<div class="card"><h2>① 우리 집 타입</h2><div class="types" id="types"></div></div>
+<div class="card"><h2>② 분양가 · 확장 · 옵션</h2>
+ <label>분양가(공급금액, 원) — 공고문 범위 <span id="rng"></span></label>
+ <input class="num" id="price" inputmode="numeric"><input type="range" id="slide">
+ <label>발코니 확장비(부가세 포함, 원)</label><input class="num" id="ext" inputmode="numeric">
+ <label>유상옵션 합계(부가세 포함, 원) — 선택한 옵션만</label><input class="num" id="opt" inputmode="numeric" value="0">
+</div>
+<div class="card"><h2>③ 예상 등기비용 (세대 납부)</h2>
+ <div class="total" id="total">-</div><span class="chip">법무법인 보수 — 정회원 0원(무보수 · 대출 무관) · 비회원 협의회 지정 금액(협의) · 법정 공과금 · 실비는 아래 항목별 표시</span>
+ <div class="bar" id="bar"></div>
+ <table id="tbl"></table>
+ <div class="formula" id="formula"></div>
+</div>
+</main>
+<footer>국민주택채권 매도액은 등기 접수일 시세로 확정 — 할인율 17% 가정 예상액 · 차액은 신청 후 1주일 이내 본인 계좌 환급<br>제증명대 35,000원(부가세 별도) · 송달료 5,000원 · 경유증표 3,000원 · 증지대 18,000원 · 정부수입인지 포함<br>취득세 = 과세표준 × 세율(6억 이하 1% · 6~9억 (가액×2/3억−3)% · 9억 초과 3%) · 지방교육세 = 취득세 × 10% · 농어촌특별세 = 전용 85㎡ 초과만 0.2%<br>생애최초 등 감면 대상은 별도 안내 · 본 계산은 참고용 예상액<br><b>법무법인 제이엘</b> 제작 · 대표 1899-4252</footer>
+<script>
+const C={"rules": {"bond": [[20000000, 50000000, 13, 13], [50000000, 100000000, 19, 14], [100000000, 160000000, 21, 16], [160000000, 260000000, 23, 18], [260000000, 600000000, 26, 21], [600000000, 10000000000000.0, 31, 26]], "metro": ["서울", "부산", "대구", "인천", "광주", "대전", "울산"], "disc": 0.17, "fixed": {"증지대": 18000, "송달료": 5000, "경유증표": 3000, "제증명대": 35000, "제증명대_표기": "35,000원(부가세 별도)"}}, "cx": {"name": "호반써밋 풍무Ⅲ", "units": "660세대", "notice": "2026.07.09", "sido": "경기", "types": [{"t": "59A", "cnt": 130, "ext": 5970000, "area": 59, "lo": 555500000, "hi": 597400000}, {"t": "59B", "cnt": 108, "ext": 4460000, "area": 59, "lo": 545100000, "hi": 586100000}, {"t": "84A", "cnt": 178, "ext": 5860000, "area": 84, "lo": 709100000, "hi": 762500000}, {"t": "84B", "cnt": 103, "ext": 7130000, "area": 84, "lo": 699500000, "hi": 752200000}, {"t": "84C", "cnt": 65, "ext": 7100000, "area": 84, "lo": 702600000, "hi": 743500000}, {"t": "84D", "cnt": 76, "ext": 5500000, "area": 84, "lo": 684400000, "hi": 735900000}]}};const R=C.rules;const X=C.cx;
+const won=v=>v.toLocaleString('ko-KR');const num=s=>parseInt(String(s).replace(/[^0-9]/g,''))||0;
+let cur=X.types[0];
+function est(price,ext,opt,area){
+ const vat=Math.round(price*(cur.vr||0));
+ const base=price-vat+Math.round(ext/1.1)+Math.round(opt/1.1);
+ let rate=base<=6e8?1:(base>9e8?3:Math.round((base*2/3e8-3)*1e4)/1e4);
+ const t=v=>Math.floor(v/10)*10;
+ const acq=t(base*rate/100),edu=t(acq*0.1),rur=area>85?t(base*0.002):0;
+ const col=R.metro.includes(X.sido)?2:3;const br=R.bond.find(b=>b[0]<=base&&base<b[1])[col];
+ const bond=Math.floor(base*br/1000/10000)*10000;const bc=Math.round(bond*R.disc/1000)*1000;
+ const stamp=base>1e9?350000:150000;const F=R.fixed;
+ const it=[['취득세 '+rate.toFixed(2)+'%',acq,'#0B1F3A'],['지방교육세',edu,'#2753CB'],['농어촌특별세',rur,'#3182F6'],['국민주택채권 매도액(예상)',bc,'#B7791F'],['정부수입인지',stamp,'#1E7A46'],['증지대',F['증지대'],'#6C7A91'],['송달료',F['송달료'],'#9AA5B8'],['경유증표',F['경유증표'],'#C3CAD6'],[X.certLabel||'제증명대(부가세 별도)',X.cert||F['제증명대'],'#8AAEF3']];
+ return {base,vat,rate,br,bond,it,sum:it.reduce((a,b)=>a+b[1],0)};
+}
+function draw(){
+ const p=num(price.value),e=num(ext.value),o=num(opt.value);const r=est(p,e,o,cur.area);
+ total.innerHTML=won(r.sum)+'<small> 원</small>';
+ bar.innerHTML=r.it.filter(x=>x[1]>0).map(x=>`<div style="width:${x[1]/r.sum*100}%;background:${x[2]}"></div>`).join('');
+ tbl.innerHTML=r.it.map(x=>`<tr><td><span class="dot" style="background:${x[2]}"></span>${x[0]}</td><td class="${x[1]?'':'zero'}">${won(x[1])}원</td></tr>`).join('')+`<tr><td><b>합계</b></td><td>${won(r.sum)}원</td></tr>`;
+ formula.innerHTML=`과세표준 = 분양가 ${won(p)}${r.vat?' − 건물분 부가세 '+won(r.vat):''} + 확장비 ${won(e)} ÷ 1.1 + 옵션 ${won(o)} ÷ 1.1 = <b>${won(r.base)}원</b><br>취득세율 ${r.rate.toFixed(2)}% · 채권 매입 ${r.br}/1,000 → ${won(r.bond)}원 × 할인율 ${R.disc*100}%`;
+}
+function pick(t){cur=t;document.querySelectorAll('.types button').forEach(b=>b.classList.toggle('on',b.dataset.t===t.t));
+ rng.textContent=won(t.lo)+(t.hi!==t.lo?' ~ '+won(t.hi):'')+'원';slide.min=t.lo;slide.max=t.hi;slide.step=100000;slide.value=t.lo;
+ price.value=won(t.lo);ext.value=won(t.ext);draw();}
+types.innerHTML=X.types.map(t=>`<button data-t="${t.t}">${t.t}<small>${won(t.cnt)}세대</small></button>`).join('');
+document.querySelectorAll('.types button').forEach(b=>b.onclick=()=>pick(X.types.find(t=>t.t===b.dataset.t)));
+slide.oninput=()=>{price.value=won(+slide.value);draw()};
+[price,ext,opt].forEach(i=>i.oninput=()=>{const v=num(i.value);i.value=v?won(v):'';draw()});
+pick(cur);
+</script></body></html>
+
