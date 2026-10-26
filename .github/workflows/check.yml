@@ -1,0 +1,20 @@
+name: check
+on: { push: { branches: [check] } }
+permissions: { contents: write }
+jobs:
+  c:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { ref: check }
+      - run: |
+          O=https://kingjin77-rgb.github.io/jl-demo
+          {
+          sleep 30
+          for s in pyeongtaek-godeok-umilin-prestige mapo-xi-hillstate-lachels hillstate-lake-songdo5 harrington-place-pungmu proposal; do for sub in "" admin/ platform/ platform/admin/; do echo -n "$s/$sub "; curl -s -o /tmp/p.html -w "%{http_code} " "$O/$s/$sub?t=$(date +%s)"; grep -o 'build jl-proposal-demo[^<]*' /tmp/p.html | head -1; done; done
+          echo -n "preview(삭제 확인) "; curl -s -o /dev/null -w "%{http_code}\n" $O/preview/
+          date -u
+          } > result.txt 2>&1
+          cat result.txt
+          git config user.name check; git config user.email check@users.noreply.github.com
+          git add result.txt; git commit -m "check result"; git push
